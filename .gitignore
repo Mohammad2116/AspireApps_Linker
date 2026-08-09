@@ -1,0 +1,47 @@
+# Eclipse
+.metadata/
+*.log
+.settings/
+.project
+.classpath
+
+# Java
+*.class
+*.war
+*.ear
+
+# Spring Boot / Maven / Gradle
+target/
+build/
+.gradle/
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/
+
+# IntelliJ / IDEA
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Temp files
+tmp/
+temp/
+
+# Environment / secrets
+*.env
+*.properties
+application-*.yml
+application-*.properties
+
+# Docker
+docker-compose.override.yml
+
+# Others
+coverage/
+node_modules/
