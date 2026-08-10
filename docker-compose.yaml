@@ -1,2 +1,52 @@
 services:
-  
+# /////////////////////////////////////////////////////////////////////// POSTGRES
+  postgres-service:
+    image: postgres:16-alpine
+    container_name: linker_postgres_service
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
+
+    networks:
+      - linker-network
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U demoapps -d linker_url_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+# /////////////////////////////////////////////////////////////////////// EUREKA SERVER
+  eureka-server:
+    image: linker/linker_eureka_server
+    container_name: linker_eureka_server
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+
+    environment:
+      SERVER_PORT: 8761
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: false
+      EUREKA_CLIENT_FETCH_REGISTERY: false
+
+    ports:
+      - "8761:8761"
+
+    networks:
+      - linker-network
+
+# /////////////////////////////////////////////////////////////////// GENERAL CONFIGURATIONS
+volumes:
+  postgres-data:
+
+networks:
+  linker-network:
+    driver: bridge

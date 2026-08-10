@@ -37,10 +37,12 @@ temp/
 *.env
 *.properties
 application-*.yml
+application-*.yaml
 application-*.properties
 
 # Docker
 docker-compose.override.yml
+docker-compose.override.yaml
 
 # Others
 coverage/
