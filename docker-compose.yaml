@@ -74,6 +74,36 @@ services:
     networks:
       - linker-network
 
+  #///////////////////////////////////////////////////////////////////////////// USER SERVICE
+  user-service:
+    image: linker/user-service
+    container_name: linker-user-service
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      gateway-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+    healthcheck:
+      test: [ "CMD_SHELL", "curl -fsS http://localhost:8080/actuator/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+    #    Ports should remove to prevent access service directly
+    ports:
+      - "9000:8080"
+
+    networks:
+      - linker-network
+
 #///////////////////////////////////////////////////////////////////////////// GENERAL CONFIGURATIONS
 volumes:
   postgres-data:

@@ -10,9 +10,9 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>gateway-service</artifactId>
-    <name>gateway-service</name>
-    <description>gateway-service</description>
+    <artifactId>gateway-server</artifactId>
+    <name>gateway-server</name>
+    <description>gateway-server</description>
 
     <dependencies>
         <dependency>
