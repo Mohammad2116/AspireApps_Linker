@@ -45,3 +45,4 @@ docker-compose.override.yml
 # Others
 coverage/
 node_modules/
+/restart_everything.sh
