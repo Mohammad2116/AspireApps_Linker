@@ -4,7 +4,11 @@ spring:
 
   cloud:
     gateway:
-      routs:
+      routes:
+        - id: anything-test
+          uri: lb://gateway-service
+          predicates:
+            - Path=/anything
 
 security:
   jwt:
@@ -19,3 +23,5 @@ eureka:
       defaultZone: http://eureka-server:8761/eureka/
     fetch-registry: true
     register-with-eureka: true
+  server:
+    wait-time-in-ms-when-sync-empty: 0
