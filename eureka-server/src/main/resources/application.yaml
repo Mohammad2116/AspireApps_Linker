@@ -1,22 +1,12 @@
+server:
+  port: 8761
+
 spring:
   application:
     name: eureka-server
 
-  cloud:
-    gateway:
-      routs:
-
-security:
-  jwt:
-    secretKey: "REPLACE-THIS-WITH-SECURE-AND-STRONG-256-BIT-SECRET-KEY"
-
-server:
-  port: 8080
-
 eureka:
   client:
-    service-url:
-      defaultZone: http://eureka-server:8761/eureka/
-    fetch-registry: true
-    register-with-eureka: true
+    register-with-eureka: false
+    fetch-registry: false
 
