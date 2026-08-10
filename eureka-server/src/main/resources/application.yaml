@@ -8,4 +8,4 @@ server:
 eureka:
   client:
     register-with-eureka: false
-    fetch-register: false
+    fetch-registry: false

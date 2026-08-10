@@ -47,3 +47,4 @@ docker-compose.override.yaml
 # Others
 coverage/
 node_modules/
+/restart_everything.sh

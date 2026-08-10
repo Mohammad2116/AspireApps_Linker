@@ -18,6 +18,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>eureka-server</module>
 <!--        services defines here as project grows-->
     </modules>
 
