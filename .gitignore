@@ -1,6 +1,5 @@
 # Eclipse
 .metadata/
-*.log
 .settings/
 .project
 .classpath
