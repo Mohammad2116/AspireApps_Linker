@@ -21,8 +21,8 @@ CREATE TABLE IF NOT EXISTS users
     created_at            TIMESTAMPTZ         NOT NULL DEFAULT now(),
     updated_at            TIMESTAMPTZ         NULL,
     last_login_at         TIMESTAMPTZ         NULL,
-    enabled               BOOLEAN             NOT NULL DEFAULT FALSE,
-    email_verified        BOOLEAN             NOT NULL DEFAULT FALSE,
+    enabled        BOOLEAN NOT NULL DEFAULT TRUE,
+    email_verified BOOLEAN NOT NULL DEFAULT TRUE,
     failed_login_attempts INTEGER             NOT NULL DEFAULT 0,
     locked_until          TIMESTAMPTZ         NULL
 )

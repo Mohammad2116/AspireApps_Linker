@@ -28,9 +28,9 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(
                         authorize ->
                                 authorize.requestMatchers(
-                                                "/ir/aspireapps/api/v1/linker/auth/register",
-                                                "/ir/aspireapps/api/v1/linker/auth/login",
-                                                "/ir/aspireapps/api/v1/linker/auth/refresh"
+                                                "/ir/aspireapps/linker/api/v1/auth/register",
+                                                "/ir/aspireapps/linker/api/v1/auth/login",
+                                                "/ir/aspireapps/linker/api/v1/auth/refresh"
                                         )
                                         .permitAll()
                                         .anyRequest().authenticated()

@@ -43,10 +43,10 @@ public class User {
     private Instant lastLoginAt;
     @Column(nullable = false)
     @Builder.Default
-    private boolean enabled = false;
+    private boolean enabled = true;
     @Column(nullable = false)
     @Builder.Default
-    private boolean emailVerified = false;
+    private boolean emailVerified = true;
     @Column(nullable = false)
     @Builder.Default
     private int failedLoginAttempts = 0;

@@ -35,4 +35,9 @@ public class RefreshToken {
     )
     @JoinColumn(name = "user_id")
     private User user;
+
+    public void revoke() {
+        this.setRevokedAt(Instant.now());
+        this.setRevoked(true);
+    }
 }
