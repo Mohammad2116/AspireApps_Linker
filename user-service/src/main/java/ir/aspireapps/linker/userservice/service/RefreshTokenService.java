@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -64,5 +65,11 @@ public class RefreshTokenService {
 
         refreshToken.revoke();
         return Optional.of(refreshToken);
+    }
+
+    @Transactional
+    public void revokeAll(User user) {
+        List<RefreshToken> tokens = refreshTokenRepository.findAllByUserAndNotRevoked(user);
+        tokens.forEach(RefreshToken::revoke);
     }
 }

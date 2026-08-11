@@ -2,7 +2,6 @@ package ir.aspireapps.linker.userservice.service;
 
 import ir.aspireapps.linker.userservice.dto.AuthResponse;
 import ir.aspireapps.linker.userservice.dto.UserLoginRequest;
-import ir.aspireapps.linker.userservice.dto.UserRefreshRequest;
 import ir.aspireapps.linker.userservice.dto.UserRegistrationRequest;
 import ir.aspireapps.linker.userservice.model.RefreshToken;
 import ir.aspireapps.linker.userservice.model.User;
@@ -10,6 +9,7 @@ import ir.aspireapps.linker.userservice.repository.UserRepository;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -72,10 +72,10 @@ public class AuthService {
     }
 
     @Transactional
-    public AuthResponse refresh(@NotNull @Valid UserRefreshRequest request,
+    public AuthResponse refresh(@NotEmpty @Size(max = 512) String refreshToken,
                                 @NotEmpty String deviceName,
                                 @NotEmpty String deviceIp) {
-        RefreshToken oldToken = refreshTokenService.verifyToken(request.refreshToken())
+        RefreshToken oldToken = refreshTokenService.verifyToken(refreshToken)
                 .orElseThrow(() -> new RuntimeException("Invalid Refresh Token"));
         User user = oldToken.getUser();
         return AuthResponse.builder()
@@ -85,5 +85,19 @@ public class AuthService {
                         user, deviceName, deviceIp
                 ))
                 .build();
+    }
+
+    @Transactional
+    public void logout(@NotEmpty @Size(max = 512) String refreshToken) {
+        refreshTokenService.verifyToken(refreshToken)
+                .orElseThrow(() -> new RuntimeException("Invalid Refresh Token"));
+    }
+
+    @Transactional
+    public void logoutAll(@NotEmpty @Size(max = 512) String refreshToken) {
+        RefreshToken oldToken = refreshTokenService.verifyToken(refreshToken)
+                .orElseThrow(() -> new RuntimeException("Invalid Refresh Token"));
+        User user = oldToken.getUser();
+        refreshTokenService.revokeAll(user);
     }
 }
