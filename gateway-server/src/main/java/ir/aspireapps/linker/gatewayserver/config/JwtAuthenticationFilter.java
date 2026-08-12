@@ -22,7 +22,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             "/ir/aspireapps/api/v1/...",
             "/actuator",
             "/ir/aspireapps/api/v1/linker/gateway/anything",
-            "/ir/aspireapps/web/v1/linker/gateway/anything"
+            "/ir/aspireapps/web/v1/linker/gateway/anything",
+            "/ir/aspireapps/linker"
     );
     private static final List<String> ADMIN_PATHS = List.of(
             "/ir/aspireapps/api/v1/linker/admin/**"
@@ -31,7 +32,6 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-
 
         String path = exchange.getRequest().getURI().getPath();
         if (isPublic(path)) {

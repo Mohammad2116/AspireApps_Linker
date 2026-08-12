@@ -1,7 +1,7 @@
 @import "colors.css";
 
-.test {
-    background-color: var(--primary);
+.homeLinker {
+    background-color: var(--bg);
 
     text-align: center;
     display: flex;
@@ -12,14 +12,9 @@
     min-height: 50vh;
     max-height: 75vh;
 
-    color: white;
+    color: var(--text);
     padding: 2rem;
     border-radius: 12px;
-}
-
-body {
-    background-color: var(--bg);
-    color: var(--text);
 }
 
 a {
