@@ -1,7 +1,6 @@
 package ir.aspireapps.linker.userservice.controller;
 
 import ir.aspireapps.linker.userservice.dto.AuthResponse;
-import ir.aspireapps.linker.userservice.dto.UserLoginRequest;
 import ir.aspireapps.linker.userservice.dto.UserLogoutRequest;
 import ir.aspireapps.linker.userservice.dto.UserRefreshRequest;
 import ir.aspireapps.linker.userservice.service.AuthService;
@@ -31,9 +30,7 @@ public class AuthControllerWeb {
 //    }
 
     @GetMapping("login")
-    public String login(
-            @NotNull @Valid UserLoginRequest request,
-            HttpServletRequest servletRequest) {
+    public String login(HttpServletRequest servletRequest) {
         return "login";
     }
 

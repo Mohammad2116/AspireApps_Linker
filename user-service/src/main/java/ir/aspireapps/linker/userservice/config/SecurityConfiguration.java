@@ -15,7 +15,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SecurityConfiguration {
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            GatewayHeaderAuthFilter gatewayHeaderAuthFilter) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(
@@ -28,14 +30,17 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(
                         authorize ->
                                 authorize.requestMatchers(
-                                                "/ir/aspireapps/linker/api/v1/auth/register",
-                                                "/ir/aspireapps/linker/api/v1/auth/login",
-                                                "/ir/aspireapps/linker/api/v1/auth/refresh"
+                                                "/ir/aspireapps/linker/auth/api/v1/register",
+                                                "/ir/aspireapps/linker/auth/api/v1/login",
+                                                "/ir/aspireapps/linker/auth/api/v1/refresh",
+                                                "/ir/aspireapps/linker/auth/web/v1/register",
+                                                "/ir/aspireapps/linker/auth/web/v1/login",
+                                                "/ir/aspireapps/linker/auth/web/v1/refresh"
                                         )
                                         .permitAll()
                                         .anyRequest().authenticated()
                 )
-                .addFilterAfter(new GatewayHeaderAuthFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(gatewayHeaderAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .build();
