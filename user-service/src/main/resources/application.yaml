@@ -33,8 +33,8 @@ eureka:
   client:
     service-url:
       defaultZone: http://eureka-server:8761/eureka/
-    fetch-register: true
-    registery-with-eureka: true
+    fetch-registry: true
+    register-with-eureka: true
 
 server:
   port: 8080
@@ -50,14 +50,12 @@ management:
       probes:
         enabled: true
 
-#logging:
-#  level:
-#    ir.aspireapps: DEBUG
+logging:
+  level:
+    ir.aspireapps: DEBUG
 
 security:
   jwt:
-    access-token-secret-key: A-VERY-LONG-SECRETK-KEY-FOR-TOKEN-GENERATION
-    #    15m * 60s * 1000ms
+    access-token-secret-key: "A-VERY-STRONG-SECRET-KEY-FOR-ACCESS-TOKEN"
     access-token-expiration-ms: 90_000
-    #    15 * 24 * 60 * 60 * 1000
-    refresh-token-expiration-ms: 1_296_000_000
+    refresh-tokne-expiration-ms: 1_296_000_000

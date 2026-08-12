@@ -8,7 +8,7 @@ spring:
         - id: anything-test
           uri: lb://gateway-service
           predicates:
-            - Path=/anything
+            - Path=/ir/aspireapps/linker/gateway/**
 
 security:
   jwt:
