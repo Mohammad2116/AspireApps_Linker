@@ -5,10 +5,28 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: anything-test
+        - id: homepage
           uri: lb://gateway-service
           predicates:
-            - Path=/ir/aspireapps/linker/gateway/**
+            - Path=/ir/aspireapps/linker
+
+        - id: gateway-server-api
+          uri: lb://gateway-service
+          predicates:
+            - Path=/ir/aspireapps/linker/api/v1/gateway/**
+        - id: gateway-server-web
+          uri: lb://gateway-service
+          predicates:
+            - Path=/ir/aspireapps/linker/web/v1/gateway/**
+
+        - id: user-service-api
+          uri: lb://user-service
+          predicates:
+            - Path=/ir/aspireapps/linker/api/v1/auth/**
+        - id: user-service-web
+          uri: lb://user-service
+          predicates:
+            - Path=/ir/aspireapps/linker/web/v1/auth/**
 
 security:
   jwt:
