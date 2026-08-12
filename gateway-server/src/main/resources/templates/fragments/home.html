@@ -6,8 +6,14 @@
     <h5>V.1.0</h5>
 
     <div class="button-group">
-        <button class="primary-button">Sign up</button>
-        <button class="secondary-button">Log in</button>
+        <button class="primary-button"
+                th:href="|location.href='@{/ir/aspireapps/linker/auth/web/v1/regiser'}|">Sign up
+        </button>
+
+        <button class="secondary-button"
+                th:onclick="|location.href='@{/ir/aspireapps/linker/auth/web/v1/login'}|">Login
+        </button>
+
     </div>
 
     <div class="link-checker">
