@@ -1,0 +1,27 @@
+@import "colors.css";
+
+.test {
+    background-color: var(--primary);
+
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    min-height: 50vh;
+    max-height: 75vh;
+
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+a {
+    color: var(--accent);
+}
