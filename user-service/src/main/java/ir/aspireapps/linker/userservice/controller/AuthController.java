@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/ir/aspireapps/linker/api/v1/auth/")
 @RequiredArgsConstructor
-public class controller {
+public class AuthController {
     private final AuthService authService;
 
     @PostMapping("register")
