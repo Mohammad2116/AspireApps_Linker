@@ -1,0 +1,20 @@
+:root {
+    --primary: #6D28D9;
+    --primary-dark: #5B21B6;
+    --accent: #A78BFA;
+
+    --bg: #F8FAFC;
+    --surface: #FFFFFF;
+
+    --text: #1E293B;
+    --text-muted: #64748B;
+
+    --border: #E2E8F0;
+
+    --success: #10B981;
+    --warning: #F59E0B;
+    --error: #EF4444;
+
+    --navbar: #4C1D95;
+    --footer: #111827;
+}

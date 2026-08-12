@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: user-service
+
+  server:
+    wait-time-in-ms-when-sync-emtpy: 0
+
+  datasource:
+    url: jdbc:postgresql://postgres:5432/linker_user_db
+    username: demoapps
+    password: JingleBells
+    driver-class-name: org.postgresql.Driver
+
+    jpa:
+      hibernate:
+        ddl-auto: none
+      open-in-view: false
+      show-sql: true
+      properties:
+        hibernate:
+          format-sql: true
+
+    sql:
+      init:
+        mode: always
+        platform: postgres
+
+    flyway:
+      enabled: true
+      location: classpath:db/migration
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+    fetch-register: true
+    registery-with-eureka: true
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+
+#logging:
+#  level:
+#    ir.aspireapps: DEBUG
+
+security:
+  jwt:
+    access-token-secret-key: A-VERY-LONG-SECRETK-KEY-FOR-TOKEN-GENERATION
+    #    15m * 60s * 1000ms
+    access-token-expiration-ms: 90_000
+    #    15 * 24 * 60 * 60 * 1000
+    refresh-token-expiration-ms: 1_296_000_000
