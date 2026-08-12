@@ -1,7 +1,7 @@
 @import "colors.css";
 
-.test {
-    background-color: var(--success);
+.login {
+    background-color: var(--bg);
 
     text-align: center;
     display: flex;
@@ -12,7 +12,11 @@
     min-height: 50vh;
     max-height: 75vh;
 
-    color: white;
+    color: var(--text);
     padding: 2rem;
     border-radius: 12px;
+}
+
+a {
+    color: var(--accent);
 }

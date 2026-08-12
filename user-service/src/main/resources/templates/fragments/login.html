@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div class="homeLinker" th:fragment="home">
+
+    <div class="auth-card">
+        <h1>Create your Linker account</h1>
+        <p class="auth-subtitle">Register to start creating and managing your links.</p>
+
+        <form method="post" th:action="@{/register}">
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input
+                        autocomplete="username"
+                        id="username"
+                        name="username"
+                        placeholder="Enter your username"
+                        required
+                        type="text"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input
+                        autocomplete="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        required
+                        type="email"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input
+                        autocomplete="new-password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        required
+                        type="password"
+                >
+            </div>
+
+            <div class="button-group">
+                <button class="primary-button">Sign up</button>
+                <button class="secondary-button">Clean</button>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+</html>
