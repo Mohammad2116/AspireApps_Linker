@@ -31,7 +31,7 @@ public class GatewayHeaderAuthFilter extends OncePerRequestFilter {
             List<GrantedAuthority> authorities = Collections.emptyList();
             if (role != null && !role.isEmpty()) {
                 authorities = Arrays.stream(role.split(","))
-                        .map(SimpleGrantedAuthority::new)
+                        .map(r -> new SimpleGrantedAuthority("ROLE_" + r))
                         .collect(Collectors.toList());
             }
             UsernamePasswordAuthenticationToken authentication =

@@ -5,7 +5,6 @@ import ir.aspireapps.linker.userservice.model.User;
 import ir.aspireapps.linker.userservice.repository.RefreshTokenRepository;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,12 +17,20 @@ import java.util.Optional;
 @Slf4j
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
 public class RefreshTokenService {
+
+    private final long refreshTokenExpirationMs;
     private final TokenService tokenService;
     private final RefreshTokenRepository refreshTokenRepository;
-    @Value("${security.jwt.refresh-token-expiration-ms}")
-    private final long refreshTokenExpirationMs;
+
+    public RefreshTokenService(
+            @Value("${security.jwt.refresh-tokne-expiration-ms}") long refreshTokenExpirationMs,
+            TokenService tokenService,
+            RefreshTokenRepository refreshTokenRepository) {
+        this.refreshTokenRepository = refreshTokenRepository;
+        this.refreshTokenExpirationMs = refreshTokenExpirationMs;
+        this.tokenService = tokenService;
+    }
 
     @Transactional
     public String generateRefreshToken(User user, String deviceName, String deviceIp) {
@@ -69,7 +76,7 @@ public class RefreshTokenService {
 
     @Transactional
     public void revokeAll(User user) {
-        List<RefreshToken> tokens = refreshTokenRepository.findAllByUserAndNotRevoked(user);
+        List<RefreshToken> tokens = refreshTokenRepository.findAllByUserAndRevokedFalse(user);
         tokens.forEach(RefreshToken::revoke);
     }
 }

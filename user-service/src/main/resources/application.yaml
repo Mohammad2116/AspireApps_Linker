@@ -6,7 +6,7 @@ spring:
     wait-time-is-ms-when-sync-empty: 0
 
   datasource:
-    url: jdbc:postgres://postgres:5432/linker_user_db;
+    url: jdbc:postgresql://postgres:5432/linker_user_db
     username: demoapps
     password: JingleBells
     driver_class_name: org.postgresql.Driver
