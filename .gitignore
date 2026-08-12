@@ -46,3 +46,4 @@ coverage/
 node_modules/
 /restart_everything.sh
 /restart_user-service.sh
+/restart_gateway.sh

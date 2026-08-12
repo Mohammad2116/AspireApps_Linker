@@ -10,9 +10,9 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>gateway-server</artifactId>
-    <name>gateway-server</name>
-    <description>gateway-server</description>
+    <artifactId>gateway-service</artifactId>
+    <name>gateway-service</name>
+    <description>gateway-service</description>
 
     <dependencies>
         <dependency>
@@ -21,8 +21,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.thymeleaf</groupId>
-            <artifactId>thymeleaf</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
 
         <dependency>

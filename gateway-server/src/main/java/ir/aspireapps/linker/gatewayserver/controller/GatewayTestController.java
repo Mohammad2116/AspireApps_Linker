@@ -13,5 +13,4 @@ public class GatewayTestController {
                 .status(HttpStatus.OK)
                 .body("Gateway Test Success, gateway working correctly...");
     }
-
 }
