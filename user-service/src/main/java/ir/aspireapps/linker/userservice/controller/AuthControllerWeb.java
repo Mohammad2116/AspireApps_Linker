@@ -1,6 +1,9 @@
 package ir.aspireapps.linker.userservice.controller;
 
-import ir.aspireapps.linker.userservice.dto.*;
+import ir.aspireapps.linker.userservice.dto.AuthResponse;
+import ir.aspireapps.linker.userservice.dto.UserLoginRequest;
+import ir.aspireapps.linker.userservice.dto.UserLogoutRequest;
+import ir.aspireapps.linker.userservice.dto.UserRefreshRequest;
 import ir.aspireapps.linker.userservice.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -10,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -19,25 +23,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class AuthControllerWeb {
     final AuthService authService;
 
-    @PostMapping("register")
-    public String register(
-            @NotNull @Valid UserRegistrationRequest request,
-            HttpServletRequest servletRequest) {
-        return "login";
-    }
+//    @GetMapping("register")
+//    public String register(
+//            @NotNull @Valid UserRegistrationRequest request,
+//            HttpServletRequest servletRequest) {
+//        return "register";
+//    }
 
-    @PostMapping("login")
-    public ResponseEntity<AuthResponse> login(
+    @GetMapping("login")
+    public String login(
             @NotNull @Valid UserLoginRequest request,
             HttpServletRequest servletRequest) {
-        AuthResponse result = authService.login(
-                request,
-                servletRequest.getHeader("User-Agent"),
-                servletRequest.getRemoteAddr()
-        );
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(result);
+        return "login";
     }
 
     @PostMapping("refresh")
