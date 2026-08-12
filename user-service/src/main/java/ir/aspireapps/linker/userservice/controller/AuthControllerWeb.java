@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/ir/aspireapps/linker/web/v1/auth/")
+@RequestMapping("/ir/aspireapps/linker/auth/web/v1/")
 @RequiredArgsConstructor
 public class AuthControllerWeb {
     final AuthService authService;

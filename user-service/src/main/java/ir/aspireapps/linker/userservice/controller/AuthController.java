@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/ir/aspireapps/linker/api/v1/auth/")
+@RequestMapping("/ir/aspireapps/linker/auth/api/v1/")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;

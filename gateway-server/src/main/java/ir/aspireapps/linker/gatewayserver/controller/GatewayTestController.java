@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class GatewayTestController {
-    @GetMapping("/ir/aspireapps/linker/api/v1/gateway/anything")
+    @GetMapping("/ir/aspireapps/linker/gateway/api/v1/anything")
     public ResponseEntity<String> anything() {
         return ResponseEntity
                 .status(HttpStatus.OK)
