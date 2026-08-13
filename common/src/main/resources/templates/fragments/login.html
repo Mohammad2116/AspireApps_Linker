@@ -5,7 +5,12 @@
     <h3 style="white-space: pre">Enter username and password to enter</h3>
 
     <div>
-        <form method="post">
+        <div class="error" th:if="${generalError}">
+            <h4>Invalid login data</h4>
+        </div>
+
+        <form method="post" th:action="@{/ir/aspireapps/linker/auth/web/v1/login}"
+              th:object="${loginForm}">
 
             <div class="form-pair">
                 <label class="form-label" for="username">Username</label>
@@ -16,7 +21,7 @@
                        placeholder="Enter your username"
                        required
                        type="text"
-                >
+                       th:field="*{username}"/>
             </div>
 
             <div class="form-pair">
@@ -28,7 +33,7 @@
                        placeholder="Enter your password"
                        required
                        type="password"
-                >
+                       th:field="*{password}"/>
             </div>
             <br/>
             <div class="button-group">

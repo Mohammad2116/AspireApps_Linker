@@ -1,17 +1,14 @@
 package ir.aspireapps.linker.userservice.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 
+@Builder
 public record UserLoginRequest(
         @NotEmpty @Size(min = 3, max = 100)
         String username,
-
-        @NotEmpty @Size(min = 5, max = 254)
-        @Email
-        String email,
 
         @NotEmpty @Size(min = 8, max = 100)
         @Pattern(

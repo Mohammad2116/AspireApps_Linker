@@ -57,7 +57,7 @@ public class AuthService {
             @NotEmpty String deviceName,
             @NotEmpty String deviceIp) {
 
-        User user = userRepository.findByUsernameOrEmail(request.username(), request.email())
+        User user = userRepository.findByUsername(request.username())
                 .orElseThrow(() -> new RuntimeException("Wrong username or password"));
 
         if (passwordEncoder.matches(request.password(), user.getPassword())) {

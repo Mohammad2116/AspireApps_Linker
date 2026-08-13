@@ -1,8 +1,11 @@
 package ir.aspireapps.linker.userservice.controller;
 
 import ir.aspireapps.linker.userservice.dto.AuthResponse;
+import ir.aspireapps.linker.userservice.dto.UserLoginRequest;
 import ir.aspireapps.linker.userservice.dto.UserLogoutRequest;
 import ir.aspireapps.linker.userservice.dto.UserRefreshRequest;
+import ir.aspireapps.linker.userservice.form.UserLoginForm;
+import ir.aspireapps.linker.userservice.form.UserRegisterForm;
 import ir.aspireapps.linker.userservice.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -12,7 +15,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -20,18 +26,46 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/ir/aspireapps/linker/auth/web/v1/")
 @RequiredArgsConstructor
 public class AuthControllerWeb {
-    final AuthService authService;
+    private final AuthService authService;
 
-//    @GetMapping("register")
-//    public String register(
-//            @NotNull @Valid UserRegistrationRequest request,
-//            HttpServletRequest servletRequest) {
-//        return "register";
-//    }
+    @GetMapping("register")
+    public String register(
+            Model model,
+            HttpServletRequest servletRequest) {
+        model.addAttribute("registerForm", new UserRegisterForm());
+        return "register";
+    }
 
     @GetMapping("login")
-    public String login(HttpServletRequest servletRequest) {
+    public String login(
+            Model model,
+            HttpServletRequest servletRequest
+    ) {
+        model.addAttribute("loginForm", new UserLoginForm());
         return "login";
+    }
+
+    @PostMapping("login")
+    public String loginProcess(
+            @Valid @ModelAttribute("loginForm") UserLoginForm userLoginForm,
+            BindingResult bindingResult,
+            Model model,
+            HttpServletRequest servletRequest
+    ) {
+        if (bindingResult.hasFieldErrors()) {
+            model.addAttribute("generalError", true);
+            return "login";
+        }
+
+        AuthResponse response = authService.login(
+                UserLoginRequest.builder()
+                        .username(userLoginForm.getUsername())
+                        .password(userLoginForm.getPassword())
+                        .build(),
+                servletRequest.getHeader("User-Agent"),
+                servletRequest.getRemoteAddr());
+
+        return "home";
     }
 
     @PostMapping("refresh")
