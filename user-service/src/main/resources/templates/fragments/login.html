@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<div class="homeLinker" th:fragment="home">
+<div class="homeLinker" th:fragment="login">
+    <h1 style="white-space: pre">Create your Linker account</h1>
+    <h3 style="white-space: pre">Enter username and password to enter your account.</h3>
 
-    <div class="auth-card">
-        <h1>Create your Linker account</h1>
-        <p class="auth-subtitle">Enter username and password to enter your account.</p>
+    <div>
+        <form class="form-holder" method="post" th:action="@{/login-process}">
 
-        <form method="post" th:action="@{/login-process}">
-
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input
+            <div class="pair-holder">
+                <label class="pair-label" for="username">Username</label>
+                <input class="pair-input"
                         autocomplete="username"
                         id="username"
                         name="username"
@@ -20,9 +19,9 @@
                 >
             </div>
 
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input
+            <div class="pair-holder">
+                <label class="pair-label" for="password">Password</label>
+                <input class="pair-input"
                         autocomplete="new-password"
                         id="password"
                         name="password"
@@ -35,9 +34,7 @@
             <div class="button-group">
                 <button class="primary-button" type="submit">Login</button>
             </div>
-
         </form>
     </div>
-
 </div>
 </html>
