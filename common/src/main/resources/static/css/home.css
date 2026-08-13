@@ -1,0 +1,22 @@
+@import "colors.css";
+
+.homeLinker {
+    background-color: var(--bg);
+
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    min-height: 50vh;
+    max-height: 75vh;
+
+    color: var(--text);
+    padding: 2rem;
+    border-radius: 12px;
+}
+
+a {
+    color: var(--accent);
+}
