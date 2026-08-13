@@ -62,6 +62,11 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>ir.aspireapps.linker</groupId>
+            <artifactId>common</artifactId>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
