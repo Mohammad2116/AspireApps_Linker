@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<div class="home" th:fragment="login">
+    <h1 style="white-space: pre">Log into yout Linker account</h1>
+    <h3 style="white-space: pre">Enter username and password to enter</h3>
+
+    <div>
+        <form method="post">
+
+            <div class="form-pair">
+                <label class="form-label" for="username">Username</label>
+                <input autocomplete="username"
+                       class="form-input"
+                       id="username"
+                       name="username"
+                       placeholder="Enter your username"
+                       required
+                       type="text"
+                >
+            </div>
+
+            <div class="form-pair">
+                <label class="form-label" for="password">Password</label>
+                <input autocomplete="new-password"
+                       class="form-input"
+                       id="password"
+                       name="password"
+                       placeholder="Enter your password"
+                       required
+                       type="password"
+                >
+            </div>
+            <br/>
+            <div class="button-group">
+                <button class="primary-button" type="submit">Login</button>
+            </div>
+        </form>
+    </div>
+</div>
+</html>
