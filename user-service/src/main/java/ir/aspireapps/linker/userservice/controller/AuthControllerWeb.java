@@ -4,6 +4,7 @@ import ir.aspireapps.linker.userservice.dto.*;
 import ir.aspireapps.linker.userservice.form.UserLoginForm;
 import ir.aspireapps.linker.userservice.form.UserRegisterForm;
 import ir.aspireapps.linker.userservice.service.AuthService;
+import ir.aspireapps.linker.userservice.utility.InputNormalizer;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -49,8 +50,7 @@ public class AuthControllerWeb {
             model.addAttribute("generalError", true);
             return "register";
         }
-
-        model.addAttribute("registerForm", new UserRegisterForm());
+        userRegisterForm = InputNormalizer.normalize(userRegisterForm);
         AuthResponse authResponse = authService.register(
                 UserRegisterRequest.builder()
                         .username(userRegisterForm.getUsername())
@@ -94,6 +94,7 @@ public class AuthControllerWeb {
             return "login";
         }
 
+        userLoginForm = InputNormalizer.normalize(userLoginForm);
         AuthResponse authResponse = authService.login(
                 UserLoginRequest.builder()
                         .username(userLoginForm.getUsername())

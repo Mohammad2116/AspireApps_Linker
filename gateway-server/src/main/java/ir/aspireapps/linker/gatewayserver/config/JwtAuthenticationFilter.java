@@ -7,13 +7,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
 import java.util.List;
 
 @Slf4j
@@ -29,7 +32,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             "/ir/aspireapps/linker/auth/web/v1/register",
             "/ir/aspireapps/linker/auth/web/v1/login",
             "/ir/aspireapps/linker/auth/web/v1/refresh",
-            "/ir/aspireapps/linker/gateway/web/v1/anything"
+            "/ir/aspireapps/linker/gateway/web/v1/anything",
+            "/ir/aspireapps/linker/auth/web/v1/profile"
     );
     private static final List<String> ADMIN_PATHS = List.of(
             "/ir/aspireapps/linker/api/v1/admin/**"
@@ -38,20 +42,29 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-
         String path = exchange.getRequest().getURI().getPath();
+        boolean webConnection = path.contains("/web?");
+
         if (isPublic(path)) {
             log.info("Public path called at: {}", path);
             return chain.filter(exchange);
         }
         log.info("Authenticated path called at: {}", path);
 
-        String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return unauthorized(exchange);
+        String token = null;
+        if (webConnection) {
+            HttpCookie cookie = exchange.getRequest().getCookies().getFirst("ACCESS_TOKEN");
+            if (cookie == null)
+                return redirectToLogin(exchange);
+            token = cookie.getValue();
+        } else {
+            String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return unauthorized(exchange);
+            }
+            token = authHeader.substring("Bearer ".length());
         }
 
-        String token = authHeader.substring("Bearer ".length());
         Claims claims = jwtService.validateToken(token);
         String username = claims.getSubject();
         List<?> roles = claims.get("roles", List.class);
@@ -70,6 +83,14 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 .header("X-USER-ROLES", String.join(",", rolesNames))
                 .build();
         return chain.filter(exchange.mutate().request(request).build());
+    }
+
+    private Mono<Void> redirectToLogin(ServerWebExchange exchange) {
+        ServerHttpResponse response = exchange.getResponse();
+        response.getHeaders().setLocation(
+                URI.create("/ir/aspireapps/linker/auth/web/v1/login")
+        );
+        return response.setComplete();
     }
 
     @Override

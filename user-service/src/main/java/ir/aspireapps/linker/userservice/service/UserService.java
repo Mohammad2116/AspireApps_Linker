@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     private final UserRepository userRepository;
 
-
     public UserProfileResponse profile(@NotEmpty String username) {
         return userRepository.profile(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));

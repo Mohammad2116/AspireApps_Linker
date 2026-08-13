@@ -37,7 +37,11 @@ public class AuthService {
 
         User newUser = User.builder()
                 .username(request.username())
-                .password(request.password())
+                .password(
+                        passwordEncoder.encode(
+                                request.password()
+                        )
+                )
                 .email(request.email())
                 .build();
         User savedUser = userRepository.save(newUser);
