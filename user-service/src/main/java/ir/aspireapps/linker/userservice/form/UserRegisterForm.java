@@ -24,4 +24,8 @@ public class UserRegisterForm {
             message = "Password must be 8-100 chars and include at least one letter, one number, and one special character."
     )
     String password;
+
+    @NotEmpty
+    @Size(min = 8, max = 100)
+    String passwordConfirm;
 }

@@ -1,17 +1,17 @@
 package ir.aspireapps.linker.userservice.controller;
 
-import ir.aspireapps.linker.userservice.dto.AuthResponse;
-import ir.aspireapps.linker.userservice.dto.UserLoginRequest;
-import ir.aspireapps.linker.userservice.dto.UserLogoutRequest;
-import ir.aspireapps.linker.userservice.dto.UserRefreshRequest;
+import ir.aspireapps.linker.userservice.dto.*;
 import ir.aspireapps.linker.userservice.form.UserLoginForm;
 import ir.aspireapps.linker.userservice.form.UserRegisterForm;
 import ir.aspireapps.linker.userservice.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.time.Duration;
 
 @Controller
 @RequestMapping("/ir/aspireapps/linker/auth/web/v1/")
@@ -36,11 +38,45 @@ public class AuthControllerWeb {
         return "register";
     }
 
+    @PostMapping("register")
+    public String registerProcess(
+            @Valid @ModelAttribute("registerForm") UserRegisterForm userRegisterForm,
+            BindingResult bindingResult,
+            Model model,
+            HttpServletRequest servletRequest,
+            HttpServletResponse servletResponse) {
+        if (bindingResult.hasFieldErrors()) {
+            model.addAttribute("generalError", true);
+            return "register";
+        }
+
+        model.addAttribute("registerForm", new UserRegisterForm());
+        AuthResponse authResponse = authService.register(
+                UserRegisterRequest.builder()
+                        .username(userRegisterForm.getUsername())
+                        .email(userRegisterForm.getEmail())
+                        .password(userRegisterForm.getPassword())
+                        .passwordConfirm(userRegisterForm.getPasswordConfirm())
+                        .build(),
+                servletRequest.getHeader("User-Agent"),
+                servletRequest.getRemoteUser());
+
+        addTokenCookie(servletResponse,
+                "ACCESS_TOKEN",
+                authResponse.accessToken(),
+                Duration.ofMinutes(5));
+        addTokenCookie(servletResponse,
+                "REFRESH_TOKEN",
+                authResponse.accessToken(),
+                Duration.ofDays(7));
+
+        return "home";
+    }
+
     @GetMapping("login")
     public String login(
             Model model,
-            HttpServletRequest servletRequest
-    ) {
+            HttpServletRequest servletRequest) {
         model.addAttribute("loginForm", new UserLoginForm());
         return "login";
     }
@@ -50,14 +86,15 @@ public class AuthControllerWeb {
             @Valid @ModelAttribute("loginForm") UserLoginForm userLoginForm,
             BindingResult bindingResult,
             Model model,
-            HttpServletRequest servletRequest
+            HttpServletRequest servletRequest,
+            HttpServletResponse servletResponse
     ) {
         if (bindingResult.hasFieldErrors()) {
             model.addAttribute("generalError", true);
             return "login";
         }
 
-        AuthResponse response = authService.login(
+        AuthResponse authResponse = authService.login(
                 UserLoginRequest.builder()
                         .username(userLoginForm.getUsername())
                         .password(userLoginForm.getPassword())
@@ -65,6 +102,14 @@ public class AuthControllerWeb {
                 servletRequest.getHeader("User-Agent"),
                 servletRequest.getRemoteAddr());
 
+        addTokenCookie(servletResponse,
+                "ACCESS_TOKEN",
+                authResponse.accessToken(),
+                Duration.ofMinutes(5));
+        addTokenCookie(servletResponse,
+                "REFRESH_TOKEN",
+                authResponse.accessToken(),
+                Duration.ofDays(7));
         return "home";
     }
 
@@ -100,5 +145,19 @@ public class AuthControllerWeb {
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
                 .body(null);
+    }
+
+    private void addTokenCookie(HttpServletResponse servletResponse, String tokenName, String tokenValue, Duration duration) {
+        ResponseCookie cookie = ResponseCookie.from(tokenName, tokenValue)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(duration)
+                .build();
+        servletResponse.addHeader(
+                HttpHeaders.SET_COOKIE,
+                cookie.toString()
+        );
     }
 }

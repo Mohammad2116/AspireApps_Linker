@@ -2,7 +2,7 @@ package ir.aspireapps.linker.userservice.service;
 
 import ir.aspireapps.linker.userservice.dto.AuthResponse;
 import ir.aspireapps.linker.userservice.dto.UserLoginRequest;
-import ir.aspireapps.linker.userservice.dto.UserRegistrationRequest;
+import ir.aspireapps.linker.userservice.dto.UserRegisterRequest;
 import ir.aspireapps.linker.userservice.model.RefreshToken;
 import ir.aspireapps.linker.userservice.model.User;
 import ir.aspireapps.linker.userservice.repository.UserRepository;
@@ -26,7 +26,7 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(
-            @NotNull @Valid UserRegistrationRequest request,
+            @NotNull @Valid UserRegisterRequest request,
             @NotEmpty String deviceName,
             @NotEmpty String deviceIp
     ) {
