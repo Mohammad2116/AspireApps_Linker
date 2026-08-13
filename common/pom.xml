@@ -5,10 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>ir.aspireapps.micromart</groupId>
-        <artifactId>micromart-parent</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath> <!-- Important: points to the root pom -->
+        <groupId>ir.aspireapps.linker</groupId>
+        <artifactId>linker-parent</artifactId>
+        <version>0.0.1</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>common</artifactId>
@@ -18,10 +18,6 @@
     <packaging>jar</packaging>
 
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
 
         <!-- Lombok -->
         <dependency>

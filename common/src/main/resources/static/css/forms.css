@@ -10,7 +10,7 @@
 }
 
 .form-label {
-    flex: 0.25;
+    flex: 0.75;
     min-width: 0;
     padding: 0.85rem 0rem;
     color: var(--text);
