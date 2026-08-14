@@ -1,5 +1,5 @@
 package ir.aspireapps.linker.linksservice.model;
 
-public enum linkStatus {
+public enum LinkStatus {
     ACTIVE, DISABLED, EXPIRED
 }

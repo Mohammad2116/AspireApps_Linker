@@ -37,7 +37,7 @@ public class Link {
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false, columnDefinition = "link_status")
     @Builder.Default
-    private linkStatus status = linkStatus.ACTIVE;
+    private LinkStatus status = LinkStatus.ACTIVE;
 
     @CreationTimestamp
     private Instant createdAt;
