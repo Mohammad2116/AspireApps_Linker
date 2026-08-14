@@ -32,8 +32,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             "/ir/aspireapps/linker/auth/web/v1/register",
             "/ir/aspireapps/linker/auth/web/v1/login",
             "/ir/aspireapps/linker/auth/web/v1/refresh",
-            "/ir/aspireapps/linker/gateway/web/v1/anything",
-            "/ir/aspireapps/linker/auth/web/v1/profile"
+            "/ir/aspireapps/linker/gateway/web/v1/anything"
     );
     private static final List<String> ADMIN_PATHS = List.of(
             "/ir/aspireapps/linker/api/v1/admin/**"
@@ -43,7 +42,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
-        boolean webConnection = path.contains("/web?");
+        boolean webConnection = path.contains("/web/");
 
         if (isPublic(path)) {
             log.info("Public path called at: {}", path);
@@ -51,7 +50,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         }
         log.info("Authenticated path called at: {}", path);
 
-        String token = null;
+        String token;
         if (webConnection) {
             HttpCookie cookie = exchange.getRequest().getCookies().getFirst("ACCESS_TOKEN");
             if (cookie == null)
@@ -87,6 +86,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     private Mono<Void> redirectToLogin(ServerWebExchange exchange) {
         ServerHttpResponse response = exchange.getResponse();
+        response.setStatusCode(HttpStatus.SEE_OTHER);
         response.getHeaders().setLocation(
                 URI.create("/ir/aspireapps/linker/auth/web/v1/login")
         );

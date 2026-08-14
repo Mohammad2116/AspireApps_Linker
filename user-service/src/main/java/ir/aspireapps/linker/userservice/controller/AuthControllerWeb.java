@@ -70,7 +70,7 @@ public class AuthControllerWeb {
                 authResponse.accessToken(),
                 Duration.ofDays(7));
 
-        return "home";
+        return "redirect:/ir/aspireapps/linker/user/web/v1/profile";
     }
 
     @GetMapping("login")
@@ -111,7 +111,7 @@ public class AuthControllerWeb {
                 "REFRESH_TOKEN",
                 authResponse.accessToken(),
                 Duration.ofDays(7));
-        return "home";
+        return "redirect:/ir/aspireapps/linker/user/web/v1/profile";
     }
 
     @PostMapping("refresh")

@@ -28,17 +28,19 @@ public class GatewayHeaderAuthFilter extends OncePerRequestFilter {
                                     @Nonnull HttpServletResponse response,
                                     @Nonnull FilterChain filterChain) throws ServletException, IOException {
         String username = request.getHeader("X-USERNAME");
-        String role = request.getHeader("X-USER-ROLE");
+        String roles = request.getHeader("X-USER-ROLES");
 
         log.info("username: {}", username);
-        log.info("role: {}", role);
+        log.info("roles: {}", roles);
         log.info("request URL: {}", request.getRequestURI());
 
         if ((username != null) && (!username.isEmpty())
                 && (SecurityContextHolder.getContext().getAuthentication() == null)) {
             List<GrantedAuthority> authorities = Collections.emptyList();
-            if (role != null && !role.isEmpty()) {
-                authorities = Arrays.stream(role.split(","))
+            if (roles != null && !roles.isEmpty()) {
+                authorities = Arrays.stream(roles.split(","))
+                        .map(String::trim)
+                        .map(r -> r.startsWith("ROLE_") ? r : "ROLE_" + r)
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
             }

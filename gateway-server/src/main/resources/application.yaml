@@ -15,6 +15,7 @@ spring:
           predicates:
             - Path=/ir/aspireapps/linker/gateway/api/v1/**
         - id: gateway-server-web
+
           uri: lb://gateway-service
           predicates:
             - Path=/ir/aspireapps/linker/gateway/web/v1**
@@ -22,15 +23,18 @@ spring:
         - id: user-service-api
           uri: lb://user-service
           predicates:
-            - Path=/ir/aspireapps/linker/auth/api/v1/**
+            - Path=/ir/aspireapps/linker/auth/api/v1/**,/ir/aspireapps/linker/user/api/v1/**
+
         - id: user-service-web
           uri: lb://user-service
           predicates:
-            - Path=/ir/aspireapps/linker/auth/web/v1/**
+            - Path=/ir/aspireapps/linker/auth/web/v1/**,/ir/aspireapps/linker/user/web/v1/**
+          filters:
+            - PreserveHostHeader
 
 security:
   jwt:
-    secretKey: "REPLACE-THIS-WITH-SECURE-AND-STRONG-256-BIT-SECRET-KEY"
+    secretKey: "A-VERY-STRONG-SECRET-KEY-FOR-ACCESS-TOKEN"
 
 server:
   port: 8080

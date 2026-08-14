@@ -61,8 +61,9 @@ public class AuthService {
             @NotEmpty String deviceName,
             @NotEmpty String deviceIp) {
 
+        System.out.println("Request username " + request.username());
         User user = userRepository.findByUsername(request.username())
-                .orElseThrow(() -> new RuntimeException("Wrong username or password"));
+                .orElseThrow(() -> new RuntimeException("username not found"));
 
         if (passwordEncoder.matches(request.password(), user.getPassword())) {
             return AuthResponse.builder()
@@ -72,7 +73,9 @@ public class AuthService {
                             user, deviceName, deviceIp))
                     .build();
         }
-        throw new RuntimeException("Wrong username or password");
+        System.out.println("Request Password " + request.password());
+        System.out.println("user Password " + user.getPassword());
+        throw new RuntimeException("password not matched");
     }
 
     @Transactional

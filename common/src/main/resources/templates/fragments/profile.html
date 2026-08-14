@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<div class="home" th:fragment="profile">
+
+    <h1>Welcome back <span th:text="${profile.username}"></span></h1>
+    <div class="profile-pair">
+        <div class="profile-labe">Email:</div>
+        <div class="profile-text" th:text="${profile.email}"></div>
+    </div>
+    <div class="profile-pair">
+        <div class="profile-labe">Role:</div>
+        <div class="profile-text" th:text="${profile.role}"></div>
+    </div>
+    <div class="profile-pair">
+        <div class="profile-labe">Subscription:</div>
+        <div class="profile-text" th:text="${profile.status}"></div>
+    </div>
+
+    <table class="table">
+        <caption>
+            Registered links:
+        </caption>
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Original URL</th>
+            <th>Shorted URL</th>
+        </tr>
+        </thead>
+    </table>
+</div>
+</html>

@@ -2,44 +2,42 @@
 <html xmlns:th="http://www.w3.org/1999/xhtml">
 <div class="home" th:fragment="login">
     <h1 style="white-space: pre">Log into your Linker account</h1>
-    <h3 style="white-space: pre">Enter username and password to enter</h3>
+    <h3 style="white-space: pre">Enter username and password</h3>
 
-    <div>
-        <div class="error" th:if="${generalError}">
-            <h4>Invalid login data</h4>
+    <div class="general_error" th:if="${generalError}">
+        <h4>Invalid login data</h4>
+    </div>
+
+    <form method="post" th:action="@{/ir/aspireapps/linker/auth/web/v1/login}"
+          th:object="${loginForm}">
+
+        <div class="form-pair">
+            <label class="form-label" for="username">Username</label>
+            <input autocomplete="username"
+                   class="form-input"
+                   id="username"
+                   name="username"
+                   placeholder="Enter your username"
+                   required
+                   th:field="*{username}"
+                   type="text"/>
         </div>
 
-        <form method="post" th:action="@{/ir/aspireapps/linker/auth/web/v1/login}"
-              th:object="${loginForm}">
-
-            <div class="form-pair">
-                <label class="form-label" for="username">Username</label>
-                <input autocomplete="username"
-                       class="form-input"
-                       id="username"
-                       name="username"
-                       placeholder="Enter your username"
-                       required
-                       type="text"
-                       th:field="*{username}"/>
-            </div>
-
-            <div class="form-pair">
-                <label class="form-label" for="password">Password</label>
-                <input autocomplete="new-password"
-                       class="form-input"
-                       id="password"
-                       name="password"
-                       placeholder="Enter your password"
-                       required
-                       type="password"
-                       th:field="*{password}"/>
-            </div>
-            <br/>
-            <div class="button-group">
-                <button class="primary-button" type="submit">Login</button>
-            </div>
-        </form>
-    </div>
+        <div class="form-pair">
+            <label class="form-label" for="password">Password</label>
+            <input autocomplete="password"
+                   class="form-input"
+                   id="password"
+                   name="password"
+                   placeholder="Enter your password"
+                   required
+                   th:field="*{password}"
+                   type="password"/>
+        </div>
+        <br/>
+        <div class="button-group">
+            <button class="primary-button" type="submit">Login</button>
+        </div>
+    </form>
 </div>
 </html>
