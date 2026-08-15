@@ -14,6 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/ir/aspireapps/linker/links/api/v1/**")
 @RequiredArgsConstructor
@@ -24,11 +27,11 @@ public class LinkController {
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<LinkResponse> register(
             @Valid @NotNull @RequestBody LinkRegisterRequest request,
-            @NotEmpty @HeaderParam("X-USERNAME") String username) {
+            @NotEmpty @HeaderParam("X-USER-ID") String userId) {
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
                 .body(
-                        linkService.register(request, username)
+                        linkService.register(request, UUID.fromString(userId))
                 );
     }
 
@@ -36,12 +39,11 @@ public class LinkController {
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<LinkResponse> updateStatus(
             @Valid @NotNull @RequestBody LinkUpdateStatusRequest request,
-            @NotEmpty @HeaderParam("X-USERNAME") String username
-    ) {
+            @NotEmpty @HeaderParam("X-USER-ID") String userId) {
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
                 .body(
-                        linkService.updateStatus(request, username)
+                        linkService.updateStatus(request, UUID.fromString(userId))
                 );
     }
 
@@ -49,12 +51,22 @@ public class LinkController {
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<LinkResponse> details(
             @NotNull @RequestBody Long id,
-            @NotEmpty @HeaderParam("X-USERNAME") String username
-    ) {
+            @NotEmpty @HeaderParam("X-USER-ID") String userId) {
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
                 .body(
-                        linkService.details(id, username)
+                        linkService.details(id, UUID.fromString(userId))
+                );
+    }
+
+    @GetMapping("/user/links")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<List<LinkResponse>> userLinks(
+            @NotEmpty @HeaderParam("X-USER-ID") String userId) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(
+                        linkService.userLinks(UUID.fromString(userId))
                 );
     }
 }

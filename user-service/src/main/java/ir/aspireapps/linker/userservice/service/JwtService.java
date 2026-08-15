@@ -28,6 +28,7 @@ public class JwtService {
         Instant now = Instant.now();
         return Jwts.builder()
                 .subject(user.getUsername())
+                .claim("userId", user.getId())
                 .claim("roles", List.of(user.getRole().name()))
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusMillis(expirationMs)))

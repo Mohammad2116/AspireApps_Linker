@@ -66,6 +66,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
         Claims claims = jwtService.validateToken(token);
         String username = claims.getSubject();
+        String userId = claims.get("userId").toString();
         List<?> roles = claims.get("roles", List.class);
         if (username == null || roles == null) {
             return unauthorized(exchange);
@@ -75,9 +76,12 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             return forbidden(exchange);
         }
 
+        // DON'T FORGOT TH CHECK EXPIRATION OF TOKEN, IT'S IMPORTANT FOR EXPIRATION TOKENS
+
         ServerHttpRequest request = exchange
                 .getRequest()
                 .mutate()
+                .header("X-USER-ID", userId)
                 .header("X-USERNAME", username)
                 .header("X-USER-ROLES", String.join(",", rolesNames))
                 .build();
