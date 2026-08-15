@@ -62,7 +62,7 @@ public class LinkController {
     @GetMapping("/user/links")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<List<LinkResponse>> userLinks(
-            @NotEmpty @HeaderParam("X-USER-ID") String userId) {
+            @NotEmpty @RequestHeader("X-USER-ID") String userId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(

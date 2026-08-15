@@ -1,12 +1,12 @@
 package ir.aspireapps.linker.userservice.controller;
 
 import ir.aspireapps.linker.userservice.dto.UserProfileResponse;
+import ir.aspireapps.linker.userservice.feign.LinksServiceClient;
 import ir.aspireapps.linker.userservice.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,13 +14,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+@Slf4j
 @Controller
 @RequestMapping("/ir/aspireapps/linker/user/web/v1/")
 @RequiredArgsConstructor
 @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
 public class UserControllerWeb {
-    private static final Logger log = LoggerFactory.getLogger(UserControllerWeb.class);
     private final UserService userService;
+    private final LinksServiceClient linksServiceClient;
 
     @GetMapping("profile")
     public String profile(
@@ -34,6 +35,7 @@ public class UserControllerWeb {
         UserProfileResponse user = userService.profile(username);
 
         model.addAttribute("profile", user);
+        model.addAttribute("links", linksServiceClient.userLinks());
         return "profile";
     }
 }

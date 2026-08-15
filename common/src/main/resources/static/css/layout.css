@@ -18,7 +18,7 @@
 
 .navbar .row-items {
     display: flex;
-    align-items: stretch;
+    align-items: flex-start;
 }
 
 .footer {
@@ -124,14 +124,15 @@
 }
 
 /* ///////////////////////////////////////////////////////// */
-
 .navbar-button {
-    background-color: var(--primary-dark);
-    color: var(--surface);
+    background-color: transparent;
+    color: var(--primary);
 
-    padding: 0.25rem 1.5rem;
+    padding: 0.05rem 1.5rem;
 
-    border: 2px solid var(--text-muted);
+    gap: 1rem 1rem;
+
+    border: 2px solid var(--primary);
     border-radius: 8px;
 
     font-size: 1rem;
@@ -140,18 +141,21 @@
     cursor: pointer;
 
     transition: background-color 0.2s ease,
+    color 0.2s ease,
     border-color 0.2s ease,
     transform 0.2s ease,
     box-shadow 0.2s ease;
 }
 
 .navbar-button:hover {
-    background-color: var(--primary-dark);
-    border-color: var(--primary-dark);
+    background-color: var(--accent);
+    color: var(--text);
+
+    border-color: var(--accent);
 
     transform: translateY(-2px);
 
-    box-shadow: 0 4px 10px rgba(76, 29, 149, 0.25);
+    box-shadow: 0 4px 10px rgba(167, 139, 250, 0.3);
 }
 
 .navbar-button:active {

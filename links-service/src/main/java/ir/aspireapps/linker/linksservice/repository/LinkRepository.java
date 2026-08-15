@@ -21,7 +21,7 @@ public interface LinkRepository extends JpaRepository<Link, Long> {
                             l.id,
                             l.title,
                             l.originalUrl,
-                            l.shortedUrl,
+                            l.shortUrl,
                             l.userId,
                             l.status,
                             l.createdAt,
