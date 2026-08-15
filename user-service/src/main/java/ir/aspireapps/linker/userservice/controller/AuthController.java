@@ -2,6 +2,7 @@ package ir.aspireapps.linker.userservice.controller;
 
 import ir.aspireapps.linker.userservice.dto.*;
 import ir.aspireapps.linker.userservice.service.AuthService;
+import ir.aspireapps.linker.userservice.utility.InputNormalizer;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -14,15 +15,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/ir/aspireapps/linker/api/v1/auth/")
+@RequestMapping("/ir/aspireapps/linker/auth/api/v1/")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
 
     @PostMapping("register")
     public ResponseEntity<AuthResponse> register(
-            @NotNull @Valid UserRegistrationRequest request,
+            @NotNull @Valid UserRegisterRequest request,
             HttpServletRequest servletRequest) {
+        request = InputNormalizer.normalize(request);
         AuthResponse result = authService.register(
                 request,
                 servletRequest.getHeader("User-Agent"),
@@ -37,6 +39,7 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(
             @NotNull @Valid UserLoginRequest request,
             HttpServletRequest servletRequest) {
+        request = InputNormalizer.normalize(request);
         AuthResponse result = authService.login(
                 request,
                 servletRequest.getHeader("User-Agent"),

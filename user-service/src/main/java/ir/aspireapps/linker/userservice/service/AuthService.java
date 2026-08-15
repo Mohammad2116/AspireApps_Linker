@@ -2,7 +2,7 @@ package ir.aspireapps.linker.userservice.service;
 
 import ir.aspireapps.linker.userservice.dto.AuthResponse;
 import ir.aspireapps.linker.userservice.dto.UserLoginRequest;
-import ir.aspireapps.linker.userservice.dto.UserRegistrationRequest;
+import ir.aspireapps.linker.userservice.dto.UserRegisterRequest;
 import ir.aspireapps.linker.userservice.model.RefreshToken;
 import ir.aspireapps.linker.userservice.model.User;
 import ir.aspireapps.linker.userservice.repository.UserRepository;
@@ -26,7 +26,7 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(
-            @NotNull @Valid UserRegistrationRequest request,
+            @NotNull @Valid UserRegisterRequest request,
             @NotEmpty String deviceName,
             @NotEmpty String deviceIp
     ) {
@@ -37,7 +37,11 @@ public class AuthService {
 
         User newUser = User.builder()
                 .username(request.username())
-                .password(request.password())
+                .password(
+                        passwordEncoder.encode(
+                                request.password()
+                        )
+                )
                 .email(request.email())
                 .build();
         User savedUser = userRepository.save(newUser);
@@ -57,8 +61,9 @@ public class AuthService {
             @NotEmpty String deviceName,
             @NotEmpty String deviceIp) {
 
-        User user = userRepository.findByUsernameOrEmail(request.username(), request.email())
-                .orElseThrow(() -> new RuntimeException("Wrong username or password"));
+        System.out.println("Request username " + request.username());
+        User user = userRepository.findByUsername(request.username())
+                .orElseThrow(() -> new RuntimeException("username not found"));
 
         if (passwordEncoder.matches(request.password(), user.getPassword())) {
             return AuthResponse.builder()
@@ -68,7 +73,9 @@ public class AuthService {
                             user, deviceName, deviceIp))
                     .build();
         }
-        throw new RuntimeException("Wrong username or password");
+        System.out.println("Request Password " + request.password());
+        System.out.println("user Password " + user.getPassword());
+        throw new RuntimeException("password not matched");
     }
 
     @Transactional

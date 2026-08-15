@@ -1,13 +1,18 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<div class="homeLinker" th:fragment="home">
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<div class="home" th:fragment="home">
     <h1 style="white-space: pre">W E L C O M E - T O - A S P I R E A P P S</h1>
     <h1 style="white-space: pre"> L I N K E R </h1>
     <h5>V.1.0</h5>
 
     <div class="button-group">
-        <button class="primary-button">Sign up</button>
-        <button class="secondary-button">Log in</button>
+        <button class="primary-button"
+                th:onClick="|location.href='@{/ir/aspireapps/linker/auth/web/v1/register}'|">Sign up
+        </button>
+
+        <button class="secondary-button"
+                th:onclick="|location.href='@{/ir/aspireapps/linker/auth/web/v1/login'}|">Login
+        </button>
     </div>
 
     <div class="link-checker">

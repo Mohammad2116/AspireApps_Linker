@@ -2,6 +2,8 @@ package ir.aspireapps.linker.userservice.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 
@@ -18,10 +20,14 @@ public class RefreshToken {
     private long id;
     @Column(nullable = false, length = 512, unique = true)
     private String tokenHash;
-    @Column(nullable = false)
+
+    @Column(name = "device_ip", columnDefinition = "inet")
+    @JdbcTypeCode(SqlTypes.INET)
     private String deviceIp;
-    @Column(nullable = false, length = 254)
+
+    @Column(length = 254)
     private String deviceName;
+
     @Column(nullable = false)
     private Instant expiresAt;
     @Column(nullable = false)

@@ -3,27 +3,36 @@ package ir.aspireapps.linker.gatewayserver.config;
 import io.jsonwebtoken.Claims;
 import ir.aspireapps.linker.gatewayserver.service.JwtService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     private static final List<String> PUBLIC_PATHS = List.of(
-            "/ir/aspireapps/linker/api/v1/auth/register",
-            "/ir/aspireapps/linker/api/v1/auth/login",
-            "/ir/aspireapps/linker/api/v1/auth/refresh",
+            "/ir/aspireapps/linker/auth/api/v1/register",
+            "/ir/aspireapps/linker/auth/api/v1/login",
+            "/ir/aspireapps/linker/auth/api/v1/refresh",
+            "/ir/aspireapps/linker/gateway/api/v1/anything",
             "/actuator",
-            "/ir/aspireapps/linker/api/v1/gateway/anything"
+            "/ir/aspireapps/linker/auth/web/v1/register",
+            "/ir/aspireapps/linker/auth/web/v1/login",
+            "/ir/aspireapps/linker/auth/web/v1/refresh",
+            "/ir/aspireapps/linker/gateway/web/v1/anything"
     );
     private static final List<String> ADMIN_PATHS = List.of(
             "/ir/aspireapps/linker/api/v1/admin/**"
@@ -32,18 +41,29 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-
         String path = exchange.getRequest().getURI().getPath();
+        boolean webConnection = path.contains("/web/");
+
         if (isPublic(path)) {
+            log.info("Public path called at: {}", path);
             return chain.filter(exchange);
         }
+        log.info("Authenticated path called at: {}", path);
 
-        String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return unauthorized(exchange);
+        String token;
+        if (webConnection) {
+            HttpCookie cookie = exchange.getRequest().getCookies().getFirst("ACCESS_TOKEN");
+            if (cookie == null)
+                return redirectToLogin(exchange);
+            token = cookie.getValue();
+        } else {
+            String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return unauthorized(exchange);
+            }
+            token = authHeader.substring("Bearer ".length());
         }
 
-        String token = authHeader.substring("Bearer ".length());
         Claims claims = jwtService.validateToken(token);
         String username = claims.getSubject();
         String userId = claims.get("userId").toString();
@@ -66,6 +86,15 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 .header("X-USER-ROLES", String.join(",", rolesNames))
                 .build();
         return chain.filter(exchange.mutate().request(request).build());
+    }
+
+    private Mono<Void> redirectToLogin(ServerWebExchange exchange) {
+        ServerHttpResponse response = exchange.getResponse();
+        response.setStatusCode(HttpStatus.SEE_OTHER);
+        response.getHeaders().setLocation(
+                URI.create("/ir/aspireapps/linker/auth/web/v1/login")
+        );
+        return response.setComplete();
     }
 
     @Override

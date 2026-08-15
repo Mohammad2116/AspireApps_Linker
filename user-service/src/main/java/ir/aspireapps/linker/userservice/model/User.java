@@ -3,7 +3,9 @@ package ir.aspireapps.linker.userservice.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -27,12 +29,19 @@ public class User {
     private String email;
     @Column(nullable = false, unique = true, length = 512)
     private String password;
-    @Column(nullable = false)
+
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(columnDefinition = "user_role")
     @Builder.Default
     private UserRole role = UserRole.USER;
-    @Column(nullable = false)
+
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(columnDefinition = "subscription_status")
     @Builder.Default
     private SubscriptionStatus status = SubscriptionStatus.FREE;
+
     @Column(nullable = false)
     @CreationTimestamp
     private Instant createdAt;

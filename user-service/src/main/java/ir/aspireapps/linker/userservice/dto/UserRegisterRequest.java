@@ -4,8 +4,10 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 
-public record UserRegistrationRequest(
+@Builder
+public record UserRegisterRequest(
         @NotEmpty @Size(min = 3, max = 100)
         String username,
 
@@ -18,6 +20,10 @@ public record UserRegistrationRequest(
                 regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[^A-Za-z\\d]).{8,100}$",
                 message = "Password must be 8-100 chars and include at least one letter, one number, and one special character."
         )
-        String password
+        String password,
+
+        @NotEmpty @Size(min = 8, max = 100)
+        String passwordConfirm
+
 ) {
 }

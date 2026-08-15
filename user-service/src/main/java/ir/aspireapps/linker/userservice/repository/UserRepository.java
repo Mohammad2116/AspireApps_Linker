@@ -17,8 +17,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     boolean existsByEmail(@NotEmpty @Size(min = 5, max = 254) @Email String email);
 
-    Optional<User> findByUsernameOrEmail(@NotEmpty @Size(min = 3, max = 100) String username,
-                                         @NotEmpty @Size(min = 5, max = 254) @Email String email);
+    Optional<User> findByUsername(@NotEmpty @Size(min = 3, max = 100) String username);
 
     @Query("""
                 SELECT NEW ir.aspireapps.linker.userservice.dto.UserProfileResponse (
@@ -35,4 +34,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
                 WHERE u.username = :username
             """)
     Optional<UserProfileResponse> profile(@NotEmpty @Param("username") String username);
+
 }

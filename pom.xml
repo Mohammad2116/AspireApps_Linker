@@ -18,9 +18,11 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>common</module>
         <module>eureka-server</module>
         <module>gateway-server</module>
         <module>user-service</module>
+        <module>links-service</module>
     </modules>
 
     <properties>
