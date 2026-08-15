@@ -7,7 +7,6 @@ import ir.aspireapps.linker.linksservice.service.LinkService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.HeaderParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +26,7 @@ public class LinkController {
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<LinkResponse> register(
             @Valid @NotNull @RequestBody LinkRegisterRequest request,
-            @NotEmpty @HeaderParam("X-USER-ID") String userId) {
+            @NotEmpty @RequestHeader("X-USER-ID") String userId) {
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
                 .body(
@@ -39,7 +38,7 @@ public class LinkController {
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<LinkResponse> updateStatus(
             @Valid @NotNull @RequestBody LinkUpdateStatusRequest request,
-            @NotEmpty @HeaderParam("X-USER-ID") String userId) {
+            @NotEmpty @RequestHeader("X-USER-ID") String userId) {
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
                 .body(
@@ -51,7 +50,7 @@ public class LinkController {
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<LinkResponse> details(
             @NotNull @RequestBody Long id,
-            @NotEmpty @HeaderParam("X-USER-ID") String userId) {
+            @NotEmpty @RequestHeader("X-USER-ID") String userId) {
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
                 .body(

@@ -1,5 +1,6 @@
 package ir.aspireapps.linker.userservice.config;
 
+import feign.Logger;
 import feign.RequestInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,11 @@ import java.util.stream.Collectors;
 @Slf4j
 @Configuration
 public class FeignConfiguration {
+    @Bean
+    public Logger.Level feignLoggerLevel() {
+        return Logger.Level.FULL;
+    }
+
     @Bean
     public RequestInterceptor requestInterceptor() {
         return requestTemplate -> {
