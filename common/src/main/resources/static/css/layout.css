@@ -163,3 +163,34 @@
     box-shadow: none;
 }
 /* ///////////////////////////////////////////////////////// */
+.profile-pair {
+    display: flex;
+    align-items: flex-start;
+}
+
+.profile-pair .profile-label {
+    gap: 0.75rem;
+
+    width: min(100%, 600px);
+    margin: 2rem auto;
+}
+
+.profile-pair .profile-text {
+    flex: 1;
+
+    min-width: 0;
+    padding: 0.85rem 1rem;
+
+    background-color: var(--surface);
+    color: var(--text);
+
+    border: 2px solid var(--border);
+    border-radius: 8px;
+
+    font-size: 1rem;
+
+    outline: none;
+
+    transition: border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
