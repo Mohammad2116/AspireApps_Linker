@@ -53,6 +53,7 @@ management:
 logging:
   level:
     ir.aspireapps: DEBUG
+    feign: DEBUG
 
 security:
   jwt:
