@@ -12,6 +12,6 @@ import java.util.List;
         configuration = FeignConfiguration.class
 )
 public interface LinksServiceClient {
-    @GetMapping("/api/aspireapps/linker/links/api/v1/user/links")
+    @GetMapping("/ir/aspireapps/linker/links/api/v1/user/links")
     List<LinkResponse> userLinks();
 }
