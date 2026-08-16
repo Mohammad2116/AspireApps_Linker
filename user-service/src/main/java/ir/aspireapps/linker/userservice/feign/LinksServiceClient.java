@@ -5,8 +5,7 @@ import ir.aspireapps.linker.common.dto.LinkResponse;
 import ir.aspireapps.linker.userservice.config.FeignConfiguration;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,4 +19,10 @@ public interface LinksServiceClient {
 
     @PostMapping("/ir/aspireapps/linker/links/api/v1/register")
     LinkResponse registerLink(@NotNull LinkRegisterRequest request);
+
+    @DeleteMapping("/ir/aspireapps/linker/links/api/v1/delete/{linkId}")
+    Void deleteLink(@NotNull @PathVariable long linkId);
+
+    @PutMapping("/ir/aspireapps/linker/links/api/v1/toggle/{linkId}")
+    Void toggleLink(@NotNull @PathVariable long linkId);
 }

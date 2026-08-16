@@ -80,4 +80,16 @@ public class UserControllerWeb {
         model.addAttribute("links", linksServiceClient.userLinks());
         return "profile";
     }
+
+    @GetMapping("delete/linkId")
+    public String deleteLinkProcess(@Valid @PathVariable long linkId) {
+        linksServiceClient.deleteLink(linkId);
+        return "profile";
+    }
+
+    @GetMapping("toggle/linkId")
+    public String toggleLinkProcess(@Valid @PathVariable long linkId) {
+        linksServiceClient.toggleLink(linkId);
+        return "profile";
+    }
 }

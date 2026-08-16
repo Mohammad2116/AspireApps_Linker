@@ -76,13 +76,17 @@
 
                         <button
                                 class="table-button table-button-toggle"
-                                type="button">
+                                th:onClick="|location.href='@{/ir/aspireapps/linker/user/web/v1/delete/{linkId}(linkId=${link.id})}'|"
+                                type="button"
+                        >
                             Toggle
                         </button>
 
                         <button
                                 class="table-button table-button-delete"
-                                type="button">
+                                th:onClick="|location.href='@{/ir/aspireapps/linker/user/web/v1/toggle/{linkId}(linkId=${link.id})}'|"
+                                type="button"
+                        >
                             Delete
                         </button>
 
