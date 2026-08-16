@@ -29,10 +29,12 @@ public class GatewayHeaderAuthFilter extends OncePerRequestFilter {
                                     @Nonnull FilterChain filterChain) throws ServletException, IOException {
         String username = request.getHeader("X-USERNAME");
         String roles = request.getHeader("X-USER-ROLES");
+        String status = request.getHeader("X-USER-STATUS");
 
         log.info("username: {}", username);
         log.info("roles: {}", roles);
         log.info("request URL: {}", request.getRequestURI());
+        log.info("status: {}", status);
 
         if ((username != null) && (!username.isEmpty())
                 && (SecurityContextHolder.getContext().getAuthentication() == null)) {

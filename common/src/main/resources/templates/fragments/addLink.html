@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+<div class="home" th:fragment="addLink">
+    <h1 style="white-space: pre">Register New link</h1>
+    <h3 style="white-space: pre">fillup this form to register a new link</h3>
+
+    <form method="post" th:action="@{/ir/aspireapps/linker/user/web/v1/addLinkProcess}"
+          th:object="${addLinkForm}">
+
+        <div class="form-pair">
+            <label class="form-label" for="title">Title</label>
+            <input autocomplete="title"
+                   class="form-input"
+                   id="title"
+                   name="title"
+                   placeholder="title"
+                   required
+                   th:field="*{title}"
+                   type="text"/>
+        </div>
+
+        <div class="form-pair">
+            <label class="form-label" for="originalUrl">Original URL</label>
+            <input autocomplete="originalUrl"
+                   class="form-input"
+                   id="originalUrl"
+                   name="originalUrl"
+                   placeholder="Target url"
+                   required
+                   th:field="*{originalUrl}"
+                   type="text"/>
+        </div>
+
+        <div class="form-pair">
+            <label class="form-label" for="status">Activated by default</label>
+            <input autocomplete="status"
+                   class="form-input"
+                   id="status"
+                   name="status"
+                   placeholder="Enter your password"
+                   required
+                   th:field="*{status}"
+                   type="checkbox"/>
+        </div>
+
+        <div class="form-pair">
+            <label class="form-label" for="expiresAt">Expires at</label>
+            <input autocomplete="expiresAt"
+                   class="form-input"
+                   id="expiresAt"
+                   name="expiresAt"
+                   placeholder="expiresAt"
+                   required
+                   th:field="*{expiresAt}"
+                   type="date"/>
+        </div>
+        <th:block th:if="${freeAccount}">
+            <div class="general_error">
+                <label class="form-label">* Free account expirations will be rounded between 5-min to 7-days
+                    automatically</label>
+            </div>
+        </th:block>
+        <br/>
+        <div class="button-group">
+            <button class="primary-button" type="submit">Register Link</button>
+        </div>
+    </form>
+</div>
+</html>

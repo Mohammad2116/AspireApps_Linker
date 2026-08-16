@@ -40,6 +40,7 @@ public class FeignConfiguration {
             String userId = request.getHeader("X-USER-ID");
             String userName = request.getHeader("X-USERNAME");
             String roles = request.getHeader("X-USER-ROLES");
+            String status = request.getHeader("X-USER-STATUS");
 
             if (roles != null && !roles.isBlank()) {
 
@@ -66,9 +67,14 @@ public class FeignConfiguration {
                 requestTemplate.header("X-USER-ROLES", roles);
             }
 
+            if (status != null && !status.isBlank()) {
+                requestTemplate.header("X-USER-STATUS", status);
+            }
+
             log.info("User Id: {}", userId);
             log.info("User Name: {}", userName);
             log.info("Roles: {}", roles);
+            log.info("status: {}", status);
         };
     }
 }

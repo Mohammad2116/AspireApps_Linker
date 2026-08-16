@@ -68,6 +68,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String username = claims.getSubject();
         String userId = claims.get("userId").toString();
         List<?> roles = claims.get("roles", List.class);
+        String userSubscriptionStatus = claims.get("status").toString();
         if (username == null || roles == null) {
             return unauthorized(exchange);
         }
@@ -84,6 +85,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 .header("X-USER-ID", userId)
                 .header("X-USERNAME", username)
                 .header("X-USER-ROLES", String.join(",", rolesNames))
+                .header("X-USER-STATUS", userSubscriptionStatus)
                 .build();
         return chain.filter(exchange.mutate().request(request).build());
     }

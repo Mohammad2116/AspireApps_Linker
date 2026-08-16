@@ -30,6 +30,7 @@ public class JwtService {
                 .subject(user.getUsername())
                 .claim("userId", user.getId())
                 .claim("roles", List.of(user.getRole().name()))
+                .claim("status", user.getStatus().name())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusMillis(expirationMs)))
                 .signWith(secretKey)

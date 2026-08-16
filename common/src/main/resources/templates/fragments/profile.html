@@ -4,22 +4,29 @@
 
     <h1>Welcome back <span th:text="${profile.username}"></span></h1>
     <div class="profile-pair">
-        <div class="profile-labe">Email:</div>
+        <div class="profile-label">Email:</div>
         <div class="profile-text" th:text="${profile.email}"></div>
     </div>
     <div class="profile-pair">
-        <div class="profile-labe">Role:</div>
+        <div class="profile-label">Role:</div>
         <div class="profile-text" th:text="${profile.role}"></div>
     </div>
     <div class="profile-pair">
-        <div class="profile-labe">Subscription:</div>
+        <div class="profile-label">Subscription:</div>
         <div class="profile-text" th:text="${profile.status}"></div>
     </div>
 
-    <div class="navbar">
-        <div class="navbar-button">Register a new link</div>
-        <div class="navbar-button"></div>
-    </div>
+    <nav class="row-items">
+        <button class="navbar-button"
+                th:onclick="|location.href='@{/ir/aspireapps/linker/user/web/v1/addLink}'|">
+            Register a new link
+        </button>
+
+        <button class="navbar-button"
+                th:onclick="|location.href='@{/ir/aspireapps/linker/user/web/v1/profile}'|">
+            Refresh links
+        </button>
+    </nav>
 
     <table class="table">
         <caption>
