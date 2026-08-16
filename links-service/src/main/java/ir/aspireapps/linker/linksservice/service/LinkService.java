@@ -1,12 +1,12 @@
 package ir.aspireapps.linker.linksservice.service;
 
+import ir.aspireapps.linker.linksservice.converter.LinkConverter;
 import ir.aspireapps.linker.linksservice.dto.LinkRegisterRequest;
 import ir.aspireapps.linker.linksservice.dto.LinkResponse;
 import ir.aspireapps.linker.linksservice.dto.LinkUpdateStatusRequest;
 import ir.aspireapps.linker.linksservice.model.Link;
 import ir.aspireapps.linker.linksservice.model.LinkStatus;
 import ir.aspireapps.linker.linksservice.repository.LinkRepository;
-import ir.aspireapps.linker.linksservice.utility.LinkShortener;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class LinkService {
     private final LinkRepository linksRepository;
-    private final LinkShortener linkShortener;
+    private final LinkConverter linkConverter;
 
     @Transactional
     public LinkResponse register(@Valid @NotNull LinkRegisterRequest request,
@@ -30,10 +30,10 @@ public class LinkService {
         Link newLink = Link.builder()
                 .title(request.title())
                 .originalUrl(request.url())
-                .shortUrl(linkShortener.shortOf(request.url()))
                 .userId(userId)
                 .expiresAt(request.expiresAt())
                 .build();
+        linkConverter.encode(newLink);
         newLink = linksRepository.save(newLink);
         return LinkResponse.builder()
                 .id(newLink.getId())
