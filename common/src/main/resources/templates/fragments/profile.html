@@ -28,19 +28,70 @@
         </button>
     </nav>
 
-    <table class="table">
-        <caption>
-            Registered links:
-        </caption>
-        <thead>
-        <tr>
-            <th>#</th>
-            <th>Original URL</th>
-            <th>Shorted URL</th>
-        </tr>
-        </thead>
-    </table>
-    <div><h1>Row links:</h1></div>
-    <div th:text="${links}"></div>
+    <div class="links-table-container">
+        <table class="links-table">
+            <caption>
+                Registered links:
+            </caption>
+            <thead>
+            <tr>
+                <th>title</th>
+                <th>Original URL</th>
+                <th>Shorted URL</th>
+                <th>Status</th>
+                <th>Created At</th>
+                <th>Expires At</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="link : ${links}">
+                <td th:text="${link.title}"></td>
+                <td class="original-url">
+                    <a target="_blank"
+                       th:href="${link.originalUrl}"
+                       th:text="${link.originalUrl}"></a>
+                </td>
+                <td>
+                    <a th:href="${link.shortUrl}"
+                       th:text="${link.shortUrl}"></a>
+                </td>
+                <td>
+                    <span
+                            class="link-status"
+                            th:classappend="${link.status.name() == 'ACTIVE'}
+                            ? ' link-status-active'
+                            : (${link.status.name() == 'DISABLED'}
+                            ? ' link-status-disabled'
+                            : ' link-status-expired')"
+                            th:text="${link.status}">
+                    </span>
+                </td>
+                <td th:text="${link.createdAt}"></td>
+                <td th:text="${link.expiresAt}"></td>
+                <td>
+
+                    <div class="table-actions">
+
+                        <button
+                                class="table-button table-button-toggle"
+                                type="button">
+                            Toggle
+                        </button>
+
+                        <button
+                                class="table-button table-button-delete"
+                                type="button">
+                            Delete
+                        </button>
+
+                    </div>
+
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 </html>
