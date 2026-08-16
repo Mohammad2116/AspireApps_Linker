@@ -21,8 +21,8 @@ public interface LinksServiceClient {
     LinkResponse registerLink(@NotNull LinkRegisterRequest request);
 
     @DeleteMapping("/ir/aspireapps/linker/links/api/v1/delete/{linkId}")
-    Void deleteLink(@NotNull @PathVariable long linkId);
+    void deleteLink(@NotNull @PathVariable long linkId);
 
     @PutMapping("/ir/aspireapps/linker/links/api/v1/toggle/{linkId}")
-    Void toggleLink(@NotNull @PathVariable long linkId);
+    void toggleLink(@NotNull @PathVariable long linkId);
 }

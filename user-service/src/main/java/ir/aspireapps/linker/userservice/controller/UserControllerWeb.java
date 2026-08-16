@@ -81,15 +81,29 @@ public class UserControllerWeb {
         return "profile";
     }
 
-    @GetMapping("delete/linkId")
-    public String deleteLinkProcess(@Valid @PathVariable long linkId) {
+    @GetMapping("delete/{linkId}")
+    public String deleteLinkProcess(@Valid @PathVariable long linkId,
+                                    @NotEmpty @RequestHeader("X-USERNAME") String username,
+                                    Model model) {
         linksServiceClient.deleteLink(linkId);
+
+        UserProfileResponse user = userService.profile(username);
+
+        model.addAttribute("profile", user);
+        model.addAttribute("links", linksServiceClient.userLinks());
         return "profile";
     }
 
-    @GetMapping("toggle/linkId")
-    public String toggleLinkProcess(@Valid @PathVariable long linkId) {
+    @GetMapping("toggle/{linkId}")
+    public String toggleLinkProcess(@Valid @PathVariable long linkId,
+                                    @NotEmpty @RequestHeader("X-USERNAME") String username,
+                                    Model model) {
         linksServiceClient.toggleLink(linkId);
+
+        UserProfileResponse user = userService.profile(username);
+
+        model.addAttribute("profile", user);
+        model.addAttribute("links", linksServiceClient.userLinks());
         return "profile";
     }
 }

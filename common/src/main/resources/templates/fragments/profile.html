@@ -76,7 +76,7 @@
 
                         <button
                                 class="table-button table-button-toggle"
-                                th:onClick="|location.href='@{/ir/aspireapps/linker/user/web/v1/delete/{linkId}(linkId=${link.id})}'|"
+                                th:onClick="|location.href='@{/ir/aspireapps/linker/user/web/v1/toggle/{linkId}(linkId=${link.id})}'|"
                                 type="button"
                         >
                             Toggle
@@ -84,7 +84,7 @@
 
                         <button
                                 class="table-button table-button-delete"
-                                th:onClick="|location.href='@{/ir/aspireapps/linker/user/web/v1/toggle/{linkId}(linkId=${link.id})}'|"
+                                th:onClick="|location.href='@{/ir/aspireapps/linker/user/web/v1/delete/{linkId}(linkId=${link.id})}'|"
                                 type="button"
                         >
                             Delete
