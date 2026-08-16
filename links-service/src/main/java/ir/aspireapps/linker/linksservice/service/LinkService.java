@@ -8,6 +8,7 @@ import ir.aspireapps.linker.linksservice.model.Link;
 import ir.aspireapps.linker.linksservice.model.LinkStatus;
 import ir.aspireapps.linker.linksservice.repository.LinkRepository;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -96,5 +97,28 @@ public class LinkService {
 
     public List<LinkResponse> userLinks(UUID userId) {
         return linksRepository.findUserLinks(userId);
+    }
+
+    @Transactional
+    public void delete(@NotNull long linkId, @NotEmpty UUID userId) {
+        Link link = linksRepository.findByIdAndUserId(linkId, userId)
+                .orElseThrow(() -> new RuntimeException("Link not found"));
+        linksRepository.delete(link);
+    }
+
+    @Transactional
+    public void toggle(@NotNull long linkId, @NotEmpty UUID userId) {
+        Link link = linksRepository.findByIdAndUserId(linkId, userId)
+                .orElseThrow(() -> new RuntimeException("Link not found"));
+        if (link.getExpiresAt().isBefore(Instant.now()))
+            link.setStatus(LinkStatus.EXPIRED);
+        else
+            link.setStatus(toggleOf(link.getStatus()));
+    }
+
+    LinkStatus toggleOf(LinkStatus status) {
+        if (status == LinkStatus.DISABLED)
+            return LinkStatus.ACTIVE;
+        return LinkStatus.DISABLED;
     }
 }
