@@ -10,6 +10,9 @@
 
     <form method="post" th:action="@{/ir/aspireapps/linker/auth/web/v1/login}"
           th:object="${loginForm}">
+        <input name="returnUrl"
+               th:value="${returnUrl}"
+               type="hidden"/>
 
         <div class="form-pair">
             <label class="form-label" for="username">Username</label>

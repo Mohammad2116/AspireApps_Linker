@@ -18,10 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 
@@ -75,9 +72,11 @@ public class AuthControllerWeb {
 
     @GetMapping("login")
     public String login(
+            @RequestParam(required = false) String returnUrl,
             Model model,
             HttpServletRequest servletRequest) {
         model.addAttribute("loginForm", new UserLoginForm());
+        model.addAttribute("returnUrl", returnUrl);
         return "login";
     }
 
@@ -111,21 +110,33 @@ public class AuthControllerWeb {
                 "REFRESH_TOKEN",
                 authResponse.accessToken(),
                 Duration.ofDays(7));
-        return "redirect:/ir/aspireapps/linker/user/web/v1/profile";
+
+        if (userLoginForm.getReturnUrl().isBlank())
+            return "redirect:/ir/aspireapps/linker/user/web/v1/profile";
+        return "redirect:/" + userLoginForm.getReturnUrl();
     }
 
     @PostMapping("refresh")
-    public ResponseEntity<AuthResponse> refresh(
+    public String refresh(
             @NotNull @Valid UserRefreshRequest request,
-            HttpServletRequest servletRequest) {
-        AuthResponse result = authService.refresh(
+            HttpServletRequest servletRequest,
+            HttpServletResponse servletResponse) {
+        AuthResponse authResponse = authService.refresh(
                 request.refreshToken(),
                 servletRequest.getHeader("User-Agent"),
                 servletRequest.getRemoteAddr());
+        addTokenCookie(servletResponse,
+                "ACCESS_TOKEN",
+                authResponse.accessToken(),
+                Duration.ofMinutes(5));
+        addTokenCookie(servletResponse,
+                "REFRESH_TOKEN",
+                authResponse.accessToken(),
+                Duration.ofDays(7));
 
-        return ResponseEntity
-                .status(HttpStatus.ACCEPTED)
-                .body(result);
+        if (request.returnUrl().isBlank())
+            return "redirect:/ir/aspireapps/linker/user/web/v1/profile";
+        return "redirect:/" + request.returnUrl();
     }
 
     @PostMapping("logout")

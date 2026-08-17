@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class UserLoginForm {
+    private String returnUrl;
+
     @NotEmpty
     @Size(min = 3, max = 100)
     private String username;
