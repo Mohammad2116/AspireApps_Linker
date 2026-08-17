@@ -67,7 +67,7 @@ public class AuthControllerWeb {
                 Duration.ofMinutes(5));
         addTokenCookie(servletResponse,
                 "REFRESH_TOKEN",
-                authResponse.accessToken(),
+                authResponse.refreshToken(),
                 Duration.ofDays(7));
 
         return "redirect:/ir/aspireapps/linker/user/web/v1/profile";

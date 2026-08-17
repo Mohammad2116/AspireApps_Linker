@@ -53,11 +53,18 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         log.info("Authenticated path called at: {}", path);
 
         String token;
+        String refreshToken = null;
         if (webConnection) {
+
             HttpCookie cookie = exchange.getRequest().getCookies().getFirst("ACCESS_TOKEN");
             if (cookie == null)
                 return redirectToLogin(exchange);
             token = cookie.getValue();
+
+            HttpCookie refreshCookie = exchange.getRequest().getCookies().getFirst("REFRESH_TOKEN");
+            if (refreshCookie != null)
+                refreshToken = refreshCookie.getValue();
+
         } else {
             String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -71,18 +78,24 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String userId = claims.get("userId").toString();
         List<?> roles = claims.get("roles", List.class);
         String userSubscriptionStatus = claims.get("status").toString();
-        if (username == null || roles == null) {
-            return unauthorized(exchange);
-        }
         List<String> rolesNames = roles.stream().map(Object::toString).toList();
-        if (isAdmin(path) && !rolesNames.contains("ROLE_ADMIN")) {
-            return forbidden(exchange);
-        }
 
-        if (claims.getExpiration().before(Date.from(Instant.now()))) {
-
+        if (webConnection) {
+            if (claims.getExpiration().before(Date.from(Instant.now()))) {
+                if (refreshToken == null) {
+                    return redirectToLogin(exchange);
+                } else {
+                    return redirectToRefresh(exchange);
+                }
+            }
+        } else {
+            if (username == null) {
+                return unauthorized(exchange);
+            }
+            if (isAdmin(path) && !rolesNames.contains("ROLE_ADMIN")) {
+                return forbidden(exchange);
+            }
         }
-        // DON'T FORGOT TH CHECK EXPIRATION OF TOKEN, IT'S IMPORTANT FOR EXPIRATION TOKENS
 
         ServerHttpRequest request = exchange
                 .getRequest()
@@ -95,11 +108,20 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         return chain.filter(exchange.mutate().request(request).build());
     }
 
+    private Mono<Void> redirectToRefresh(ServerWebExchange exchange) {
+        ServerHttpResponse response = exchange.getResponse();
+        response.setStatusCode(HttpStatus.SEE_OTHER);
+        response.getHeaders().setLocation(
+                URI.create("/ir/aspireapps/linker/auth/web/v1/refresh?returnUrl=" + exchange.getRequest().getPath())
+        );
+        return response.setComplete();
+    }
+
     private Mono<Void> redirectToLogin(ServerWebExchange exchange) {
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(HttpStatus.SEE_OTHER);
         response.getHeaders().setLocation(
-                URI.create("/ir/aspireapps/linker/auth/web/v1/login")
+                URI.create("/ir/aspireapps/linker/auth/web/v1/login?returnUrl=" + exchange.getRequest().getPath())
         );
         return response.setComplete();
     }
