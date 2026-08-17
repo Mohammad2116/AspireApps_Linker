@@ -17,6 +17,8 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
@@ -77,6 +79,9 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             return forbidden(exchange);
         }
 
+        if (claims.getExpiration().before(Date.from(Instant.now()))) {
+
+        }
         // DON'T FORGOT TH CHECK EXPIRATION OF TOKEN, IT'S IMPORTANT FOR EXPIRATION TOKENS
 
         ServerHttpRequest request = exchange

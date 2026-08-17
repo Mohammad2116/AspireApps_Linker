@@ -35,6 +35,7 @@ public class LinkService {
                 .expiresAt(request.expiresAt())
                 .build();
         linkConverter.encode(newLink);
+        System.out.println("generated link is " + newLink.toString());
         newLink = linksRepository.save(newLink);
         return LinkResponse.builder()
                 .id(newLink.getId())
