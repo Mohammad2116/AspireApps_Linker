@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 
+@Slf4j
 @Controller
 @RequestMapping("/ir/aspireapps/linker/auth/web/v1/")
 @RequiredArgsConstructor
@@ -117,7 +119,7 @@ public class AuthControllerWeb {
     }
 
     @PostMapping("refresh")
-    public String refresh(
+    public ResponseEntity<AuthResponse> refresh(
             @NotNull @Valid UserRefreshRequest request,
             HttpServletRequest servletRequest,
             HttpServletResponse servletResponse) {
@@ -131,15 +133,15 @@ public class AuthControllerWeb {
         addTokenCookie(servletResponse,
                 "ACCESS_TOKEN",
                 authResponse.accessToken(),
-                Duration.ofMinutes(5));
+                Duration.ofSeconds(authService.accessTokenExpireSeconds()));
         addTokenCookie(servletResponse,
                 "REFRESH_TOKEN",
-                authResponse.accessToken(),
-                Duration.ofDays(7));
+                authResponse.refreshToken(),
+                Duration.ofSeconds(authService.refreshTokenExpireSeconds()));
 
-        if (request.returnUrl().isBlank())
-            return "redirect:/ir/aspireapps/linker/user/web/v1/profile";
-        return "redirect:/" + request.returnUrl();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(authResponse);
     }
 
     @PostMapping("logout")
