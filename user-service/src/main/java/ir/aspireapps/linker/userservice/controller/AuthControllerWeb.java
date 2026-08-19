@@ -125,6 +125,9 @@ public class AuthControllerWeb {
                 request.refreshToken(),
                 servletRequest.getHeader("User-Agent"),
                 servletRequest.getRemoteAddr());
+        log.info("New AuthResponse create as below:");
+        log.info(authResponse.toString());
+
         addTokenCookie(servletResponse,
                 "ACCESS_TOKEN",
                 authResponse.accessToken(),

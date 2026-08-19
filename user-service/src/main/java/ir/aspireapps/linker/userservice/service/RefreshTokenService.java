@@ -79,4 +79,8 @@ public class RefreshTokenService {
         List<RefreshToken> tokens = refreshTokenRepository.findAllByUserAndRevokedFalse(user);
         tokens.forEach(RefreshToken::revoke);
     }
+
+    public long refreshTokenExpirationSeconds() {
+        return refreshTokenExpirationMs;
+    }
 }

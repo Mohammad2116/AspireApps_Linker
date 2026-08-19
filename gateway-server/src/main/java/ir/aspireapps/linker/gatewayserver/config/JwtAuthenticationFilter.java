@@ -1,6 +1,7 @@
 package ir.aspireapps.linker.gatewayserver.config;
 
 import io.jsonwebtoken.Claims;
+import ir.aspireapps.linker.common.dto.UserRefreshRequest;
 import ir.aspireapps.linker.gatewayserver.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -40,6 +42,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             "/ir/aspireapps/linker/api/v1/admin/**"
     );
     private final JwtService jwtService;
+    private final WebClient.Builder webClientBuilder;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -85,7 +88,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 if (refreshToken == null) {
                     return redirectToLogin(exchange);
                 } else {
-                    return redirectToRefresh(exchange);
+                    return redirectToRefresh(exchange, refreshToken);
                 }
             }
         } else {
@@ -108,13 +111,28 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         return chain.filter(exchange.mutate().request(request).build());
     }
 
-    private Mono<Void> redirectToRefresh(ServerWebExchange exchange) {
-        ServerHttpResponse response = exchange.getResponse();
-        response.setStatusCode(HttpStatus.SEE_OTHER);
-        response.getHeaders().setLocation(
-                URI.create("/ir/aspireapps/linker/auth/web/v1/refresh?returnUrl=" + exchange.getRequest().getPath())
-        );
-        return response.setComplete();
+    private Mono<Void> redirectToRefresh(ServerWebExchange exchange,
+                                         String refreshToken) {
+        UserRefreshRequest request = UserRefreshRequest.builder()
+                .refreshToken(refreshToken)
+                .returnUrl(exchange.getRequest().getPath().value())
+                .build();
+        return webClientBuilder
+                .build()
+                .post()
+                .uri("http://user-service/ir/aspireapps/linker/auth/v1/refresh")
+                .bodyValue(request)
+                .exchangeToMono(response -> {
+                    ServerHttpResponse gatewayResponse =
+                            exchange.getResponse();
+                    List<String> cookies = response.headers()
+                            .header(HttpHeaders.SET_COOKIE);
+                    gatewayResponse.getHeaders()
+                            .put(HttpHeaders.SET_COOKIE, cookies);
+                    gatewayResponse.setStatusCode(HttpStatus.SEE_OTHER);
+                    gatewayResponse.getHeaders().setLocation(URI.create(request.returnUrl()));
+                    return gatewayResponse.setComplete();
+                });
     }
 
     private Mono<Void> redirectToLogin(ServerWebExchange exchange) {

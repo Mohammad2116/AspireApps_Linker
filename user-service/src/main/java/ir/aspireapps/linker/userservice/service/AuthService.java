@@ -107,4 +107,12 @@ public class AuthService {
         User user = oldToken.getUser();
         refreshTokenService.revokeAll(user);
     }
+
+    public long refreshTokenExpireSeconds() {
+        return refreshTokenService.refreshTokenExpirationSeconds();
+    }
+
+    public long accessTokenExpireSeconds() {
+        return jwtService.accessTokenExpirationSeconds();
+    }
 }
