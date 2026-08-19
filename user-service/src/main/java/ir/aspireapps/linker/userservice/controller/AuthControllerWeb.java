@@ -90,6 +90,7 @@ public class AuthControllerWeb {
             HttpServletRequest servletRequest,
             HttpServletResponse servletResponse
     ) {
+        log.info("returnUrl = [{}]", userLoginForm.getReturnUrl());
         if (bindingResult.hasFieldErrors()) {
             model.addAttribute("generalError", true);
             return "login";
@@ -113,14 +114,18 @@ public class AuthControllerWeb {
                 authResponse.accessToken(),
                 Duration.ofDays(7));
 
-        if (userLoginForm.getReturnUrl().isBlank())
+        String returnUrl = userLoginForm.getReturnUrl();
+        if (returnUrl == null || returnUrl.isBlank())
             return "redirect:/ir/aspireapps/linker/user/web/v1/profile";
-        return "redirect:/" + userLoginForm.getReturnUrl();
+        if (!returnUrl.startsWith("/"))
+            returnUrl = "/" + returnUrl;
+        log.info("Redirecting to: {}", returnUrl);
+        return "redirect:" + userLoginForm.getReturnUrl();
     }
 
     @PostMapping("refresh")
     public ResponseEntity<AuthResponse> refresh(
-            @NotNull @Valid UserRefreshRequest request,
+            @NotNull @Valid @RequestBody UserRefreshRequest request,
             HttpServletRequest servletRequest,
             HttpServletResponse servletResponse) {
         AuthResponse authResponse = authService.refresh(
@@ -147,7 +152,7 @@ public class AuthControllerWeb {
     @PostMapping("logout")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Void> logout(
-            @NotNull @Valid UserLogoutRequest request) {
+            @NotNull @Valid @RequestBody UserLogoutRequest request) {
         authService.logout(request.refreshToken());
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
@@ -157,7 +162,7 @@ public class AuthControllerWeb {
     @PostMapping("logout/all")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Void> logoutAll(
-            @NotNull @Valid UserLogoutRequest request) {
+            @NotNull @Valid @RequestBody UserLogoutRequest request) {
         authService.logoutAll(request.refreshToken());
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)

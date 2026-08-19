@@ -7,13 +7,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/ir/aspireapps/linker/auth/api/v1/")
 @RequiredArgsConstructor
@@ -22,7 +25,7 @@ public class AuthController {
 
     @PostMapping("register")
     public ResponseEntity<AuthResponse> register(
-            @NotNull @Valid UserRegisterRequest request,
+            @NotNull @Valid @RequestBody UserRegisterRequest request,
             HttpServletRequest servletRequest) {
         request = InputNormalizer.normalize(request);
         AuthResponse result = authService.register(
@@ -37,7 +40,7 @@ public class AuthController {
 
     @PostMapping("login")
     public ResponseEntity<AuthResponse> login(
-            @NotNull @Valid UserLoginRequest request,
+            @NotNull @Valid @RequestBody UserLoginRequest request,
             HttpServletRequest servletRequest) {
         request = InputNormalizer.normalize(request);
         AuthResponse result = authService.login(
@@ -52,8 +55,9 @@ public class AuthController {
 
     @PostMapping("refresh")
     public ResponseEntity<AuthResponse> refresh(
-            @NotNull @Valid UserRefreshRequest request,
+            @NotNull @Valid @RequestBody UserRefreshRequest request,
             HttpServletRequest servletRequest) {
+        log.info("🔥🔥🔥 API REFRESH CONTROLLER REACHED");
         AuthResponse result = authService.refresh(
                 request.refreshToken(),
                 servletRequest.getHeader("User-Agent"),
@@ -77,7 +81,7 @@ public class AuthController {
     @PostMapping("logout/all")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Void> logoutAll(
-            @NotNull @Valid UserLogoutRequest request) {
+            @NotNull @Valid @RequestBody UserLogoutRequest request) {
         authService.logoutAll(request.refreshToken());
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)

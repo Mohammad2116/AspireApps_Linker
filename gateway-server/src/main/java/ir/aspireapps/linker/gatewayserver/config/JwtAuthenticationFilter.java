@@ -1,6 +1,7 @@
 package ir.aspireapps.linker.gatewayserver.config;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import ir.aspireapps.linker.common.dto.UserRefreshRequest;
 import ir.aspireapps.linker.gatewayserver.service.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -46,8 +47,14 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        log.info(("=================================================================="));
+        log.info("New request comes throw Gateway filter ");
+        log.info("exchange: {}", exchange.toString());
+
         String path = exchange.getRequest().getURI().getPath();
+        log.info("exchange path: {}", path);
         boolean webConnection = path.contains("/web/");
+        log.info("This is a /web/ request so we will handle it using web request patterns");
 
         if (isPublic(path)) {
             log.info("Public path called at: {}", path);
@@ -75,29 +82,44 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             }
             token = authHeader.substring("Bearer ".length());
         }
+        log.info("access token: {}", token);
+        log.info("refresh token: {}", refreshToken);
 
-        Claims claims = jwtService.validateToken(token);
+        Claims claims = null;
+        try {
+            claims = jwtService.validateToken(token);
+        } catch (ExpiredJwtException e) {
+            if (webConnection) {
+                if (refreshToken == null) {
+                    log.info("refresh token is null so, redirecting to login");
+                    return redirectToLogin(exchange);
+                } else {
+                    log.info("refresh token IS NOT null so, redirecting to refresh");
+                    return redirectToRefresh(exchange, refreshToken);
+                }
+            } else {
+                // TODO: throw an token expired exception
+            }
+        }
         String username = claims.getSubject();
         String userId = claims.get("userId").toString();
         List<?> roles = claims.get("roles", List.class);
         String userSubscriptionStatus = claims.get("status").toString();
         List<String> rolesNames = roles.stream().map(Object::toString).toList();
 
-        if (webConnection) {
-            if (claims.getExpiration().before(Date.from(Instant.now()))) {
-                if (refreshToken == null) {
-                    return redirectToLogin(exchange);
-                } else {
-                    return redirectToRefresh(exchange, refreshToken);
-                }
-            }
-        } else {
+        log.info("Is refresh token expired: {}", claims.getExpiration().before(Date.from(Instant.now())));
+        log.info("refresh token expiration: {}", claims.getExpiration());
+        if (!webConnection) {
             if (username == null) {
+                log.info("username is null so redirecting to unauthorized");
                 return unauthorized(exchange);
             }
             if (isAdmin(path) && !rolesNames.contains("ROLE_ADMIN")) {
+                log.info("user is not ADMIN so redirect to forbidden");
                 return forbidden(exchange);
             }
+        } else {
+            // TODO: handles an inconsistency in token information and request
         }
 
         ServerHttpRequest request = exchange
@@ -108,29 +130,47 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 .header("X-USER-ROLES", String.join(",", rolesNames))
                 .header("X-USER-STATUS", userSubscriptionStatus)
                 .build();
-        return chain.filter(exchange.mutate().request(request).build());
+        log.info("Create a request and send to it's target service");
+        log.info("request: {}", request);
+        Mono<Void> result = chain.filter(exchange.mutate().request(request).build());
+        log.info("Mono<Void> result of chain.filer: {}", result.toString());
+        return result;
     }
 
     private Mono<Void> redirectToRefresh(ServerWebExchange exchange,
                                          String refreshToken) {
         UserRefreshRequest request = UserRefreshRequest.builder()
                 .refreshToken(refreshToken)
-                .returnUrl(exchange.getRequest().getPath().value())
+                .returnUrl(exchange.getRequest().getURI().getRawPath())
                 .build();
+        log.info("request created at redirectToRefresh: {}", request.toString());
+        String redirectPath = "http://user-service/ir/aspireapps/linker/auth/web/v1/refresh";
+        log.info("Create a request to: {}", redirectPath);
         return webClientBuilder
                 .build()
                 .post()
-                .uri("http://user-service/ir/aspireapps/linker/auth/v1/refresh")
+                .uri(redirectPath)
                 .bodyValue(request)
                 .exchangeToMono(response -> {
+                    log.info("Refresh response status: {}", response.statusCode());
+                    log.info("Refresh Set-Cookie: {}",
+                            response.headers().header(HttpHeaders.SET_COOKIE));
+                    log.info("Refresh Location: {}",
+                            response.headers().header(HttpHeaders.LOCATION));
+
+                    log.info("exchange cookies are:");
+                    log.info(exchange.getResponse().getCookies().toString());
+
                     ServerHttpResponse gatewayResponse =
                             exchange.getResponse();
                     List<String> cookies = response.headers()
                             .header(HttpHeaders.SET_COOKIE);
+                    log.info("Set Cookies are: {}", cookies.stream().toList());
                     gatewayResponse.getHeaders()
                             .put(HttpHeaders.SET_COOKIE, cookies);
                     gatewayResponse.setStatusCode(HttpStatus.SEE_OTHER);
                     gatewayResponse.getHeaders().setLocation(URI.create(request.returnUrl()));
+                    log.info("return URL is: {}", URI.create(request.returnUrl()));
                     return gatewayResponse.setComplete();
                 });
     }

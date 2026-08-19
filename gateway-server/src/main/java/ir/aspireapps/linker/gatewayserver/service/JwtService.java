@@ -1,6 +1,7 @@
 package ir.aspireapps.linker.gatewayserver.service;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +18,7 @@ public class JwtService {
         this.secretKey = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    public Claims validateToken(String token) {
+    public Claims validateToken(String token) throws ExpiredJwtException {
         return Jwts.parser()
                 .verifyWith(this.secretKey)
                 .build()
