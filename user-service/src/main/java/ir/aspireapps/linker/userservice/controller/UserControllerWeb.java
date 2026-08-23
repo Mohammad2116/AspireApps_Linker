@@ -41,7 +41,6 @@ public class UserControllerWeb {
 
         model.addAttribute("profile", user);
         model.addAttribute("links", linksServiceClient.userLinks());
-        model.addAttribute("loggedIn", true);
         return "profile";
     }
 
@@ -52,7 +51,6 @@ public class UserControllerWeb {
         if (!status.equals(SubscriptionStatus.PREMIUM.name()))
             model.addAttribute("freeAccount", "freeAccount");
         model.addAttribute("addLinkForm", new AddLinkForm());
-        model.addAttribute("loggedIn", true);
         return "addLink";
     }
 
@@ -93,7 +91,6 @@ public class UserControllerWeb {
 
         model.addAttribute("profile", user);
         model.addAttribute("links", linksServiceClient.userLinks());
-        model.addAttribute("loggedIn", true);
         return "profile";
     }
 
@@ -107,7 +104,6 @@ public class UserControllerWeb {
 
         model.addAttribute("profile", user);
         model.addAttribute("links", linksServiceClient.userLinks());
-        model.addAttribute("loggedIn", true);
         return "profile";
     }
 }

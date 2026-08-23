@@ -23,7 +23,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ServerWebExchange;
 
 import java.time.Duration;
 
@@ -36,11 +35,9 @@ public class AuthControllerWeb {
 
     @GetMapping("register")
     public String register(
-            @NotNull @RequestHeader("AUTHENTICATED") Boolean authenticated,
             Model model,
             HttpServletRequest servletRequest) {
         model.addAttribute("registerForm", new UserRegisterForm());
-        model.addAttribute("loggedIn", authenticated);
         return "register";
     }
 
@@ -90,12 +87,10 @@ public class AuthControllerWeb {
     @GetMapping("login")
     public String login(
             @RequestParam(required = false) String returnUrl,
-            @NotNull @RequestHeader("AUTHENTICATED") Boolean authenticated,
             Model model,
             HttpServletRequest servletRequest) {
         model.addAttribute("loginForm", new UserLoginForm());
         model.addAttribute("returnUrl", returnUrl);
-        model.addAttribute("loggedIn", authenticated);
         return "login";
     }
 
@@ -104,7 +99,6 @@ public class AuthControllerWeb {
             @Valid @ModelAttribute("loginForm") UserLoginForm userLoginForm,
             BindingResult bindingResult,
             Model model,
-            ServerWebExchange exchange,
             HttpServletRequest servletRequest,
             HttpServletResponse servletResponse
     ) {
@@ -142,9 +136,6 @@ public class AuthControllerWeb {
                         authService.refreshTokenExpireSeconds())
         );
 
-        Boolean loggedIn = exchange.getAttribute("LOGGED-IN");
-        if (Boolean.TRUE.equals(loggedIn))
-            model.addAttribute("loggedIn", true);
         String returnUrl = userLoginForm.getReturnUrl();
         if (returnUrl == null || returnUrl.isBlank())
             return "redirect:/ir/aspireapps/linker/user/web/v1/profile";
