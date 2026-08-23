@@ -1,7 +1,7 @@
 package ir.aspireapps.linker.userservice.controller;
 
-import io.jsonwebtoken.ExpiredJwtException;
 import ir.aspireapps.linker.userservice.dto.*;
+import ir.aspireapps.linker.userservice.error.InvalidJwtToken;
 import ir.aspireapps.linker.userservice.form.UserLoginForm;
 import ir.aspireapps.linker.userservice.form.UserRegisterForm;
 import ir.aspireapps.linker.userservice.service.AuthService;
@@ -144,7 +144,7 @@ public class AuthControllerWeb {
                     request.refreshToken(),
                     servletRequest.getHeader("User-Agent"),
                     servletRequest.getRemoteAddr());
-        } catch (ExpiredJwtException e) {
+        } catch (InvalidJwtToken e) {
             return ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
                     .body(null);

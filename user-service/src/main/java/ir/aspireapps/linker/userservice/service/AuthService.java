@@ -1,9 +1,11 @@
 package ir.aspireapps.linker.userservice.service;
 
-import io.jsonwebtoken.ExpiredJwtException;
 import ir.aspireapps.linker.userservice.dto.AuthResponse;
 import ir.aspireapps.linker.userservice.dto.UserLoginRequest;
 import ir.aspireapps.linker.userservice.dto.UserRegisterRequest;
+import ir.aspireapps.linker.userservice.error.DuplicateResourceException;
+import ir.aspireapps.linker.userservice.error.InvalidJwtToken;
+import ir.aspireapps.linker.userservice.error.ResourceNotFoundException;
 import ir.aspireapps.linker.userservice.model.RefreshToken;
 import ir.aspireapps.linker.userservice.model.User;
 import ir.aspireapps.linker.userservice.repository.UserRepository;
@@ -15,8 +17,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -34,9 +34,9 @@ public class AuthService {
             @NotEmpty String deviceIp
     ) {
         if (userRepository.existsByUsername(request.username()))
-            throw new RuntimeException("Username is already in use");
+            throw new DuplicateResourceException("Username is already in use");
         if (userRepository.existsByEmail(request.email()))
-            throw new RuntimeException("Email is already in use");
+            throw new DuplicateResourceException("Email is already in use");
 
         User newUser = User.builder()
                 .username(request.username())
@@ -63,10 +63,8 @@ public class AuthService {
             @NotNull @Valid UserLoginRequest request,
             @NotEmpty String deviceName,
             @NotEmpty String deviceIp) {
-
-        System.out.println("Request username " + request.username());
         User user = userRepository.findByUsername(request.username())
-                .orElseThrow(() -> new RuntimeException("username not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("username or password not found"));
 
         if (passwordEncoder.matches(request.password(), user.getPassword())) {
             return AuthResponse.builder()
@@ -76,18 +74,15 @@ public class AuthService {
                             user, deviceName, deviceIp))
                     .build();
         }
-        System.out.println("Request Password " + request.password());
-        System.out.println("user Password " + user.getPassword());
-        throw new RuntimeException("password not matched");
+        throw new ResourceNotFoundException("username or password not found");
     }
 
     @Transactional
     public AuthResponse refresh(@NotEmpty @Size(max = 512) String refreshToken,
                                 @NotEmpty String deviceName,
-                                @NotEmpty String deviceIp) throws ExpiredJwtException {
-        Optional<RefreshToken> oldToken = refreshTokenService.verifyToken(refreshToken);
-        if (oldToken.isEmpty()) throw new ExpiredJwtException(null, null, "Invalid Refresh Token");
-        User user = oldToken.get().getUser();
+                                @NotEmpty String deviceIp) throws InvalidJwtToken {
+        RefreshToken oldToken = refreshTokenService.verifyToken(refreshToken);
+        User user = oldToken.getUser();
         return AuthResponse.builder()
                 .accessToken(jwtService.generateAccessToken(user))
                 .accessTokenExpiresInSeconds(jwtService.accessTokenExpirationSeconds())
@@ -99,14 +94,12 @@ public class AuthService {
 
     @Transactional
     public void logout(@NotEmpty @Size(max = 512) String refreshToken) {
-        refreshTokenService.verifyToken(refreshToken)
-                .orElseThrow(() -> new RuntimeException("Invalid Refresh Token"));
+        refreshTokenService.verifyToken(refreshToken);
     }
 
     @Transactional
     public void logoutAll(@NotEmpty @Size(max = 512) String refreshToken) {
-        RefreshToken oldToken = refreshTokenService.verifyToken(refreshToken)
-                .orElseThrow(() -> new RuntimeException("Invalid Refresh Token"));
+        RefreshToken oldToken = refreshTokenService.verifyToken(refreshToken);
         User user = oldToken.getUser();
         refreshTokenService.revokeAll(user);
     }

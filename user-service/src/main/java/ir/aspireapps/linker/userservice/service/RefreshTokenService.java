@@ -1,5 +1,6 @@
 package ir.aspireapps.linker.userservice.service;
 
+import ir.aspireapps.linker.userservice.error.InvalidJwtToken;
 import ir.aspireapps.linker.userservice.model.RefreshToken;
 import ir.aspireapps.linker.userservice.model.User;
 import ir.aspireapps.linker.userservice.repository.RefreshTokenRepository;
@@ -12,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -50,28 +50,28 @@ public class RefreshTokenService {
     }
 
     @Transactional
-    public Optional<RefreshToken> verifyToken(@NotEmpty @Size(max = 512) String token) {
+    public RefreshToken verifyToken(@NotEmpty @Size(max = 512) String token) {
         String hashedToken = tokenService.hashToken(token);
         RefreshToken refreshToken = refreshTokenRepository.findByTokenHash(hashedToken)
                 .orElse(null);
 
         if (refreshToken == null) {
             log.error("Invalid Refresh Token");
-            return Optional.empty();
+            throw new InvalidJwtToken("Invalid refresh Token");
         }
 
         if (refreshToken.getExpiresAt().isBefore(Instant.now())) {
             log.error("Expired Refresh Token");
-            return Optional.empty();
+            throw new InvalidJwtToken("Expired refresh token used");
         }
 
         if (refreshToken.isRevoked()) {
             log.error("Revoked Refresh Token");
-            return Optional.empty();
+            throw new InvalidJwtToken("Revoked refresh token used");
         }
 
         refreshToken.revoke();
-        return Optional.of(refreshToken);
+        return refreshToken;
     }
 
     @Transactional
