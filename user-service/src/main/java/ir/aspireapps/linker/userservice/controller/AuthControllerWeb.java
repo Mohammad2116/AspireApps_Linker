@@ -1,6 +1,7 @@
 package ir.aspireapps.linker.userservice.controller;
 
 import ir.aspireapps.linker.userservice.dto.*;
+import ir.aspireapps.linker.userservice.error.DuplicateResourceException;
 import ir.aspireapps.linker.userservice.error.InvalidJwtToken;
 import ir.aspireapps.linker.userservice.form.UserLoginForm;
 import ir.aspireapps.linker.userservice.form.UserRegisterForm;
@@ -51,15 +52,21 @@ public class AuthControllerWeb {
             return "register";
         }
         userRegisterForm = InputNormalizer.normalize(userRegisterForm);
-        AuthResponse authResponse = authService.register(
-                UserRegisterRequest.builder()
-                        .username(userRegisterForm.getUsername())
-                        .email(userRegisterForm.getEmail())
-                        .password(userRegisterForm.getPassword())
-                        .passwordConfirm(userRegisterForm.getPasswordConfirm())
-                        .build(),
-                servletRequest.getHeader("User-Agent"),
-                servletRequest.getRemoteUser());
+        AuthResponse authResponse;
+        try {
+            authResponse = authService.register(
+                    UserRegisterRequest.builder()
+                            .username(userRegisterForm.getUsername())
+                            .email(userRegisterForm.getEmail())
+                            .password(userRegisterForm.getPassword())
+                            .passwordConfirm(userRegisterForm.getPasswordConfirm())
+                            .build(),
+                    servletRequest.getHeader("User-Agent"),
+                    servletRequest.getRemoteUser());
+        } catch (DuplicateResourceException e) {
+            model.addAttribute("duplicateResourceException", true);
+            return "register";
+        }
 
         addTokenCookie(servletResponse,
                 "ACCESS_TOKEN",
@@ -122,7 +129,6 @@ public class AuthControllerWeb {
                 Duration.ofSeconds(
                         authService.refreshTokenExpireSeconds())
         );
-        ;
 
         String returnUrl = userLoginForm.getReturnUrl();
         if (returnUrl == null || returnUrl.isBlank())

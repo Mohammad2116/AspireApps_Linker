@@ -8,6 +8,9 @@
 <hr/>
 <div class="profil-row-items">
     <a class="navbar-button" th:href="@{/ir/aspireapps/linker/home}">home</a>
-    <a class="navbar-button" th:href="@{/ir/aspireapps/linker/user/web/v1/profile}">profile</a>
+    <div th:if="${loggedIn}">
+        <a class="navbar-button" th:href="@{/ir/aspireapps/linker/user/web/v1/profile}">profile</a>
+        <a class="navbar-button" th:href="@{/ir/aspireapps/linker/user/web/v1/logout}">logout</a>
+    </div>
 </div>
 </html>
