@@ -1,5 +1,6 @@
 package ir.aspireapps.linker.userservice.controller;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import ir.aspireapps.linker.userservice.dto.*;
 import ir.aspireapps.linker.userservice.form.UserLoginForm;
 import ir.aspireapps.linker.userservice.form.UserRegisterForm;
@@ -63,11 +64,15 @@ public class AuthControllerWeb {
         addTokenCookie(servletResponse,
                 "ACCESS_TOKEN",
                 authResponse.accessToken(),
-                Duration.ofMinutes(5));
+                Duration.ofSeconds(
+                        authResponse.accessTokenExpiresInSeconds())
+        );
         addTokenCookie(servletResponse,
                 "REFRESH_TOKEN",
                 authResponse.refreshToken(),
-                Duration.ofDays(7));
+                Duration.ofSeconds(
+                        authService.refreshTokenExpireSeconds())
+        );
 
         return "redirect:/ir/aspireapps/linker/user/web/v1/profile";
     }
@@ -108,11 +113,16 @@ public class AuthControllerWeb {
         addTokenCookie(servletResponse,
                 "ACCESS_TOKEN",
                 authResponse.accessToken(),
-                Duration.ofMinutes(5));
+                Duration.ofSeconds(
+                        authResponse.accessTokenExpiresInSeconds())
+        );
         addTokenCookie(servletResponse,
                 "REFRESH_TOKEN",
-                authResponse.accessToken(),
-                Duration.ofDays(7));
+                authResponse.refreshToken(),
+                Duration.ofSeconds(
+                        authService.refreshTokenExpireSeconds())
+        );
+        ;
 
         String returnUrl = userLoginForm.getReturnUrl();
         if (returnUrl == null || returnUrl.isBlank())
@@ -128,10 +138,17 @@ public class AuthControllerWeb {
             @NotNull @Valid @RequestBody UserRefreshRequest request,
             HttpServletRequest servletRequest,
             HttpServletResponse servletResponse) {
-        AuthResponse authResponse = authService.refresh(
-                request.refreshToken(),
-                servletRequest.getHeader("User-Agent"),
-                servletRequest.getRemoteAddr());
+        AuthResponse authResponse;
+        try {
+            authResponse = authService.refresh(
+                    request.refreshToken(),
+                    servletRequest.getHeader("User-Agent"),
+                    servletRequest.getRemoteAddr());
+        } catch (ExpiredJwtException e) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(null);
+        }
         log.info("New AuthResponse create as below:");
         log.info(authResponse.toString());
 

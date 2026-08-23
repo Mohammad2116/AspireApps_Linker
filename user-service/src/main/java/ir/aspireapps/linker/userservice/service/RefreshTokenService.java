@@ -24,7 +24,7 @@ public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
 
     public RefreshTokenService(
-            @Value("${security.jwt.refresh-tokne-expiration-ms}") long refreshTokenExpirationMs,
+            @Value("${security.jwt.refresh-token-expiration-ms}") long refreshTokenExpirationMs,
             TokenService tokenService,
             RefreshTokenRepository refreshTokenRepository) {
         this.refreshTokenRepository = refreshTokenRepository;
@@ -81,6 +81,6 @@ public class RefreshTokenService {
     }
 
     public long refreshTokenExpirationSeconds() {
-        return refreshTokenExpirationMs;
+        return refreshTokenExpirationMs / 1000;
     }
 }

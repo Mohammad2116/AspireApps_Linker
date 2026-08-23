@@ -1,5 +1,6 @@
 package ir.aspireapps.linker.userservice.service;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import ir.aspireapps.linker.userservice.dto.AuthResponse;
 import ir.aspireapps.linker.userservice.dto.UserLoginRequest;
 import ir.aspireapps.linker.userservice.dto.UserRegisterRequest;
@@ -14,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -81,10 +84,10 @@ public class AuthService {
     @Transactional
     public AuthResponse refresh(@NotEmpty @Size(max = 512) String refreshToken,
                                 @NotEmpty String deviceName,
-                                @NotEmpty String deviceIp) {
-        RefreshToken oldToken = refreshTokenService.verifyToken(refreshToken)
-                .orElseThrow(() -> new RuntimeException("Invalid Refresh Token"));
-        User user = oldToken.getUser();
+                                @NotEmpty String deviceIp) throws ExpiredJwtException {
+        Optional<RefreshToken> oldToken = refreshTokenService.verifyToken(refreshToken);
+        if (oldToken.isEmpty()) throw new ExpiredJwtException(null, null, "Invalid Refresh Token");
+        User user = oldToken.get().getUser();
         return AuthResponse.builder()
                 .accessToken(jwtService.generateAccessToken(user))
                 .accessTokenExpiresInSeconds(jwtService.accessTokenExpirationSeconds())

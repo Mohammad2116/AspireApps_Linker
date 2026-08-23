@@ -58,5 +58,5 @@ logging:
 security:
   jwt:
     access-token-secret-key: "A-VERY-STRONG-SECRET-KEY-FOR-ACCESS-TOKEN"
-    access-token-expiration-ms: 15_000
-    refresh-tokne-expiration-ms: 60_000
+    access-token-expiration-ms: 900_000 #1000 * 60 * 15
+    refresh-token-expiration-ms: 604_800_000 #1000 * 60 * 60 * 24 * 7
