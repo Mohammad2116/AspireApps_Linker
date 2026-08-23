@@ -3,6 +3,7 @@ package ir.aspireapps.linker.userservice.controller;
 import ir.aspireapps.linker.userservice.dto.*;
 import ir.aspireapps.linker.userservice.error.DuplicateResourceException;
 import ir.aspireapps.linker.userservice.error.InvalidJwtToken;
+import ir.aspireapps.linker.userservice.error.ResourceNotFoundException;
 import ir.aspireapps.linker.userservice.form.UserLoginForm;
 import ir.aspireapps.linker.userservice.form.UserRegisterForm;
 import ir.aspireapps.linker.userservice.service.AuthService;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ServerWebExchange;
 
 import java.time.Duration;
 
@@ -34,9 +36,11 @@ public class AuthControllerWeb {
 
     @GetMapping("register")
     public String register(
+            @NotNull @RequestHeader("AUTHENTICATED") Boolean authenticated,
             Model model,
             HttpServletRequest servletRequest) {
         model.addAttribute("registerForm", new UserRegisterForm());
+        model.addAttribute("loggedIn", authenticated);
         return "register";
     }
 
@@ -80,17 +84,18 @@ public class AuthControllerWeb {
                 Duration.ofSeconds(
                         authService.refreshTokenExpireSeconds())
         );
-
         return "redirect:/ir/aspireapps/linker/user/web/v1/profile";
     }
 
     @GetMapping("login")
     public String login(
             @RequestParam(required = false) String returnUrl,
+            @NotNull @RequestHeader("AUTHENTICATED") Boolean authenticated,
             Model model,
             HttpServletRequest servletRequest) {
         model.addAttribute("loginForm", new UserLoginForm());
         model.addAttribute("returnUrl", returnUrl);
+        model.addAttribute("loggedIn", authenticated);
         return "login";
     }
 
@@ -99,6 +104,7 @@ public class AuthControllerWeb {
             @Valid @ModelAttribute("loginForm") UserLoginForm userLoginForm,
             BindingResult bindingResult,
             Model model,
+            ServerWebExchange exchange,
             HttpServletRequest servletRequest,
             HttpServletResponse servletResponse
     ) {
@@ -109,13 +115,19 @@ public class AuthControllerWeb {
         }
 
         userLoginForm = InputNormalizer.normalize(userLoginForm);
-        AuthResponse authResponse = authService.login(
-                UserLoginRequest.builder()
-                        .username(userLoginForm.getUsername())
-                        .password(userLoginForm.getPassword())
-                        .build(),
-                servletRequest.getHeader("User-Agent"),
-                servletRequest.getRemoteAddr());
+        AuthResponse authResponse;
+        try {
+            authResponse = authService.login(
+                    UserLoginRequest.builder()
+                            .username(userLoginForm.getUsername())
+                            .password(userLoginForm.getPassword())
+                            .build(),
+                    servletRequest.getHeader("User-Agent"),
+                    servletRequest.getRemoteAddr());
+        } catch (ResourceNotFoundException e) {
+            model.addAttribute("generalError", true);
+            return "login";
+        }
 
         addTokenCookie(servletResponse,
                 "ACCESS_TOKEN",
@@ -130,6 +142,9 @@ public class AuthControllerWeb {
                         authService.refreshTokenExpireSeconds())
         );
 
+        Boolean loggedIn = exchange.getAttribute("LOGGED-IN");
+        if (Boolean.TRUE.equals(loggedIn))
+            model.addAttribute("loggedIn", true);
         String returnUrl = userLoginForm.getReturnUrl();
         if (returnUrl == null || returnUrl.isBlank())
             return "redirect:/ir/aspireapps/linker/user/web/v1/profile";
