@@ -1,5 +1,6 @@
 package ir.aspireapps.linker.gatewayserver.controller;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,9 +13,12 @@ public class GatewayControllerWeb {
             Model model,
             ServerWebExchange exchange
     ) {
-        boolean authenticated = Boolean.TRUE.equals(exchange.getAttribute("AUTHENTICATED"));
-        if (authenticated)
-            model.addAttribute("loggedIn", true);
+        HttpCookie cookie = exchange.getRequest().getCookies().getFirst("REFRESH_TOKEN");
+        if (cookie != null)
+            model.addAttribute("AUTHENTICATED", true);
+        else
+            model.addAttribute("AUTHENTICATED", false);
+
         return "home";
     }
 }

@@ -111,4 +111,8 @@ public class AuthService {
     public long accessTokenExpireSeconds() {
         return jwtService.accessTokenExpirationSeconds();
     }
+
+    public boolean isRefreshTokenValid(String refreshToken) {
+        return refreshTokenService.isValid(refreshToken);
+    }
 }

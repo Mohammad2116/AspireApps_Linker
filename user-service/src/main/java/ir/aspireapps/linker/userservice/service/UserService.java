@@ -1,6 +1,7 @@
 package ir.aspireapps.linker.userservice.service;
 
 import ir.aspireapps.linker.userservice.dto.UserProfileResponse;
+import ir.aspireapps.linker.userservice.error.ResourceNotFoundException;
 import ir.aspireapps.linker.userservice.repository.UserRepository;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,6 @@ public class UserService {
 
     public UserProfileResponse profile(@NotEmpty String username) {
         return userRepository.profile(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 }

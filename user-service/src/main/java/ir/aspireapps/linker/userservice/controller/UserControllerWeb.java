@@ -3,11 +3,13 @@ package ir.aspireapps.linker.userservice.controller;
 import ir.aspireapps.linker.common.dto.LinkRegisterRequest;
 import ir.aspireapps.linker.common.dto.LinkResponse;
 import ir.aspireapps.linker.userservice.dto.UserProfileResponse;
+import ir.aspireapps.linker.userservice.error.ResourceNotFoundException;
 import ir.aspireapps.linker.userservice.feign.LinksServiceClient;
 import ir.aspireapps.linker.userservice.form.AddLinkForm;
 import ir.aspireapps.linker.userservice.model.SubscriptionStatus;
 import ir.aspireapps.linker.userservice.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
@@ -33,24 +35,34 @@ public class UserControllerWeb {
             @NotEmpty @RequestHeader("X-USERNAME") String username,
             @NotEmpty @RequestHeader("X-USER-ROLES") String roles,
             Model model,
-            HttpServletRequest servletRequest) {
+            HttpServletRequest servletRequest,
+            HttpServletResponse servletResponse) {
         log.info("X-USERNAME: {}", username);
         log.info("X-USER-ROLES: {}", roles);
 
-        UserProfileResponse user = userService.profile(username);
+        UserProfileResponse user;
+        try {
+            user = userService.profile(username);
+        } catch (ResourceNotFoundException e) {
+            AuthControllerWeb.removeTokenCookies(servletResponse);
+            return "redirect:/ir/aspireapps/linker/home";
+        }
 
         model.addAttribute("profile", user);
         model.addAttribute("links", linksServiceClient.userLinks());
+        model.addAttribute("AUTHENTICATED", true);
         return "profile";
     }
 
     @GetMapping("addLink")
     public String addLink(
             @NotEmpty @RequestHeader("X-USER-STATUS") String status,
-            Model model) {
+            Model model,
+            HttpServletRequest servletRequest) {
         if (!status.equals(SubscriptionStatus.PREMIUM.name()))
             model.addAttribute("freeAccount", "freeAccount");
         model.addAttribute("addLinkForm", new AddLinkForm());
+        model.addAttribute("AUTHENTICATED", true);
         return "addLink";
     }
 
@@ -60,7 +72,8 @@ public class UserControllerWeb {
             @NotEmpty @RequestHeader("X-USER-ROLES") String roles,
             @NotEmpty @RequestHeader("X-USER-STATUS") String status,
             @Valid @ModelAttribute AddLinkForm addLinkForm,
-            Model model) {
+            Model model,
+            HttpServletRequest servletRequest) {
         if (!status.equals(SubscriptionStatus.PREMIUM.name()))
             model.addAttribute("freeAccount", "freeAccount");
 
@@ -78,32 +91,37 @@ public class UserControllerWeb {
 
         model.addAttribute("profile", user);
         model.addAttribute("links", linksServiceClient.userLinks());
+        model.addAttribute("AUTHENTICATED", true);
         return "profile";
     }
 
     @GetMapping("delete/{linkId}")
     public String deleteLinkProcess(@Valid @PathVariable long linkId,
                                     @NotEmpty @RequestHeader("X-USERNAME") String username,
-                                    Model model) {
+                                    Model model,
+                                    HttpServletRequest servletRequest) {
         linksServiceClient.deleteLink(linkId);
 
         UserProfileResponse user = userService.profile(username);
 
         model.addAttribute("profile", user);
         model.addAttribute("links", linksServiceClient.userLinks());
+        model.addAttribute("AUTHENTICATED", true);
         return "profile";
     }
 
     @GetMapping("toggle/{linkId}")
     public String toggleLinkProcess(@Valid @PathVariable long linkId,
                                     @NotEmpty @RequestHeader("X-USERNAME") String username,
-                                    Model model) {
+                                    Model model,
+                                    HttpServletRequest servletRequest) {
         linksServiceClient.toggleLink(linkId);
 
         UserProfileResponse user = userService.profile(username);
 
         model.addAttribute("profile", user);
         model.addAttribute("links", linksServiceClient.userLinks());
+        model.addAttribute("AUTHENTICATED", true);
         return "profile";
     }
 }

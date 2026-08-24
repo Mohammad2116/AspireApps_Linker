@@ -83,4 +83,14 @@ public class RefreshTokenService {
     public long refreshTokenExpirationSeconds() {
         return refreshTokenExpirationMs / 1000;
     }
+
+    public boolean isValid(@NotEmpty @Size(max = 512) String token) {
+        String hashedToken = tokenService.hashToken(token);
+        RefreshToken refreshToken = refreshTokenRepository.findByTokenHash(hashedToken)
+                .orElse(null);
+
+        return refreshToken != null
+                && !refreshToken.getExpiresAt().isBefore(Instant.now())
+                && !refreshToken.isRevoked();
+    }
 }
