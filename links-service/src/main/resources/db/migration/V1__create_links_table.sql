@@ -9,7 +9,10 @@ CREATE TABLE IF NOT EXISTS links
     id           BIGINT PRIMARY KEY,
     title        VARCHAR(254)  NOT NULL,
     original_url VARCHAR(1024) NOT NULL,
-    short_url    VARCHAR(10)   NOT NULL,
+    short_url VARCHAR
+(
+    10
+) NULL,
     user_id      UUID          NOT NULL,
     status       link_status   NOT NULL DEFAULT 'ACTIVE',
     created_at   TIMESTAMPTZ   NOT NULL DEFAULT now(),

@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -28,15 +30,18 @@ public class LinkService {
     @Transactional
     public LinkResponse register(@Valid @NotNull LinkRegisterRequest request,
                                  @NotNull UUID userId) {
+        log.info("registering new link starts");
         Link newLink = Link.builder()
                 .title(request.title())
                 .originalUrl(request.url())
                 .userId(userId)
                 .expiresAt(request.expiresAt())
                 .build();
-        linkConverter.encode(newLink);
-        System.out.println("generated link is " + newLink.toString());
         newLink = linksRepository.save(newLink);
+
+        log.info("new link created with following data: {}", newLink.toString());
+        linkConverter.encode(newLink);
+        log.info("new link shorted field updated as below: {}", newLink.toString());
         return LinkResponse.builder()
                 .id(newLink.getId())
                 .title(newLink.getTitle())
@@ -48,7 +53,6 @@ public class LinkService {
                 .updatedAt(newLink.getUpdatedAt())
                 .expiresAt(newLink.getExpiresAt())
                 .build();
-
     }
 
     @Transactional

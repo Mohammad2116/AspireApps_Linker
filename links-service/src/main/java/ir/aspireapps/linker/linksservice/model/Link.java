@@ -17,6 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
 public class Link {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "links_seq")
@@ -28,7 +29,7 @@ public class Link {
     @Column(nullable = false, length = 1024)
     private String originalUrl;
 
-    @Column(nullable = false, length = 10, unique = true)
+    @Column(nullable = true, length = 10, unique = true)
     private String shortUrl;
     @Column(nullable = false)
     private UUID userId;
@@ -39,10 +40,12 @@ public class Link {
     @Builder.Default
     private LinkStatus status = LinkStatus.ACTIVE;
 
+    @Builder.Default
     @CreationTimestamp
-    private Instant createdAt;
+    private Instant createdAt = Instant.now();
+    @Builder.Default
     @UpdateTimestamp
-    private Instant updatedAt;
+    private Instant updatedAt = Instant.now();
     @Column(nullable = false)
     private Instant expiresAt;
 }

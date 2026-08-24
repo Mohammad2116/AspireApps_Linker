@@ -17,13 +17,18 @@
 
     <div class="link-checker">
         <input
+                id="shorted"
                 aria-label="Shortened URL"
                 class="link-input"
                 placeholder="Enter a shortened URL"
                 type="text"/>
-        <button class="primary-button" type="button">
+        <button class="primary-button" th:onclick="|location.href='@{/ir/aspireapps/visit/}' + encodeURIComponent(document.getElementById('shorted').value)|"
+                type="button">
             Go
         </button>
+    </div>
+    <div class="general_error" th:if="${redirectError}">
+        <h4>Invalid shorted link, check link and try again</h4>
     </div>
 </div>
 </html>

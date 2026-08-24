@@ -1,7 +1,9 @@
 package ir.aspireapps.linker.linksservice.repository;
 
 import ir.aspireapps.linker.linksservice.dto.LinkResponse;
+import ir.aspireapps.linker.linksservice.dto.RedirectResponse;
 import ir.aspireapps.linker.linksservice.model.Link;
+import ir.aspireapps.linker.linksservice.model.LinkStatus;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -34,4 +36,14 @@ public interface LinkRepository extends JpaRepository<Link, Long> {
     )
     List<LinkResponse> findUserLinks(@NotEmpty @Param("userId") UUID userId);
 
+    @Query(
+            """
+                        SELECT NEW ir.aspireapps.linker.linksservice.dto.RedirectResponse (
+                                l.originalUrl
+                                )
+                        FROM Link l
+                        WHERE l.shortUrl = :shorted AND l.status = :status
+                    """
+    )
+    Optional<RedirectResponse> findByShortedAndStatus(@Param("shorted") String shorted, @Param("status") LinkStatus status);
 }

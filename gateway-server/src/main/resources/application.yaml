@@ -10,15 +10,20 @@ spring:
           predicates:
             - Path=/ir/aspireapps/linker/home
 
+        - id: links-service
+          uri: lb://links-service
+          predicates:
+            - Path=/ir/aspireapps/visit/**, /ir/aspireapps/linker/links/api/v1/visit/**
+
         - id: gateway-server-api
           uri: lb://gateway-service
           predicates:
             - Path=/ir/aspireapps/linker/gateway/api/v1/**
-        - id: gateway-server-web
 
+        - id: gateway-server-web
           uri: lb://gateway-service
           predicates:
-            - Path=/ir/aspireapps/linker/gateway/web/v1**
+            - Path=/ir/aspireapps/linker/gateway/web/v1/**
 
         - id: user-service-api
           uri: lb://user-service

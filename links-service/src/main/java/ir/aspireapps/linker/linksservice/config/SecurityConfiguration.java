@@ -27,11 +27,12 @@ public class SecurityConfiguration {
                             );
                         }
                 )
+
                 .authorizeHttpRequests(
                         authorize ->
-                                authorize
-                                        .anyRequest().authenticated()
+                                authorize.anyRequest().permitAll()
                 )
+
                 .addFilterAfter(gatewayHeaderAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
