@@ -1,5 +1,6 @@
-package ir.aspireapps.linker.analysisservice;
+package ir.aspireapps.linker.analysisservice.model;
 
+import ir.aspireapps.linker.common.model.HitState;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,7 +18,7 @@ public class AnalyzeData {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @Column(nullable = false, unique = true)
-    private long linkId;
+    private String shorted_url;
     @Column(nullable = false)
     @Builder.Default
     private long hitCount = 0;
@@ -27,4 +28,7 @@ public class AnalyzeData {
     @Column(nullable = false)
     @Builder.Default
     private Instant counterResetAt = Instant.now();
+    @Column(nullable = false)
+    @Builder.Default
+    private HitState linkHitState = HitState.NORMAL;
 }
