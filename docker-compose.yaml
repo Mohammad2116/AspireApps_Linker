@@ -116,6 +116,27 @@ services:
     networks:
       - linker-network
 
+  #///////////////////////////////////////////////////////////////////////////// LINKS SERVICE
+  analysis-service:
+    image: linker/analysis-service
+    container_name: linker-analysis-service
+    build:
+      context: ./analysis-service
+      dockerfile: Dockerfile
+
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+    #    Ports should remove to prevent access service directly
+    ports:
+      - "9002:8080"
+
+    networks:
+      - linker-network
+
 #///////////////////////////////////////////////////////////////////////////// GENERAL CONFIGURATIONS
 volumes:
   postgres-data:

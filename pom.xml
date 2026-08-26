@@ -23,6 +23,7 @@
         <module>gateway-server</module>
         <module>user-service</module>
         <module>links-service</module>
+        <module>analysis-service</module>
     </modules>
 
 
