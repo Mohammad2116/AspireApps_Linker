@@ -3,6 +3,8 @@ package ir.aspireapps.linker.analysisservice.model;
 import ir.aspireapps.linker.common.model.HitState;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 
@@ -28,9 +30,11 @@ public class AnalyzeData {
     @Column(nullable = false)
     @Builder.Default
     private Instant counterResetAt = Instant.now();
-    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(nullable = false, columnDefinition = "hit_state_type")
     @Builder.Default
-    private HitState linkHitState = HitState.NORMAL;
+    private HitState hitState = HitState.NORMAL;
 
     public void incClickCount() {
         this.allTimeHitCount++;

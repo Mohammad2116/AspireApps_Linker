@@ -1,5 +1,6 @@
 package ir.aspireapps.linker.linksservice.model;
 
+import ir.aspireapps.linker.common.model.HitState;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -39,6 +40,12 @@ public class Link {
     @Column(nullable = false, columnDefinition = "link_status")
     @Builder.Default
     private LinkStatus status = LinkStatus.ACTIVE;
+
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(nullable = false, columnDefinition = "hit_state")
+    @Builder.Default
+    private HitState hitState = HitState.NORMAL;
 
     @Builder.Default
     @CreationTimestamp

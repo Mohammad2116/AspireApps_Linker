@@ -4,6 +4,10 @@ CREATE TYPE link_status AS ENUM (
     'ACTIVE', 'DISABLED', 'EXPIRED'
     );
 
+CREATE TYPE hit_state AS ENUM (
+    'LOW', 'NORMAL', 'HIGH', 'VERY_HIGH'
+    );
+
 CREATE TABLE IF NOT EXISTS links
 (
     id           BIGINT PRIMARY KEY,
@@ -15,6 +19,7 @@ CREATE TABLE IF NOT EXISTS links
 ) NULL,
     user_id      UUID          NOT NULL,
     status       link_status   NOT NULL DEFAULT 'ACTIVE',
+    hit_state hit_state NOT NULL DEFAULT 'NORMAL',
     created_at   TIMESTAMPTZ   NOT NULL DEFAULT now(),
     updated_at   TIMESTAMPTZ   NULL,
     expires_at   TIMESTAMPTZ   NOT NULL

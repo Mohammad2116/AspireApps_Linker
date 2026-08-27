@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS outbox_messages
     topic        VARCHAR(50) NOT NULL,
     status       event_state      default 'PENDING',
     payload      TEXT        NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL,
-    updated_at TIMESTAMPTZ NULL
+    created_at   TIMESTAMPTZ NOT NULL,
+    updated_at   TIMESTAMPTZ NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_outbox_pending

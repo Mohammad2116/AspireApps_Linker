@@ -1,5 +1,6 @@
 package ir.aspireapps.linker.linksservice.service;
 
+import ir.aspireapps.linker.common.payload.LinkClickedPayload;
 import ir.aspireapps.linker.linksservice.converter.LinkConverter;
 import ir.aspireapps.linker.linksservice.dto.LinkRegisterRequest;
 import ir.aspireapps.linker.linksservice.dto.LinkResponse;
@@ -26,6 +27,7 @@ import java.util.UUID;
 public class LinkService {
     private final LinkRepository linksRepository;
     private final LinkConverter linkConverter;
+    private final OutboxService outboxService;
 
     @Transactional
     public LinkResponse register(@Valid @NotNull LinkRegisterRequest request,
@@ -38,10 +40,12 @@ public class LinkService {
                 .expiresAt(request.expiresAt())
                 .build();
         newLink = linksRepository.save(newLink);
-
         log.info("new link created with following data: {}", newLink.toString());
         linkConverter.encode(newLink);
         log.info("new link shorted field updated as below: {}", newLink.toString());
+
+        outboxService.register(newLink);
+
         return LinkResponse.builder()
                 .id(newLink.getId())
                 .title(newLink.getTitle())
@@ -49,6 +53,7 @@ public class LinkService {
                 .shortUrl(newLink.getShortUrl())
                 .userId(newLink.getUserId())
                 .status(newLink.getStatus())
+                .hitState(newLink.getHitState())
                 .createdAt(newLink.getCreatedAt())
                 .updatedAt(newLink.getUpdatedAt())
                 .expiresAt(newLink.getExpiresAt())
@@ -73,6 +78,7 @@ public class LinkService {
                 .shortUrl(link.getShortUrl())
                 .userId(link.getUserId())
                 .status(link.getStatus())
+                .hitState(link.getHitState())
                 .createdAt(link.getCreatedAt())
                 .updatedAt(link.getUpdatedAt())
                 .expiresAt(link.getExpiresAt())
@@ -94,6 +100,7 @@ public class LinkService {
                 .shortUrl(link.getShortUrl())
                 .userId(link.getUserId())
                 .status(link.getStatus())
+                .hitState(link.getHitState())
                 .createdAt(link.getCreatedAt())
                 .updatedAt(link.getUpdatedAt())
                 .expiresAt(link.getExpiresAt())
@@ -101,13 +108,16 @@ public class LinkService {
     }
 
     public List<LinkResponse> userLinks(UUID userId) {
+
         return linksRepository.findUserLinks(userId);
+
     }
 
     @Transactional
     public void delete(@NotNull long linkId, @NotEmpty UUID userId) {
         Link link = linksRepository.findByIdAndUserId(linkId, userId)
                 .orElseThrow(() -> new RuntimeException("Link not found"));
+        outboxService.delete(link);
         linksRepository.delete(link);
     }
 
@@ -125,5 +135,12 @@ public class LinkService {
         if (status == LinkStatus.DISABLED)
             return LinkStatus.ACTIVE;
         return LinkStatus.DISABLED;
+    }
+
+    @Transactional
+    public void updateHitState(LinkClickedPayload payload) {
+        Link link = linksRepository.findByShortUrlAndStatus(payload.shortedUrl(), LinkStatus.ACTIVE)
+                .orElseThrow(() -> new RuntimeException("Link not found or inactive"));
+        link.setHitState(payload.currentHitState());
     }
 }

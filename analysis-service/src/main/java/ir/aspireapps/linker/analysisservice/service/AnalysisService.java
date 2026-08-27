@@ -36,7 +36,7 @@ public class AnalysisService {
         analyzeData = analysisRepository.save(analyzeData);
         AnalysisResponse.builder()
                 .shortedUrl(analyzeData.getShortedUrl())
-                .linkHitState(analyzeData.getLinkHitState())
+                .linkHitState(analyzeData.getHitState())
                 .build();
     }
 
@@ -53,7 +53,7 @@ public class AnalysisService {
                     Instant.now()).toSeconds() >= 60) {
                 analyzeData.setHitCount(0);
                 analyzeData.setCounterResetAt(Instant.now());
-                analyzeData.setLinkHitState(newState);
+                analyzeData.setHitState(newState);
                 String payloadString = null;
                 try {
                     payloadString = objectMapper.writeValueAsString(payload);
@@ -65,7 +65,7 @@ public class AnalysisService {
                         "popularity-response-topic",
                         payloadString);
             } else if (hitStateImproved(currentState, newState)) {
-                analyzeData.setLinkHitState(newState);
+                analyzeData.setHitState(newState);
                 String payloadString = null;
                 try {
                     payloadString = objectMapper.writeValueAsString(payload);

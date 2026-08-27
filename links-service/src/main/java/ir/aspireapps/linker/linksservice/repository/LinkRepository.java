@@ -26,6 +26,7 @@ public interface LinkRepository extends JpaRepository<Link, Long> {
                             l.shortUrl,
                             l.userId,
                             l.status,
+                            l.hitState,
                             l.createdAt,
                             l.updatedAt,
                             l.expiresAt
@@ -39,11 +40,15 @@ public interface LinkRepository extends JpaRepository<Link, Long> {
     @Query(
             """
                         SELECT NEW ir.aspireapps.linker.linksservice.dto.RedirectResponse (
-                                l.originalUrl
+                                l.id,
+                                l.originalUrl,
+                                l.hitState
                                 )
                         FROM Link l
                         WHERE l.shortUrl = :shorted AND l.status = :status
                     """
     )
-    Optional<RedirectResponse> findByShortedAndStatus(@Param("shorted") String shorted, @Param("status") LinkStatus status);
+    Optional<RedirectResponse> findByShortUrlAndStatusDto(@Param("shorted") String shorted, @Param("status") LinkStatus status);
+
+    Optional<Link> findByShortUrlAndStatus(String shorted, LinkStatus status);
 }

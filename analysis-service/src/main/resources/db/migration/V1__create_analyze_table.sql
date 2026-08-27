@@ -1,4 +1,4 @@
-CREATE TYPE hit_state AS ENUM (
+CREATE TYPE hit_state_type AS ENUM (
     'LOW', 'NORMAL', 'HIGH', 'VERY_HIGH'
 );
 
@@ -13,5 +13,5 @@ CREATE TABLE IF NOT EXISTS analysis
     hit_count             BIGINT NOT NULL,
     all_time_hit_count BIGINT NOT NULL,
     counter_reset_at   TIMESTAMP WITH TIME ZONE,
-    link_hit_state hit_state default 'NORMAL'
+    hit_state hit_state_type default 'NORMAL'
                                      );
