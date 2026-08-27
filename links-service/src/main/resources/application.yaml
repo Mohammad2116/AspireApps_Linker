@@ -38,6 +38,15 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
+  data:
+    redis:
+      host: redis
+      port: 6379
+      password: myStrongRedisPassword
+      timeout: 6s
+    cache:
+      type: redis
+
 eureka:
   client:
     service-url:
