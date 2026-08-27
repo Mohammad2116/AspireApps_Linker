@@ -1,7 +1,10 @@
 package ir.aspireapps.linker.common.model;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -11,7 +14,6 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public abstract class OutboxMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

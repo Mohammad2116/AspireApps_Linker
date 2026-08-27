@@ -1,5 +1,7 @@
 package ir.aspireapps.linker.analysisservice.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ir.aspireapps.linker.analysisservice.model.AnalyzeData;
 import ir.aspireapps.linker.analysisservice.repository.AnalysisRepository;
 import ir.aspireapps.linker.common.dto.AnalysisResponse;
@@ -7,17 +9,21 @@ import ir.aspireapps.linker.common.model.HitState;
 import ir.aspireapps.linker.common.payload.LinkClickedPayload;
 import ir.aspireapps.linker.common.payload.LinkRegisteredPayload;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AnalysisService {
     private final AnalysisRepository analysisRepository;
+    private final OutboxService outboxService;
+    private final ObjectMapper objectMapper;
 
     @Transactional
     public void register(LinkRegisteredPayload request) {
@@ -48,12 +54,28 @@ public class AnalysisService {
                 analyzeData.setHitCount(0);
                 analyzeData.setCounterResetAt(Instant.now());
                 analyzeData.setLinkHitState(newState);
-                //////////// TODO: send update message to links-service using kafka
-                return;
+                String payloadString = null;
+                try {
+                    payloadString = objectMapper.writeValueAsString(payload);
+                } catch (JsonProcessingException e) {
+                    log.info("Could not serialize payload", e);
+                    throw new RuntimeException("Could not serialize payload");
+                }
+                outboxService.register(analyzeData.getId(),
+                        "popularity-response-topic",
+                        payloadString);
             } else if (hitStateImproved(currentState, newState)) {
                 analyzeData.setLinkHitState(newState);
-                return;
-                ////////// TODO: send update message to links-service using kafka
+                String payloadString = null;
+                try {
+                    payloadString = objectMapper.writeValueAsString(payload);
+                } catch (JsonProcessingException e) {
+                    log.info("Could not serialize payload", e);
+                    throw new RuntimeException("Could not serialize payload");
+                }
+                outboxService.register(analyzeData.getId(),
+                        "popularity-response-topic",
+                        payloadString);
             }
         } else {
             return;
