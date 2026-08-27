@@ -9,4 +9,6 @@ public interface AnalysisRepository extends JpaRepository<AnalyzeData, Long> {
     boolean existsByShortedUrl(@NotEmpty @Size(min = 4, max = 10) String shortedUrl);
 
     AnalyzeData findByShortedUrl(String shortedUrl);
+
+    void deleteByShortedUrl(String shortedUrl);
 }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ir.aspireapps.linker.analysisservice.service.AnalysisService;
 import ir.aspireapps.linker.common.payload.LinkClickedPayload;
+import ir.aspireapps.linker.common.payload.LinkDeletePayload;
 import ir.aspireapps.linker.common.payload.LinkRegisteredPayload;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
@@ -46,5 +47,18 @@ public class MessageListener {
             throw new RuntimeException("Error parsing link-registered-payload");
         }
         analysisService.register(payload);
+    }
+
+    @KafkaListener(topics = "link-deleted-topic", groupId = "linker")
+    @Transactional
+    public void deletedListener(
+            @Nonnull ConsumerRecord<String, String> record) {
+        LinkDeletePayload payload;
+        try {
+            payload = objectMapper.readValue(record.value(), LinkDeletePayload.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Error parsing link-deleted-payload", e);
+        }
+        analysisService.delete(payload.shortUrl());
     }
 }

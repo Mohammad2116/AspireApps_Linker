@@ -102,4 +102,9 @@ public class AnalysisService {
         else if (hitCount > 25) hitState = HitState.NORMAL;
         return hitState;
     }
+
+    @Transactional
+    public void delete(String shortUrl) {
+        analysisRepository.deleteByShortedUrl(shortUrl);
+    }
 }
