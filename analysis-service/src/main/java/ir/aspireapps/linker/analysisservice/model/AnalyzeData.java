@@ -18,7 +18,7 @@ public class AnalyzeData {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @Column(nullable = false, unique = true)
-    private String shorted_url;
+    private String shortedUrl;
     @Column(nullable = false)
     @Builder.Default
     private long hitCount = 0;
@@ -31,4 +31,9 @@ public class AnalyzeData {
     @Column(nullable = false)
     @Builder.Default
     private HitState linkHitState = HitState.NORMAL;
+
+    public void incClickCount() {
+        this.allTimeHitCount++;
+        this.hitCount++;
+    }
 }

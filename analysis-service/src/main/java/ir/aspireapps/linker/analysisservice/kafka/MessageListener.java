@@ -1,0 +1,50 @@
+package ir.aspireapps.linker.analysisservice.kafka;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import ir.aspireapps.linker.analysisservice.service.AnalysisService;
+import ir.aspireapps.linker.common.payload.LinkClickedPayload;
+import ir.aspireapps.linker.common.payload.LinkRegisteredPayload;
+import jakarta.annotation.Nonnull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class MessageListener {
+    private final AnalysisService analysisService;
+    private final ObjectMapper objectMapper;
+
+    @KafkaListener(topics = "link-visit-topic", groupId = "linker")
+    @Transactional
+    public void visitListener(
+            @Nonnull ConsumerRecord<String, String> record) {
+        LinkClickedPayload payload;
+        try {
+            payload = objectMapper.readValue(record.value(), LinkClickedPayload.class);
+        } catch (JsonProcessingException e) {
+            log.error("Error parsing link-visit-payload", e);
+            throw new RuntimeException("Error parsing link-visit-payload");
+        }
+        analysisService.clicked(payload);
+    }
+
+    @KafkaListener(topics = "link-registered-topic", groupId = "linker")
+    @Transactional
+    public void registeredListener(
+            @Nonnull ConsumerRecord<String, String> record) {
+        LinkRegisteredPayload payload;
+        try {
+            payload = objectMapper.readValue(record.value(), LinkRegisteredPayload.class);
+        } catch (JsonProcessingException e) {
+            log.error("Error parsing link-registered-payload", e);
+            throw new RuntimeException("Error parsing link-registered-payload");
+        }
+        analysisService.register(payload);
+    }
+}

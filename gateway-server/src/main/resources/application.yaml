@@ -37,6 +37,12 @@ spring:
           filters:
             - PreserveHostHeader
 
+        - id: analysis-service
+          uri: lb://analysis-service
+          predicates:
+            - Path=/ir/aspireapps/linker/analysis/api/v1/**
+          filters:
+            - PreserveHostHeader
 security:
   jwt:
     secretKey: "A-VERY-STRONG-SECRET-KEY-FOR-ACCESS-TOKEN"
