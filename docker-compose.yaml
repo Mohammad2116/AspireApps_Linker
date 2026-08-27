@@ -253,10 +253,50 @@ services:
         echo "Kafka topics created.";
       ' 
 
+  ##############################################################################
+  redis:
+    image: redis:8-alpine
+    container_name: redis
+
+    command:
+      - redis-server
+      - --appendonly
+      - yes
+      - --requirepass
+      - myStrongRedisPassword
+
+    ports:
+      - 6379
+    #      - "6380:6379"
+    volumes:
+      - redis-data:/data
+
+    networks:
+      - linker-network
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    healthcheck:
+      test: [ "CMD",
+              "redis-cli",
+              "-a",
+              "myStrongRedisPassword",
+              "ping" ]
+
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+    restart: unless-stopped
+
 #///////////////////////////////////////////////////////////////////////////// GENERAL CONFIGURATIONS
 volumes:
   postgres-data:
   kafka-data:
+  redis-data:
 
 networks:
   linker-network:
