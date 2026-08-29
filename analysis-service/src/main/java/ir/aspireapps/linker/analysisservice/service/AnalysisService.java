@@ -54,11 +54,10 @@ public class AnalysisService {
                 analyzeData.setHitCount(0);
                 analyzeData.setCounterResetAt(Instant.now());
                 analyzeData.setHitState(newState);
-                String payloadString = null;
+                String payloadString;
                 try {
                     payloadString = objectMapper.writeValueAsString(payload);
                 } catch (JsonProcessingException e) {
-                    log.info("Could not serialize payload", e);
                     throw new RuntimeException("Could not serialize payload");
                 }
                 outboxService.register(analyzeData.getId(),
@@ -66,21 +65,19 @@ public class AnalysisService {
                         payloadString);
             } else if (hitStateImproved(currentState, newState)) {
                 analyzeData.setHitState(newState);
-                String payloadString = null;
+                String payloadString;
                 try {
                     payloadString = objectMapper.writeValueAsString(payload);
                 } catch (JsonProcessingException e) {
-                    log.info("Could not serialize payload", e);
                     throw new RuntimeException("Could not serialize payload");
                 }
                 outboxService.register(analyzeData.getId(),
                         "popularity-response-topic",
                         payloadString);
             }
-        } else {
-            return;
-            ////////////// TODO: send an error message to kafka error listener
         }
+            ////////////// TODO: send an error message to kafka error listener
+
     }
 
     private boolean hitStateImproved(HitState currentState, HitState newSate) {

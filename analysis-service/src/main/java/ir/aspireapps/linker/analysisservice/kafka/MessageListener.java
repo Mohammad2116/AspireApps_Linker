@@ -29,7 +29,6 @@ public class MessageListener {
         try {
             payload = objectMapper.readValue(record.value(), LinkClickedPayload.class);
         } catch (JsonProcessingException e) {
-            log.error("Error parsing link-visit-payload", e);
             throw new RuntimeException("Error parsing link-visit-payload");
         }
         analysisService.clicked(payload);
@@ -43,7 +42,6 @@ public class MessageListener {
         try {
             payload = objectMapper.readValue(record.value(), LinkRegisteredPayload.class);
         } catch (JsonProcessingException e) {
-            log.error("Error parsing link-registered-payload", e);
             throw new RuntimeException("Error parsing link-registered-payload");
         }
         analysisService.register(payload);
