@@ -12,7 +12,6 @@ public class WebClientConfig {
     @Bean
     @LoadBalanced
     public WebClient.Builder webClientBuilder() {
-        log.info("Someone needs a WebClient.Builder??");
         return WebClient.builder();
     }
 }
