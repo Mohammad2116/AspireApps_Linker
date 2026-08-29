@@ -31,13 +31,11 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             "/ir/aspireapps/linker/auth/api/v1/register",
             "/ir/aspireapps/linker/auth/api/v1/login",
             "/ir/aspireapps/linker/auth/api/v1/refresh",
-            "/ir/aspireapps/linker/gateway/api/v1/anything",
             "/ir/aspireapps/linker/links/api/v1/visit/",
             "/actuator",
             "/ir/aspireapps/linker/auth/web/v1/register",
             "/ir/aspireapps/linker/auth/web/v1/login",
-            "/ir/aspireapps/linker/auth/web/v1/refresh",
-            "/ir/aspireapps/linker/gateway/web/v1/anything"
+            "/ir/aspireapps/linker/auth/web/v1/refresh"
     );
     private static final List<String> ADMIN_PATHS = List.of(
             "/ir/aspireapps/linker/api/v1/admin/**"
@@ -47,19 +45,21 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        log.info(("=================================================================="));
-        if (exchange.getRequest().getURI().getPath().contains("/web/")) {
-            return processWebFilter(exchange, chain);
-        }
+        log.info("==================================================================");
+        log.info("A new request received by gateway filter");
 
         String path = exchange.getRequest().getURI().getPath();
+        log.info("exchange request path is {}", path);
+        if (path.contains("/web/")) {
+            return processWebFilter(exchange, chain);
+        }
         if (isPublic(path)) return chain.filter(exchange);
 
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer "))
             return unauthorized(exchange);
         String accessToken = authHeader.substring("Bearer ".length());
-        Claims claims = null;
+        Claims claims;
         claims = jwtService.validateToken(accessToken);
         String username = claims.getSubject();
         String userId = claims.get("userId").toString();
@@ -81,27 +81,24 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     private Mono<Void> processWebFilter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
         log.info("This is a web request, so web filter will process it");
-        log.info("exchange request path is {}", path);
+        log.info("exchange web request path is {}", path);
 
         if (isPublic(path)) {
-            log.info("This is a public path, so filter chain release here");
             return chain.filter(exchange);
         }
 
-        String accessToken = null;
+        String accessToken;
         HttpCookie accessCookie = exchange.getRequest().getCookies().getFirst("ACCESS_TOKEN");
         accessToken = accessCookie != null ? accessCookie.getValue() : null;
 
-        String refreshToken = null;
+        String refreshToken;
         HttpCookie refreshCookie = exchange.getRequest().getCookies().getFirst("REFRESH_TOKEN");
         refreshToken = refreshCookie != null ? refreshCookie.getValue() : null;
 
-        log.info("ACCESS_TOKEN: {}", accessToken);
-        log.info("REFRESH_TOKEN: {}", refreshToken);
-        if (refreshToken == null || refreshToken.isEmpty()) return redirectToLogin(exchange, false);
+        if (refreshToken == null || refreshToken.isEmpty()) return redirectToLogin(exchange);
         if (accessToken == null || accessToken.isEmpty()) return redirectToRefresh(exchange, refreshToken);
 
-        Claims claims = null;
+        Claims claims;
         try {
             claims = jwtService.validateToken(accessToken);
         } catch (ExpiredJwtException e) {
@@ -133,7 +130,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 .bodyValue(refreshRequest)
                 .exchangeToMono(response -> {
                     if (response.statusCode() == HttpStatus.FORBIDDEN)
-                        return redirectToLogin(exchange, true);
+                        return redirectToLogin(exchange);
 
                     ServerHttpResponse gatewayResponse = exchange.getResponse();
                     List<String> cookies = response.headers().header(HttpHeaders.SET_COOKIE);
@@ -144,7 +141,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 });
     }
 
-    private Mono<Void> redirectToLogin(ServerWebExchange exchange, boolean redirectToProfile) {
+    private Mono<Void> redirectToLogin(ServerWebExchange exchange) { //}, boolean redirectToProfile) {
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(HttpStatus.SEE_OTHER);
         response.getHeaders().setLocation(
@@ -168,14 +165,14 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
     }
 
-    private boolean isAdmin(String path) {
-        return ADMIN_PATHS.stream().anyMatch(path::startsWith);
-    }
-
-    private Mono<Void> forbidden(ServerWebExchange exchange) {
-        exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
-        return exchange.getResponse().setComplete();
-    }
+//    private boolean isAdmin(String path) {
+//        return ADMIN_PATHS.stream().anyMatch(path::startsWith);
+//    }
+//
+//    private Mono<Void> forbidden(ServerWebExchange exchange) {
+//        exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+//        return exchange.getResponse().setComplete();
+//    }
 
     private Mono<Void> unauthorized(ServerWebExchange exchange) {
         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
