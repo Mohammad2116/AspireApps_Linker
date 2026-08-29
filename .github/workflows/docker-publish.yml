@@ -22,7 +22,7 @@ jobs:
       # -----------------------------------------------------------------------
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
 
       # -----------------------------------------------------------------------
@@ -30,7 +30,7 @@ jobs:
       # -----------------------------------------------------------------------
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
@@ -65,16 +65,6 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
 
-      # -----------------------------------------------------------------------
-      # Docker Metadata
-      # -----------------------------------------------------------------------
-
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ github.repository_owner }}/aspireapps-linker
-
 
       # -----------------------------------------------------------------------
       # Build & Push Eureka
@@ -87,8 +77,8 @@ jobs:
           file: ./eureka-server/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/aspireapps-linker-eureka-server:latest
-            ghcr.io/${{ github.repository_owner }}/aspireapps-linker-eureka-server:${{ github.sha }}
+            ghcr.io/mohammad2116/aspireapps-linker-eureka-server:latest
+            ghcr.io/mohammad2116/aspireapps-linker-eureka-server:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -104,8 +94,8 @@ jobs:
           file: ./gateway-server/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/aspireapps-linker-gateway-server:latest
-            ghcr.io/${{ github.repository_owner }}/aspireapps-linker-gateway-server:${{ github.sha }}
+            ghcr.io/mohammad2116/aspireapps-linker-gateway-server:latest
+            ghcr.io/mohammad2116/aspireapps-linker-gateway-server:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -121,8 +111,8 @@ jobs:
           file: ./user-service/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/aspireapps-linker-user-service:latest
-            ghcr.io/${{ github.repository_owner }}/aspireapps-linker-user-service:${{ github.sha }}
+            ghcr.io/mohammad2116/aspireapps-linker-user-service:latest
+            ghcr.io/mohammad2116/aspireapps-linker-user-service:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -138,8 +128,8 @@ jobs:
           file: ./links-service/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/aspireapps-linker-links-service:latest
-            ghcr.io/${{ github.repository_owner }}/aspireapps-linker-links-service:${{ github.sha }}
+            ghcr.io/mohammad2116/aspireapps-linker-links-service:latest
+            ghcr.io/mohammad2116/aspireapps-linker-links-service:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -155,7 +145,7 @@ jobs:
           file: ./analysis-service/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/aspireapps-linker-analysis-service:latest
-            ghcr.io/${{ github.repository_owner }}/aspireapps-linker-analysis-service:${{ github.sha }}
+            ghcr.io/mohammad2116/aspireapps-linker-analysis-service:latest
+            ghcr.io/mohammad2116/aspireapps-linker-analysis-service:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
