@@ -1,12 +1,12 @@
 package ir.aspireapps.linker.linksservice.service;
 
+import ir.aspireapps.linker.common.dto.LinkResponse;
+import ir.aspireapps.linker.common.model.LinkStatus;
 import ir.aspireapps.linker.common.payload.LinkClickedPayload;
 import ir.aspireapps.linker.linksservice.converter.LinkConverter;
 import ir.aspireapps.linker.linksservice.dto.LinkRegisterRequest;
-import ir.aspireapps.linker.linksservice.dto.LinkResponse;
 import ir.aspireapps.linker.linksservice.dto.LinkUpdateStatusRequest;
 import ir.aspireapps.linker.linksservice.model.Link;
-import ir.aspireapps.linker.linksservice.model.LinkStatus;
 import ir.aspireapps.linker.linksservice.repository.LinkRepository;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -28,6 +28,7 @@ public class LinkService {
     private final LinkRepository linksRepository;
     private final LinkConverter linkConverter;
     private final OutboxService outboxService;
+    private final RedisLinkCacheService redisLinkCacheService;
 
     @Transactional
     public LinkResponse register(@Valid @NotNull LinkRegisterRequest request,
@@ -71,6 +72,8 @@ public class LinkService {
             link.setStatus(LinkStatus.EXPIRED);
         else
             link.setStatus(request.status());
+        if (redisLinkCacheService.exists(link.getShortUrl()))
+            redisLinkCacheService.evict(link.getShortUrl());
         return LinkResponse.builder()
                 .id(link.getId())
                 .title(link.getTitle())
@@ -117,6 +120,8 @@ public class LinkService {
     public void delete(@NotNull long linkId, @NotEmpty UUID userId) {
         Link link = linksRepository.findByIdAndUserId(linkId, userId)
                 .orElseThrow(() -> new RuntimeException("Link not found"));
+        if (redisLinkCacheService.exists(link.getShortUrl()))
+            redisLinkCacheService.evict(link.getShortUrl());
         outboxService.delete(link);
         linksRepository.delete(link);
     }
@@ -129,6 +134,8 @@ public class LinkService {
             link.setStatus(LinkStatus.EXPIRED);
         else
             link.setStatus(toggleOf(link.getStatus()));
+        if (redisLinkCacheService.exists(link.getShortUrl()))
+            redisLinkCacheService.evict(link.getShortUrl());
     }
 
     LinkStatus toggleOf(LinkStatus status) {
@@ -141,6 +148,20 @@ public class LinkService {
     public void updateHitState(LinkClickedPayload payload) {
         Link link = linksRepository.findByShortUrlAndStatus(payload.shortedUrl(), LinkStatus.ACTIVE)
                 .orElseThrow(() -> new RuntimeException("Link not found or inactive"));
+        if (link.getHitState() != payload.currentHitState())
+            if (redisLinkCacheService.exists(link.getShortUrl()))
+                redisLinkCacheService.evict(link.getShortUrl());
         link.setHitState(payload.currentHitState());
+    }
+
+    @Transactional
+    public void checkExpiration(Long id) {
+        Link link = linksRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("shortUrl not found"));
+        if (link.getExpiresAt().isBefore(Instant.now())) {
+            if (redisLinkCacheService.exists(link.getShortUrl()))
+                redisLinkCacheService.evict(link.getShortUrl());
+            link.setStatus(LinkStatus.EXPIRED);
+        }
     }
 }

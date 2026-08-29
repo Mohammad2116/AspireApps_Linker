@@ -1,6 +1,7 @@
 package ir.aspireapps.linker.linksservice.model;
 
 import ir.aspireapps.linker.common.model.HitState;
+import ir.aspireapps.linker.common.model.LinkStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

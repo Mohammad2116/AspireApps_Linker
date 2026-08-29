@@ -1,9 +1,9 @@
 package ir.aspireapps.linker.linksservice.repository;
 
-import ir.aspireapps.linker.linksservice.dto.LinkResponse;
+import ir.aspireapps.linker.common.dto.LinkResponse;
+import ir.aspireapps.linker.common.model.LinkStatus;
 import ir.aspireapps.linker.linksservice.dto.RedirectResponse;
 import ir.aspireapps.linker.linksservice.model.Link;
-import ir.aspireapps.linker.linksservice.model.LinkStatus;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,7 +19,7 @@ public interface LinkRepository extends JpaRepository<Link, Long> {
 
     @Query(
             """
-                    SELECT NEW ir.aspireapps.linker.linksservice.dto.LinkResponse (
+                    SELECT NEW ir.aspireapps.linker.common.dto.LinkResponse (
                             l.id,
                             l.title,
                             l.originalUrl,

@@ -1,7 +1,7 @@
 package ir.aspireapps.linker.linksservice.controller;
 
+import ir.aspireapps.linker.common.dto.LinkResponse;
 import ir.aspireapps.linker.linksservice.dto.LinkRegisterRequest;
-import ir.aspireapps.linker.linksservice.dto.LinkResponse;
 import ir.aspireapps.linker.linksservice.dto.LinkUpdateStatusRequest;
 import ir.aspireapps.linker.linksservice.service.LinkService;
 import jakarta.validation.Valid;
