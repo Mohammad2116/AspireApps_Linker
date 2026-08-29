@@ -28,12 +28,7 @@ public class FeignConfiguration {
                     (ServletRequestAttributes)
                             RequestContextHolder.getRequestAttributes();
 
-            log.info("FeignConfiguration requestInterceptor");
-
-            if (attributes == null) {
-                log.warn("No ServletRequestAttributes found");
-                return;
-            }
+            if (attributes == null) return;
 
             HttpServletRequest request = attributes.getRequest();
 
@@ -70,11 +65,6 @@ public class FeignConfiguration {
             if (status != null && !status.isBlank()) {
                 requestTemplate.header("X-USER-STATUS", status);
             }
-
-            log.info("User Id: {}", userId);
-            log.info("User Name: {}", userName);
-            log.info("Roles: {}", roles);
-            log.info("status: {}", status);
         };
     }
 }

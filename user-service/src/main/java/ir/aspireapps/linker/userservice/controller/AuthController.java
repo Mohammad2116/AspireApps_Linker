@@ -57,7 +57,6 @@ public class AuthController {
     public ResponseEntity<AuthResponse> refresh(
             @NotNull @Valid @RequestBody UserRefreshRequest request,
             HttpServletRequest servletRequest) {
-        log.info("🔥🔥🔥 API REFRESH CONTROLLER REACHED");
         AuthResponse result = authService.refresh(
                 request.refreshToken(),
                 servletRequest.getHeader("User-Agent"),

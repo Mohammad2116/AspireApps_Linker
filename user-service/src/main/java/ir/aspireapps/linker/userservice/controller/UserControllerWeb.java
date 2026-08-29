@@ -35,10 +35,7 @@ public class UserControllerWeb {
             @NotEmpty @RequestHeader("X-USERNAME") String username,
             @NotEmpty @RequestHeader("X-USER-ROLES") String roles,
             Model model,
-            HttpServletRequest servletRequest,
-            HttpServletResponse servletResponse) {
-        log.info("X-USERNAME: {}", username);
-        log.info("X-USER-ROLES: {}", roles);
+            HttpServletRequest servletRequest) {
 
         UserProfileResponse user;
         try {

@@ -6,19 +6,19 @@ spring:
     wait-time-in-ms-when-sync-emtpy: 0
 
   datasource:
-    url: jdbc:postgresql://postgres:5432/linker_user_db
-    username: demoapps
-    password: JingleBells
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
     jpa:
       hibernate:
         ddl-auto: none
       open-in-view: false
-      show-sql: true
+      show-sql: false
       properties:
         hibernate:
-          format-sql: true
+          format-sql: false
 
     sql:
       init:
@@ -57,6 +57,6 @@ logging:
 
 security:
   jwt:
-    access-token-secret-key: "A-VERY-STRONG-SECRET-KEY-FOR-ACCESS-TOKEN"
-    access-token-expiration-ms: 900_000 #1000 * 60 * 15
-    refresh-token-expiration-ms: 604_800_000 #1000 * 60 * 60 * 24 * 7
+    access-token-secret-key: ${ACCESS_TOKEN_SECURITY_KEY}
+    access-token-expiration-ms: ${ACCESS_TOKEN_TTL_MS}
+    refresh-token-expiration-ms: ${REFRESH_TOKEN_TTL_MS}

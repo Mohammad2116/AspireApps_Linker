@@ -207,9 +207,14 @@ public class AuthControllerWeb {
                     .status(HttpStatus.FORBIDDEN)
                     .body(null);
         }
-        log.info("New AuthResponse create as below:");
-        log.info(authResponse.toString());
-        generateTokenCookies(servletResponse, authResponse);
+        addTokenCookie(servletResponse,
+                "ACCESS_TOKEN",
+                authResponse.accessToken(),
+                Duration.ofSeconds(authService.accessTokenExpireSeconds()));
+        addTokenCookie(servletResponse,
+                "REFRESH_TOKEN",
+                authResponse.refreshToken(),
+                Duration.ofSeconds(authService.refreshTokenExpireSeconds()));
 
         return ResponseEntity
                 .status(HttpStatus.OK)
