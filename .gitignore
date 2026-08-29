@@ -13,8 +13,6 @@
 target/
 build/
 .gradle/
-!.mvn/wrapper/maven-wrapper.jar
-.mvn/
 
 # IntelliJ / IDEA
 .idea/
