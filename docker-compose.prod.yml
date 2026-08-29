@@ -286,6 +286,9 @@ services:
     image: redis:8-alpine
     container_name: linker-redis
 
+    environment:
+      REDIS_AUTHENTICATION_PASS: ${REDIS_AUTHENTICATION_PASS}
+
     command:
       - redis-server
       - --appendonly
