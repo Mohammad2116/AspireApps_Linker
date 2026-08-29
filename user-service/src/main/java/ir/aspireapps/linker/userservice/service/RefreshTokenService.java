@@ -56,17 +56,14 @@ public class RefreshTokenService {
                 .orElse(null);
 
         if (refreshToken == null) {
-            log.error("Invalid Refresh Token");
             throw new InvalidJwtToken("Invalid refresh Token");
         }
 
         if (refreshToken.getExpiresAt().isBefore(Instant.now())) {
-            log.error("Expired Refresh Token");
             throw new InvalidJwtToken("Expired refresh token used");
         }
 
         if (refreshToken.isRevoked()) {
-            log.error("Revoked Refresh Token");
             throw new InvalidJwtToken("Revoked refresh token used");
         }
 
