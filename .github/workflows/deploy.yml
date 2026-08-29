@@ -1,6 +1,9 @@
 name: Deploy to Production
 
 on:
+  push:
+    branches:
+      - CI-CD/main
   workflow_run:
     workflows:
       - Build and Publish Docker Images
