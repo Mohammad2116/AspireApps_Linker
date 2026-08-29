@@ -1,1 +1,0 @@
-CREATE DATABASE linker_db;

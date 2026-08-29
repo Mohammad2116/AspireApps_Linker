@@ -5,8 +5,8 @@ services:
     container_name: Linker_postgres
 
     environment:
-      POSTGRES_USER: demoapps
-      POSTGRES_PASSWORD: JingleBells
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
 
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U demoapps -d linker_url_db" ]
@@ -63,6 +63,7 @@ services:
       SERVER_PORT: 8080
       SPRING_APPLICATION_NAME: gateway-server
       EUREKA_CLIENT_SERVICE_URL_DEFAUTZONE: http://eureka-server:8761/eureka/
+      ACCESS_TOKEN_SECURITY_KEY: ${ACCESS_TOKEN_SECURITY_KEY}
 
     depends_on:
       eureka-server:
@@ -81,6 +82,15 @@ services:
     build:
       context: ./user-service
       dockerfile: Dockerfile
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME_USER}
+      DB_PORT: ${DB_PORT}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      ACCESS_TOKEN_SECURITY_KEY: ${ACCESS_TOKEN_SECURITY_KEY}
+      ACCESS_TOKEN_TTL_MS: ${ACCESS_TOKEN_TTL_MS}
+      REFRESH_TOKEN_TTL_MS: ${REFRESH_TOKEN_TTL_MS}
 
     depends_on:
       eureka-server:
@@ -102,6 +112,13 @@ services:
     build:
       context: ./links-service
       dockerfile: Dockerfile
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME_LINKS}
+      DB_PORT: ${DB_PORT}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_AUTHENTICATION_PASS: ${REDIS_AUTHENTICATION_PASS}
 
     depends_on:
       eureka-server:
@@ -123,6 +140,12 @@ services:
     build:
       context: ./analysis-service
       dockerfile: Dockerfile
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME_ANALYSIS}
+      DB_PORT: ${DB_PORT}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
 
     depends_on:
       eureka-server:
@@ -263,7 +286,7 @@ services:
       - --appendonly
       - yes
       - --requirepass
-      - myStrongRedisPassword
+      - ${REDIS_AUTHENTICATION_PASS}
 
     ports:
       - 6379
