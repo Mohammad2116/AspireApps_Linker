@@ -38,5 +38,3 @@ This project implements a URL shortening platform using a microservice architect
 This is an initial startup README. We'll update it as project structure, modules, and deployment details are added.
 # AspireApps_Linker
 AspireApps_Linker is a link-shortener service implemented as a microservices system. 
-
- 
