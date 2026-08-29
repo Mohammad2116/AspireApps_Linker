@@ -32,7 +32,6 @@ temp/
 
 # Environment / secrets
 *.env
-*.properties
 application-*.yml
 application-*.properties
 
