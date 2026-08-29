@@ -1,0 +1,332 @@
+services:
+
+  # /////////////////////////////////////////////////////////////////////////////
+  # POSTGRES
+  # /////////////////////////////////////////////////////////////////////////////
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: linker-postgres
+
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER}"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+
+    networks:
+      - linker-network
+
+
+  # /////////////////////////////////////////////////////////////////////////////
+  # EUREKA SERVER
+  # /////////////////////////////////////////////////////////////////////////////
+
+  eureka-server:
+    image: ghcr.io/mohammad2116/aspireapps-linker-eureka-server:${IMAGE_TAG:-latest}
+    container_name: linker-eureka-server
+
+    environment:
+      SERVER_PORT: 8761
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: false
+      EUREKA_CLIENT_FETCH_REGISTRY: false
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:8761/ || exit 1"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+    networks:
+      - linker-network
+
+
+  # /////////////////////////////////////////////////////////////////////////////
+  # GATEWAY SERVER
+  # /////////////////////////////////////////////////////////////////////////////
+
+  gateway-server:
+    image: ghcr.io/mohammad2116/aspireapps-linker-gateway-server:${IMAGE_TAG:-latest}
+    container_name: linker-gateway-server
+
+    environment:
+      SERVER_PORT: 8080
+      SPRING_APPLICATION_NAME: gateway-server
+      EUREKA_CLIENT_SERVICE_URL_DEFAUTZONE: http://eureka-server:8761/eureka/
+      ACCESS_TOKEN_SECURITY_KEY: ${ACCESS_TOKEN_SECURITY_KEY}
+
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+
+    networks:
+      - linker-network
+
+
+  # /////////////////////////////////////////////////////////////////////////////
+  # USER SERVICE
+  # /////////////////////////////////////////////////////////////////////////////
+
+  user-service:
+    image: ghcr.io/mohammad2116/aspireapps-linker-user-service:${IMAGE_TAG:-latest}
+    container_name: linker-user-service
+
+    environment:
+      DB_HOST: postgres
+      DB_NAME: ${DB_NAME_USER}
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      ACCESS_TOKEN_SECURITY_KEY: ${ACCESS_TOKEN_SECURITY_KEY}
+      ACCESS_TOKEN_TTL_MS: ${ACCESS_TOKEN_TTL_MS}
+      REFRESH_TOKEN_TTL_MS: ${REFRESH_TOKEN_TTL_MS}
+
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+    networks:
+      - linker-network
+
+
+  # /////////////////////////////////////////////////////////////////////////////
+  # LINKS SERVICE
+  # /////////////////////////////////////////////////////////////////////////////
+
+  links-service:
+    image: ghcr.io/mohammad2116/aspireapps-linker-links-service:${IMAGE_TAG:-latest}
+    container_name: linker-links-service
+
+    environment:
+      DB_HOST: postgres
+      DB_NAME: ${DB_NAME_LINKS}
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      REDIS_AUTHENTICATION_PASS: ${REDIS_AUTHENTICATION_PASS}
+
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+    networks:
+      - linker-network
+
+
+  # /////////////////////////////////////////////////////////////////////////////
+  # ANALYSIS SERVICE
+  # /////////////////////////////////////////////////////////////////////////////
+
+  analysis-service:
+    image: ghcr.io/mohammad2116/aspireapps-linker-analysis-service:${IMAGE_TAG:-latest}
+    container_name: linker-analysis-service
+
+    environment:
+      DB_HOST: postgres
+      DB_NAME: ${DB_NAME_ANALYSIS}
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+    networks:
+      - linker-network
+
+
+  # /////////////////////////////////////////////////////////////////////////////
+  # KAFKA
+  # /////////////////////////////////////////////////////////////////////////////
+
+  kafka:
+    image: apache/kafka:4.2.1
+    container_name: linker-kafka
+    hostname: kafka
+
+    environment:
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+    networks:
+      - linker-network
+
+
+  # /////////////////////////////////////////////////////////////////////////////
+  # KAFKA INIT
+  # /////////////////////////////////////////////////////////////////////////////
+
+  kafka-init:
+    image: apache/kafka:4.2.1
+    container_name: linker-kafka-init
+
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+    networks:
+      - linker-network
+
+    restart: "no"
+
+    command: >
+      sh -c '
+        echo "Creating Kafka topics...";
+
+        /opt/kafka/bin/kafka-topics.sh
+        --bootstrap-server kafka:9092
+        --create
+        --if-not-exists
+        --topic link-visit-topic
+        --partitions 1
+        --replication-factor 1;
+
+        /opt/kafka/bin/kafka-topics.sh
+        --bootstrap-server kafka:9092
+        --create
+        --if-not-exists
+        --topic popularity-response-topic
+        --partitions 1
+        --replication-factor 1;
+
+        /opt/kafka/bin/kafka-topics.sh
+        --bootstrap-server kafka:9092
+        --create
+        --if-not-exists
+        --topic link-registered-topic
+        --partitions 1
+        --replication-factor 1;
+
+        /opt/kafka/bin/kafka-topics.sh
+        --bootstrap-server kafka:9092
+        --create
+        --if-not-exists
+        --topic link-deleted-topic
+        --partitions 1
+        --replication-factor 1;
+
+        /opt/kafka/bin/kafka-topics.sh
+        --bootstrap-server kafka:9092
+        --create
+        --if-not-exists
+        --topic analytics-error-topic
+        --partitions 1
+        --replication-factor 1;
+
+        echo "Kafka topics created.";
+      '
+
+
+  # /////////////////////////////////////////////////////////////////////////////
+  # REDIS
+  # /////////////////////////////////////////////////////////////////////////////
+
+  redis:
+    image: redis:8-alpine
+    container_name: linker-redis
+
+    command:
+      - redis-server
+      - --appendonly
+      - yes
+      - --requirepass
+      - ${REDIS_AUTHENTICATION_PASS}
+
+    volumes:
+      - redis-data:/data
+
+    networks:
+      - linker-network
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "redis-cli -a \"$${REDIS_AUTHENTICATION_PASS}\" ping | grep PONG"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+    restart: unless-stopped
+
+
+# /////////////////////////////////////////////////////////////////////////////
+# VOLUMES
+# /////////////////////////////////////////////////////////////////////////////
+
+volumes:
+  postgres-data:
+  kafka-data:
+  redis-data:
+
+
+# /////////////////////////////////////////////////////////////////////////////
+# NETWORK
+# /////////////////////////////////////////////////////////////////////////////
+
+networks:
+  linker-network:
+    driver: bridge
