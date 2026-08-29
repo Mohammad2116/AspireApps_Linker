@@ -27,10 +27,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     private static final List<String> PUBLIC_PATHS = List.of(
+            "/ir/aspireapps/visit",
             "/ir/aspireapps/linker/auth/api/v1/register",
             "/ir/aspireapps/linker/auth/api/v1/login",
             "/ir/aspireapps/linker/auth/api/v1/refresh",
             "/ir/aspireapps/linker/gateway/api/v1/anything",
+            "/ir/aspireapps/linker/links/api/v1/visit/",
             "/actuator",
             "/ir/aspireapps/linker/auth/web/v1/register",
             "/ir/aspireapps/linker/auth/web/v1/login",

@@ -1,6 +1,8 @@
 package ir.aspireapps.linker.linksservice.repository;
 
-import ir.aspireapps.linker.linksservice.dto.LinkResponse;
+import ir.aspireapps.linker.common.dto.LinkResponse;
+import ir.aspireapps.linker.common.model.LinkStatus;
+import ir.aspireapps.linker.linksservice.dto.RedirectResponse;
 import ir.aspireapps.linker.linksservice.model.Link;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -17,13 +19,14 @@ public interface LinkRepository extends JpaRepository<Link, Long> {
 
     @Query(
             """
-                    SELECT NEW ir.aspireapps.linker.linksservice.dto.LinkResponse (
+                    SELECT NEW ir.aspireapps.linker.common.dto.LinkResponse (
                             l.id,
                             l.title,
                             l.originalUrl,
                             l.shortUrl,
                             l.userId,
                             l.status,
+                            l.hitState,
                             l.createdAt,
                             l.updatedAt,
                             l.expiresAt
@@ -34,4 +37,18 @@ public interface LinkRepository extends JpaRepository<Link, Long> {
     )
     List<LinkResponse> findUserLinks(@NotEmpty @Param("userId") UUID userId);
 
+    @Query(
+            """
+                        SELECT NEW ir.aspireapps.linker.linksservice.dto.RedirectResponse (
+                                l.id,
+                                l.originalUrl,
+                                l.hitState
+                                )
+                        FROM Link l
+                        WHERE l.shortUrl = :shorted AND l.status = :status
+                    """
+    )
+    Optional<RedirectResponse> findByShortUrlAndStatusDto(@Param("shorted") String shorted, @Param("status") LinkStatus status);
+
+    Optional<Link> findByShortUrlAndStatus(String shorted, LinkStatus status);
 }

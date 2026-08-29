@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: analysis-service
+
+  server:
+    wait-time-in-ms-when-sync-empty: 0
+
+  datasource:
+    url: jdbc:postgresql://postgres:5432/linker_analyze_db
+    username: demoapps
+    password: JingleBells
+    driver-class-name: org.postgresql.Driver
+
+    jpa:
+      hibernate:
+        ddl-auto: none
+      open-in-view: false
+      show-sql: true
+      properties:
+        hibernate:
+          format-sql: true
+
+    sql:
+      init:
+        mode: always
+        platform: postgres
+
+    flyway:
+      enabled: true
+      location: classpath:db/migration
+
+  kafka:
+    bootstrap-servers: kafka:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    exposure:
+      include: health
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+
+logging:
+  level:
+    ir.aspireapps: DEBUG

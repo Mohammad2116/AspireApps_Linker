@@ -1,7 +1,7 @@
 package ir.aspireapps.linker.linksservice.controller;
 
+import ir.aspireapps.linker.common.dto.LinkResponse;
 import ir.aspireapps.linker.linksservice.dto.LinkRegisterRequest;
-import ir.aspireapps.linker.linksservice.dto.LinkResponse;
 import ir.aspireapps.linker.linksservice.dto.LinkUpdateStatusRequest;
 import ir.aspireapps.linker.linksservice.service.LinkService;
 import jakarta.validation.Valid;
@@ -70,12 +70,14 @@ public class LinkController {
     }
 
     @DeleteMapping("/ir/aspireapps/linker/links/api/v1/delete/{linkId}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     void deleteLink(@NotNull @PathVariable long linkId,
                     @NotEmpty @RequestHeader("X-USER-ID") String userId) {
         linkService.delete(linkId, UUID.fromString(userId));
     }
 
     @PutMapping("/ir/aspireapps/linker/links/api/v1/toggle/{linkId}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     void toggleLink(@NotNull @PathVariable long linkId,
                     @NotEmpty @RequestHeader("X-USER-ID") String userId) {
         linkService.toggle(linkId, UUID.fromString(userId));

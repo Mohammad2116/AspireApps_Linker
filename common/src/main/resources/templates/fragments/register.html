@@ -64,6 +64,15 @@
                 <button class="primary-button" type="submit">Register</button>
             </div>
         </form>
+
+        <div class="general_error" th:if="${duplicateResourceException}">
+            <h4>Username Or Email Already registered</br>
+                Try to log into your account</h4>
+            <button class="primary-button"
+                    th:onclick="|location.href='@{/ir/aspireapps/linker/auth/web/v1/login'}|">Login
+            </button>
+        </div>
+    </div>
     </div>
 </div>
 </html>
