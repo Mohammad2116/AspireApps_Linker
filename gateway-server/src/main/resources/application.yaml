@@ -45,7 +45,7 @@ spring:
             - PreserveHostHeader
 security:
   jwt:
-    secretKey: "A-VERY-STRONG-SECRET-KEY-FOR-ACCESS-TOKEN"
+    secretKey: ${ACCESS_TOKEN_SECURITY_KEY}
 
 server:
   port: 8080
