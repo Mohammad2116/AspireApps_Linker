@@ -7,7 +7,6 @@ import lombok.Builder;
 public record RedirectResponse(
         Long id,
         String originalUrl,
-
         HitState hitState
 ) {
 
