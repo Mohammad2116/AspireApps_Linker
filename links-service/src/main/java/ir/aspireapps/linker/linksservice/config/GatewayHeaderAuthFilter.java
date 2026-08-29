@@ -29,12 +29,7 @@ public class GatewayHeaderAuthFilter extends OncePerRequestFilter {
                                     @Nonnull FilterChain filterChain) throws ServletException, IOException {
         String username = request.getHeader("X-USERNAME");
         String roles = request.getHeader("X-USER-ROLES");
-        String status = request.getHeader("X-USER-STATUS");
-        log.info("========= beginning of GatewayHeaderAuthFilter ===========");
-        log.info("username: {}", username);
-        log.info("roles: {}", roles);
-        log.info("request URL: {}", request.getRequestURI());
-        log.info("user status {}", status);
+        //String status = request.getHeader("X-USER-STATUS");
 
         if ((username != null) && (!username.isEmpty())
                 && (SecurityContextHolder.getContext().getAuthentication() == null)) {
@@ -51,11 +46,7 @@ public class GatewayHeaderAuthFilter extends OncePerRequestFilter {
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
-        log.info("========= end of GatewayHeaderAuthFilter ===========");
-        log.info("username: {}", username);
-        log.info("roles: {}", roles);
-        log.info("request URL: {}", request.getRequestURI());
-        log.info("user status {}", status);
+
         filterChain.doFilter(request, response);
     }
 }

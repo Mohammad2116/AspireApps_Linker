@@ -33,11 +33,10 @@ public class OutboxService {
         LinkRegisteredPayload payload = LinkRegisteredPayload.builder()
                 .shortedUrl(link.getShortUrl())
                 .build();
-        String payloadString = null;
+        String payloadString;
         try {
             payloadString = objectMapper.writeValueAsString(payload);
         } catch (JsonProcessingException e) {
-            log.info("Could not serialize link registered payload");
             throw new RuntimeException(e);
         }
         OutboxMessage outboxMessage = new OutboxMessage();
@@ -62,7 +61,6 @@ public class OutboxService {
                     )
             );
         } catch (JsonProcessingException e) {
-            log.info("Could not serialize link clicked payload");
             throw new RuntimeException("Could not serialize link clicked payload" + e);
         }
         outboxRepository.save(outboxMessage);
@@ -80,7 +78,6 @@ public class OutboxService {
                                     .build()
                     ));
         } catch (JsonProcessingException e) {
-            log.info("Could not serialize link deleted payload");
             throw new RuntimeException(e);
         }
         outboxRepository.save(outboxMessage);

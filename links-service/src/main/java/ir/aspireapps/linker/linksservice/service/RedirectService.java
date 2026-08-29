@@ -25,20 +25,9 @@ public class RedirectService {
         RedirectResponse redirectResponse;
         Instant expirationDate;
         boolean cached = true;
-        if (redisLinkCacheService.exists(shortUrl)) {
-            log.info(("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$"));
-            log.info("DATA FOUND AT REDIS:");
-            RedisLinkCache linkCache = null;
-            try {
-                linkCache = redisLinkCacheService.get(shortUrl);
-            } catch (Exception e) {
-                log.info("ShortURL: {}", shortUrl);
-                log.info(e.getMessage());
-                log.info(e.getStackTrace().toString());
-            }
-            log.info("linkCache: {}", linkCache);
+        RedisLinkCache linkCache = redisLinkCacheService.get(shortUrl);
+        if (linkCache != null) {
             redirectResponse = new RedirectResponse(linkCache.getId(), linkCache.getOriginalUrl(), linkCache.getHitState());
-            log.info("redirect Response: {}", redirectResponse);
             expirationDate = linkCache.getExpiresAt();
         } else {
             Link link = linkRepository.findByShortUrlAndStatus(shortUrl, LinkStatus.ACTIVE)
@@ -59,6 +48,8 @@ public class RedirectService {
                             redirectResponse.originalUrl(),
                             redirectResponse.hitState(),
                             expirationDate));
+        else
+            redisLinkCacheService.refreshTtl(shortUrl, redirectResponse.hitState());
         return redirectResponse;
     }
 }
