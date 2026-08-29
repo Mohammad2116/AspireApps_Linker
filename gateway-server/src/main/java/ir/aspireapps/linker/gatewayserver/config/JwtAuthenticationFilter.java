@@ -37,9 +37,9 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             "/ir/aspireapps/linker/auth/web/v1/login",
             "/ir/aspireapps/linker/auth/web/v1/refresh"
     );
-    private static final List<String> ADMIN_PATHS = List.of(
-            "/ir/aspireapps/linker/api/v1/admin/**"
-    );
+    //    private static final List<String> ADMIN_PATHS = List.of(
+//            "/ir/aspireapps/linker/api/v1/admin/**"
+//    );
     private final JwtService jwtService;
     private final WebClient.Builder webClientBuilder;
 
