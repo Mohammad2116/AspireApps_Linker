@@ -33,7 +33,6 @@ public class LinkService {
     @Transactional
     public LinkResponse register(@Valid @NotNull LinkRegisterRequest request,
                                  @NotNull UUID userId) {
-        log.info("registering new link starts");
         Link newLink = Link.builder()
                 .title(request.title())
                 .originalUrl(request.url())
@@ -41,12 +40,8 @@ public class LinkService {
                 .expiresAt(request.expiresAt())
                 .build();
         newLink = linksRepository.save(newLink);
-        log.info("new link created with following data: {}", newLink.toString());
         linkConverter.encode(newLink);
-        log.info("new link shorted field updated as below: {}", newLink.toString());
-
         outboxService.register(newLink);
-
         return LinkResponse.builder()
                 .id(newLink.getId())
                 .title(newLink.getTitle())
@@ -72,7 +67,7 @@ public class LinkService {
             link.setStatus(LinkStatus.EXPIRED);
         else
             link.setStatus(request.status());
-        if (redisLinkCacheService.exists(link.getShortUrl()))
+        if (link.getStatus() != LinkStatus.ACTIVE)
             redisLinkCacheService.evict(link.getShortUrl());
         return LinkResponse.builder()
                 .id(link.getId())
@@ -120,8 +115,7 @@ public class LinkService {
     public void delete(@NotNull long linkId, @NotEmpty UUID userId) {
         Link link = linksRepository.findByIdAndUserId(linkId, userId)
                 .orElseThrow(() -> new RuntimeException("Link not found"));
-        if (redisLinkCacheService.exists(link.getShortUrl()))
-            redisLinkCacheService.evict(link.getShortUrl());
+        redisLinkCacheService.evict(link.getShortUrl());
         outboxService.delete(link);
         linksRepository.delete(link);
     }
@@ -134,7 +128,7 @@ public class LinkService {
             link.setStatus(LinkStatus.EXPIRED);
         else
             link.setStatus(toggleOf(link.getStatus()));
-        if (redisLinkCacheService.exists(link.getShortUrl()))
+        if (link.getStatus() != LinkStatus.ACTIVE)
             redisLinkCacheService.evict(link.getShortUrl());
     }
 
@@ -149,8 +143,7 @@ public class LinkService {
         Link link = linksRepository.findByShortUrlAndStatus(payload.shortedUrl(), LinkStatus.ACTIVE)
                 .orElseThrow(() -> new RuntimeException("Link not found or inactive"));
         if (link.getHitState() != payload.currentHitState())
-            if (redisLinkCacheService.exists(link.getShortUrl()))
-                redisLinkCacheService.evict(link.getShortUrl());
+            redisLinkCacheService.evict(link.getShortUrl());
         link.setHitState(payload.currentHitState());
     }
 
@@ -159,8 +152,7 @@ public class LinkService {
         Link link = linksRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("shortUrl not found"));
         if (link.getExpiresAt().isBefore(Instant.now())) {
-            if (redisLinkCacheService.exists(link.getShortUrl()))
-                redisLinkCacheService.evict(link.getShortUrl());
+            redisLinkCacheService.evict(link.getShortUrl());
             link.setStatus(LinkStatus.EXPIRED);
         }
     }

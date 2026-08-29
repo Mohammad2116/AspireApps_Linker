@@ -26,12 +26,9 @@ public class VisitControllerWeb {
     public String visitWeb(
             @NotBlank @PathVariable String shorted,
             Model model,
-            HttpServletRequest request
-            //,ServerWebExchange exchange
-    ) {
-        log.info("visitWeb");
-        log.info("shorted: {}", shorted);
-        RedirectResponse result = null;
+            HttpServletRequest request) {
+
+        RedirectResponse result;
         try {
             result = redirectService.visitApi(shorted);
             model.addAttribute("target", result.originalUrl());
@@ -49,6 +46,5 @@ public class VisitControllerWeb {
             model.addAttribute("redirectError", "Invalid Shorted Link");
             return "home";
         }
-
     }
 }

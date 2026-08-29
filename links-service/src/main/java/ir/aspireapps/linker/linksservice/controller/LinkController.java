@@ -70,12 +70,14 @@ public class LinkController {
     }
 
     @DeleteMapping("/ir/aspireapps/linker/links/api/v1/delete/{linkId}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     void deleteLink(@NotNull @PathVariable long linkId,
                     @NotEmpty @RequestHeader("X-USER-ID") String userId) {
         linkService.delete(linkId, UUID.fromString(userId));
     }
 
     @PutMapping("/ir/aspireapps/linker/links/api/v1/toggle/{linkId}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     void toggleLink(@NotNull @PathVariable long linkId,
                     @NotEmpty @RequestHeader("X-USER-ID") String userId) {
         linkService.toggle(linkId, UUID.fromString(userId));
