@@ -26,7 +26,7 @@ public abstract class InputNormalizer {
     public static UserLoginRequest normalize(UserLoginRequest request) {
         return UserLoginRequest.builder()
                 .username(normalizeString(request.username()))
-                .password(normalizeString(request.password()))
+                .password(request.password())
                 .build();
     }
 
