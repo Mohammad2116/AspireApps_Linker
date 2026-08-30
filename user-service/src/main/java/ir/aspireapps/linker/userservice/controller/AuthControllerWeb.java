@@ -36,7 +36,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class AuthControllerWeb {
     @Value("${app.security.cookies-security")
-    private boolean cookiesSecure;
+    private String cookiesSecure;
 
     private final AuthService authService;
 
@@ -282,7 +282,7 @@ public class AuthControllerWeb {
     private void addTokenCookie(HttpServletResponse servletResponse, String tokenName, String tokenValue, Duration duration) {
         ResponseCookie cookie = ResponseCookie.from(tokenName, tokenValue)
                 .httpOnly(true)
-                .secure(cookiesSecure)
+                .secure(Boolean.parseBoolean(cookiesSecure))
                 .sameSite("Lax")
                 .path("/")
                 .maxAge(duration)
