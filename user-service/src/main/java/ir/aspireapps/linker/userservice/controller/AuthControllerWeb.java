@@ -36,22 +36,17 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class AuthControllerWeb {
     @Value("${app.security.cookies-security")
-    private String cookiesSecure;
+    private static String cookiesSecure;
 
     private final AuthService authService;
 
     private static String extractRefreshToken(HttpServletRequest servletRequest) {
-        Cookie[] cookies = servletRequest.getCookies();
-        String refreshToken = null;
-        Cookie refCookie = null;
-        if (cookies != null)
-            refCookie = Arrays.stream(cookies)
-                    .filter(cookie -> "REFRESH_TOKEN".equals(cookie.getName()))
-                    .findFirst()
-                    .orElse(null);
-        if (refCookie != null)
-            refreshToken = refCookie.getValue();
-        return refreshToken;
+        Cookie cookie = Arrays.stream(servletRequest.getCookies())
+                .filter(c -> c.getName().equals("refresh_token"))
+                .findFirst().orElse(null);
+        if (cookie != null)
+            return cookie.getValue();
+        return null;
     }
 
     private static void addAuthenticationToModel(Model model, boolean state) {
@@ -61,13 +56,13 @@ public class AuthControllerWeb {
     protected static void removeTokenCookies(HttpServletResponse servletResponse) {
         Cookie accessCookie = new Cookie("ACCESS_TOKEN", null);
         accessCookie.setHttpOnly(true);
-        accessCookie.setSecure(true);
+        accessCookie.setSecure(Boolean.parseBoolean(cookiesSecure));
         accessCookie.setPath("/");
         accessCookie.setMaxAge(0);
 
         Cookie refreshCookie = new Cookie("REFRESH_TOKEN", null);
         refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(true);
+        refreshCookie.setSecure(Boolean.parseBoolean(cookiesSecure));
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge(0);
 
