@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class MessageListener {
     private final AnalysisService analysisService;
     private final ObjectMapper objectMapper;
-
     @KafkaListener(topics = "link-visit-topic", groupId = "linker")
     @Transactional
     public void visitListener(

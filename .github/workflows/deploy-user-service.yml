@@ -3,11 +3,11 @@ name: Deploy to Production
 on:
   workflow_run:
     workflows:
-      - Build and Publish Docker Images
+      - Build and Publish Docker Images - user-service
     types:
       - completed
     branches:
-      - CI-CD/main
+      - CI-CD/microservice/user-service
 
 permissions:
   contents: read
@@ -48,13 +48,13 @@ jobs:
 
             docker compose \
               -f docker-compose.prod.yml \
-              pull
+              pull user-service
 
             echo "Starting services..."
 
             docker compose \
               -f docker-compose.prod.yml \
-              up -d
+              up -d user-service
 
             echo "Removing unused Docker images..."
 

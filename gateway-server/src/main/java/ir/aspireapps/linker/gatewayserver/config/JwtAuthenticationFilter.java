@@ -3,6 +3,9 @@ package ir.aspireapps.linker.gatewayserver.config;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import ir.aspireapps.linker.common.dto.UserRefreshRequest;
+import ir.aspireapps.linker.common.utility.LoggingConstants;
+import ir.aspireapps.linker.common.utility.LoggingContext;
+import ir.aspireapps.linker.common.utility.LoggingEvents;
 import ir.aspireapps.linker.gatewayserver.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +24,7 @@ import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -45,19 +49,34 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        log.info("==================================================================");
-        log.info("A new request received by gateway filter");
+        String requestId = exchange.getRequest().getHeaders().getFirst(LoggingConstants.REQUEST_ID_HEADER);
+        if (requestId == null || requestId.isEmpty()) requestId = UUID.randomUUID().toString();
+        LoggingContext.putRequestId(requestId);
+        exchange.getResponse().getHeaders().add(LoggingConstants.REQUEST_ID_HEADER, requestId);
+        exchange.getRequest().getHeaders().add(LoggingConstants.REQUEST_ID_HEADER, requestId);
 
         String path = exchange.getRequest().getURI().getPath();
-        log.info("exchange request path is {}", path);
-        if (path.contains("/web/")) {
-            return processWebFilter(exchange, chain);
-        }
-        if (isPublic(path)) return chain.filter(exchange);
+        log.info("{} - Request path {}", LoggingEvents.REQUEST_STARTED, path);
+
+        if (path.contains("/web/"))
+            return processWebFilter(exchange, chain).doFinally(signalType -> {
+                log.info("{} - Requested to WEB path: {}", LoggingEvents.REQUEST_COMPLETED, path);
+                LoggingContext.clear();
+            });
+
+        if (isPublic(path))
+            return chain.filter(exchange).doFinally(signal -> {
+                log.info("{} - Request to public path: {}", LoggingEvents.REQUEST_COMPLETED, path);
+                LoggingContext.clear();
+            });
 
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (authHeader == null || !authHeader.startsWith("Bearer "))
-            return unauthorized(exchange);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return unauthorized(exchange).doFinally(signalType -> {
+                log.warn("{} - Authorized path with no or not Bearer authHeader to: {}", LoggingEvents.REQUEST_FAILED, path);
+                LoggingContext.clear();
+            });
+        }
         String accessToken = authHeader.substring("Bearer ".length());
         Claims claims;
         claims = jwtService.validateToken(accessToken);
@@ -75,7 +94,11 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 .header("X-USER-ROLES", String.join(",", rolesNames))
                 .build();
 
-        return chain.filter(exchange.mutate().request(request).build());
+        return chain.filter(exchange.mutate().request(request).build())
+                .doFinally(signalType -> {
+                    log.info("{} - Request to authorized path: {}", LoggingEvents.REQUEST_COMPLETED, path);
+                    LoggingContext.clear();
+                });
     }
 
     private Mono<Void> processWebFilter(ServerWebExchange exchange, GatewayFilterChain chain) {

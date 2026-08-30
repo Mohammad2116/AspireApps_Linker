@@ -13,8 +13,6 @@
 target/
 build/
 .gradle/
-!.mvn/wrapper/maven-wrapper.jar
-.mvn/
 
 # IntelliJ / IDEA
 .idea/
@@ -34,7 +32,6 @@ temp/
 
 # Environment / secrets
 *.env
-*.properties
 application-*.yml
 application-*.properties
 

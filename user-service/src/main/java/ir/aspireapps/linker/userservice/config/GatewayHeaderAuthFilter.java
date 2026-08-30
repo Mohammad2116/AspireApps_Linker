@@ -1,5 +1,8 @@
 package ir.aspireapps.linker.userservice.config;
 
+import ir.aspireapps.linker.common.utility.LoggingConstants;
+import ir.aspireapps.linker.common.utility.LoggingContext;
+import ir.aspireapps.linker.common.utility.LoggingEvents;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -18,6 +21,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -27,14 +31,15 @@ public class GatewayHeaderAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@Nonnull HttpServletRequest request,
                                     @Nonnull HttpServletResponse response,
                                     @Nonnull FilterChain filterChain) throws ServletException, IOException {
+        String requestId = request.getHeader(LoggingConstants.REQUEST_ID_HEADER);
+        if (requestId == null || requestId.isEmpty()) requestId = UUID.randomUUID().toString();
+        LoggingContext.putRequestId(requestId);
+        response.setHeader(LoggingConstants.REQUEST_ID_HEADER, requestId);
+
+        log.info("{} - Request received at user-Service", LoggingEvents.REQUEST_STARTED);
         String username = request.getHeader("X-USERNAME");
         String roles = request.getHeader("X-USER-ROLES");
         String status = request.getHeader("X-USER-STATUS");
-
-        log.info("username: {}", username);
-        log.info("roles: {}", roles);
-        log.info("request URL: {}", request.getRequestURI());
-        log.info("status: {}", status);
 
         if ((username != null) && (!username.isEmpty())
                 && (SecurityContextHolder.getContext().getAuthentication() == null)) {
@@ -50,7 +55,15 @@ public class GatewayHeaderAuthFilter extends OncePerRequestFilter {
                     new UsernamePasswordAuthenticationToken(username, null, authorities);
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            log.info("Request Authenticated with: username[{}], role[{}],  status[{}]", username, roles, status);
+        } else {
+            log.info("Request with no auth information received");
         }
-        filterChain.doFilter(request, response);
+
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            log.info("{} - Request completed at user-Service", LoggingEvents.REQUEST_COMPLETED);
+        }
     }
 }

@@ -51,6 +51,15 @@ management:
         enabled: true
 
 logging:
+  pattern:
+    console: >
+      %d{yyyy-MM-dd HH:mm:ss.SSS}
+      %-5level
+      [%X{requestId}]
+      [%thread]
+      %logger{36}
+      -
+      %msg
   level:
     ir.aspireapps: DEBUG
     feign: DEBUG
@@ -60,3 +69,7 @@ security:
     access-token-secret-key: ${ACCESS_TOKEN_SECURITY_KEY}
     access-token-expiration-ms: ${ACCESS_TOKEN_TTL_MS}
     refresh-token-expiration-ms: ${REFRESH_TOKEN_TTL_MS}
+
+app:
+  security:
+    cookies-security: ${COOKIE_SECURE:true}

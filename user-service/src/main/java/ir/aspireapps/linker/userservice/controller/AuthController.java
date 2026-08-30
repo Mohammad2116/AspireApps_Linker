@@ -1,5 +1,6 @@
 package ir.aspireapps.linker.userservice.controller;
 
+import ir.aspireapps.linker.common.utility.LoggingEvents;
 import ir.aspireapps.linker.userservice.dto.*;
 import ir.aspireapps.linker.userservice.service.AuthService;
 import ir.aspireapps.linker.userservice.utility.InputNormalizer;
@@ -33,6 +34,11 @@ public class AuthController {
                 servletRequest.getHeader("User-Agent"),
                 servletRequest.getRemoteAddr()
         );
+        if (result == null)
+            log.warn("{} - User registration failed", LoggingEvents.USER_REGISTRATION_FAILED);
+        else
+            log.info("{} - User registration complete", LoggingEvents.USER_REGISTERED);
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(result);
@@ -48,6 +54,10 @@ public class AuthController {
                 servletRequest.getHeader("User-Agent"),
                 servletRequest.getRemoteAddr()
         );
+        if (result == null)
+            log.warn("{} - User login using username and password failed", LoggingEvents.AUTH_LOGIN_FAILED);
+        else
+            log.info("{} - User login using username and password complete", LoggingEvents.AUTH_LOGIN_SUCCESS);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(result);
@@ -61,7 +71,10 @@ public class AuthController {
                 request.refreshToken(),
                 servletRequest.getHeader("User-Agent"),
                 servletRequest.getRemoteAddr());
-
+        if (result == null)
+            log.warn("{} - User auth refreshing failed", LoggingEvents.AUTH_LOGIN_FAILED);
+        else
+            log.info("{} - User auth refreshed successfully", LoggingEvents.AUTH_LOGIN_SUCCESS);
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
                 .body(result);
@@ -72,6 +85,7 @@ public class AuthController {
     public ResponseEntity<Void> logout(
             @NotNull @Valid UserLogoutRequest request) {
         authService.logout(request.refreshToken());
+        log.info("{} - User logged out successfully", LoggingEvents.AUTH_LOGOUT_SUCCESS);
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
                 .body(null);
@@ -82,6 +96,7 @@ public class AuthController {
     public ResponseEntity<Void> logoutAll(
             @NotNull @Valid @RequestBody UserLogoutRequest request) {
         authService.logoutAll(request.refreshToken());
+        log.info("{} - User logged out all sessions successfully", LoggingEvents.AUTH_LOGOUT_ALL_SUCCESS);
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
                 .body(null);

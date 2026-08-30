@@ -58,3 +58,17 @@ eureka:
     register-with-eureka: true
   server:
     wait-time-in-ms-when-sync-empty: 0
+
+logging:
+  pattern:
+    console: >
+      %d{yyyy-MM-dd HH:mm:ss.SSS}
+      %-5level
+      [%X{requestId}]
+      [%thread]
+      %logger{36}
+      -
+      %msg
+  level:
+    ir.aspireapps: DEBUG
+    feign: DEBUG
