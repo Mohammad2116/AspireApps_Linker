@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -34,6 +35,9 @@ import java.util.Arrays;
 @RequestMapping("/ir/aspireapps/linker/auth/web/v1/")
 @RequiredArgsConstructor
 public class AuthControllerWeb {
+    @Value("${app.security.cookies-security")
+    private boolean cookiesSecure;
+
     private final AuthService authService;
 
     private static String extractRefreshToken(HttpServletRequest servletRequest) {
@@ -278,7 +282,7 @@ public class AuthControllerWeb {
     private void addTokenCookie(HttpServletResponse servletResponse, String tokenName, String tokenValue, Duration duration) {
         ResponseCookie cookie = ResponseCookie.from(tokenName, tokenValue)
                 .httpOnly(true)
-                .secure(true)
+                .secure(cookiesSecure)
                 .sameSite("Lax")
                 .path("/")
                 .maxAge(duration)
