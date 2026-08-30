@@ -54,7 +54,8 @@ public class AuthService {
                 .email(request.email())
                 .build();
         User savedUser = userRepository.save(newUser);
-
+        log.info("New user: username[{}], email[{}], status[{}], ... ==> inserted into users table", newUser.getUsername(), savedUser.getEmail(), savedUser.getStatus());
+        log.debug("New user tokens will generate based on : device name[{}], device ip[{}]", deviceName, deviceIp);
         return AuthResponse.builder()
                 .accessToken(jwtService.generateAccessToken(savedUser))
                 .accessTokenExpiresInSeconds(jwtService.accessTokenExpirationSeconds())
@@ -74,7 +75,9 @@ public class AuthService {
                     log.warn("Username [{}] not found in database", request.username());
                     return new ResourceNotFoundException("username or password not found");
                 });
-
+        log.debug("Login info: username[{}], password[{}...]", request.username(),
+                user.getPassword().subSequence(0, 2));
+        log.debug("user login tokens will generate based on : device name[{}], device ip[{}]", deviceName, deviceIp);
         if (passwordEncoder.matches(request.password(), user.getPassword())) {
             return AuthResponse.builder()
                     .accessToken(jwtService.generateAccessToken(user))
@@ -93,6 +96,8 @@ public class AuthService {
                                 @NotEmpty String deviceIp) throws InvalidJwtToken {
         RefreshToken oldToken = refreshTokenService.verifyToken(refreshToken);
         User user = oldToken.getUser();
+        log.debug("Old token injected user is [{}]", user.getUsername());
+        log.debug("user refresh tokens will generate based on : device name[{}], device ip[{}]", deviceName, deviceIp);
         return AuthResponse.builder()
                 .accessToken(jwtService.generateAccessToken(user))
                 .accessTokenExpiresInSeconds(jwtService.accessTokenExpirationSeconds())
