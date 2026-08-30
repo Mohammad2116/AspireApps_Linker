@@ -43,7 +43,7 @@ public abstract class InputNormalizer {
         return UserLoginForm.builder()
                 .returnUrl(normalizeString(request.getReturnUrl()))
                 .username(normalizeString(request.getUsername()))
-                .password(normalizeString(request.getPassword()))
+                .password(request.getPassword())
                 .build();
     }
 }
