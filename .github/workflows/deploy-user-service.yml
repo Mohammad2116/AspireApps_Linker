@@ -54,7 +54,7 @@ jobs:
 
             docker compose \
               -f docker-compose.prod.yml \
-              up -d user-service
+              up -d --no-deps user-service
 
             echo "Removing unused Docker images..."
 
