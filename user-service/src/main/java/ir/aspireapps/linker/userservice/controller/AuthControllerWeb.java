@@ -1,5 +1,6 @@
 package ir.aspireapps.linker.userservice.controller;
 
+import ir.aspireapps.linker.common.utility.LoggingEvents;
 import ir.aspireapps.linker.userservice.dto.*;
 import ir.aspireapps.linker.userservice.error.DuplicateResourceException;
 import ir.aspireapps.linker.userservice.error.InvalidJwtToken;
@@ -78,15 +79,17 @@ public class AuthControllerWeb {
         model.addAttribute("registerForm", new UserRegisterForm());
         String refreshToken = extractRefreshToken(servletRequest);
         addAuthenticationToModel(model, false);
-        log.info("Here in refresh refresh token is: {}", refreshToken);
+        log.debug("Check request cookies for valid refresh token");
         if (refreshToken != null) {
             if (authService.isRefreshTokenValid(refreshToken)) {
-                log.info("token is valued to set model to view authenticated items");
+                log.debug("Refresh token is valid, so view already logged in items on page");
                 addAuthenticationToModel(model, true);
             } else {
+                log.debug("Refresh token is not valid, so remove expired or invalid cookies");
                 removeTokenCookies(servletResponse);
             }
-        }
+        } else
+            log.debug("There is no refresh cookie available in header");
         return "register";
     }
 
@@ -105,6 +108,7 @@ public class AuthControllerWeb {
         }
         if (bindingResult.hasFieldErrors()) {
             model.addAttribute("generalError", true);
+            log.warn("{} - Binding error occurred at registration page, return to register page with error message", LoggingEvents.USER_REGISTRATION_FAILED);
             return "register";
         }
         userRegisterForm = InputNormalizer.normalize(userRegisterForm);
@@ -120,11 +124,13 @@ public class AuthControllerWeb {
                     servletRequest.getHeader("User-Agent"),
                     servletRequest.getRemoteUser());
         } catch (DuplicateResourceException e) {
+            log.error("{} - Duplicate user registration attempt, return to register page", LoggingEvents.USER_REGISTRATION_FAILED, e);
             model.addAttribute("duplicateResourceException", true);
             return "register";
         }
 
         generateTokenCookies(servletResponse, authResponse);
+        log.info("{} - User registration complete, redirecting to profile page", LoggingEvents.USER_REGISTERED);
         return "redirect:/ir/aspireapps/linker/user/web/v1/profile";
     }
 
@@ -134,18 +140,20 @@ public class AuthControllerWeb {
             Model model,
             HttpServletRequest servletRequest,
             HttpServletResponse servletResponse) {
-        log.info("Starting to log in");
+
         String refreshToken = extractRefreshToken(servletRequest);
         if (refreshToken != null) {
-            log.info("There is a refresh token in cookies, test it's validity");
+            log.info("Check validity of refresh token");
             if (authService.isRefreshTokenValid(refreshToken)) {
-                log.info("Refresh token is valid one to redirecting to profile page is consider as new target");
+                log.info("{} - Refresh token is valid redirecting to profile page is consider as new target",
+                        LoggingEvents.AUTH_LOGIN_SUCCESS);
                 return "redirect:/ir/aspireapps/linker/user/web/v1/profile";
             } else {
-                log.info("Refresh token is expired or used or invalid, remove them all and continue to logging in");
+                log.warn("Refresh token is expired or used or invalid, remove it and continue to logging in page");
                 removeTokenCookies(servletResponse);
             }
-        }
+        } else
+            log.warn("There is no refresh cookie available in header, so redirect to login page");
 
         model.addAttribute("loginForm", new UserLoginForm());
         model.addAttribute("returnUrl", returnUrl);
@@ -162,6 +170,7 @@ public class AuthControllerWeb {
     ) {
         log.info("returnUrl = [{}]", userLoginForm.getReturnUrl());
         if (bindingResult.hasFieldErrors()) {
+            log.warn("{} - Binding error occurred at login page, return to login page with error message", LoggingEvents.AUTH_LOGIN_FAILED);
             model.addAttribute("generalError", true);
             return "login";
         }
@@ -176,18 +185,23 @@ public class AuthControllerWeb {
                             .build(),
                     servletRequest.getHeader("User-Agent"),
                     servletRequest.getRemoteAddr());
+            log.info("{} - Authentication using login form was successful", LoggingEvents.AUTH_LOGIN_SUCCESS);
         } catch (ResourceNotFoundException e) {
             model.addAttribute("generalError", true);
+            log.error("{} - Something went wrong while try to create AuthResponse using login form data" +
+                    ", return to login page", LoggingEvents.AUTH_LOGIN_FAILED);
             return "login";
         }
         generateTokenCookies(servletResponse, authResponse);
 
         String returnUrl = userLoginForm.getReturnUrl();
-        if (returnUrl == null || returnUrl.isBlank())
+        if (returnUrl == null || returnUrl.isBlank()) {
+            log.info("{} - login using login form was successful, no redirect request so goto profile", LoggingEvents.AUTH_LOGIN_SUCCESS);
             return "redirect:/ir/aspireapps/linker/user/web/v1/profile";
+        }
         if (!returnUrl.startsWith("/"))
             returnUrl = "/" + returnUrl;
-        log.info("Redirecting to: {}", returnUrl);
+        log.info("{} - login using login form was successful, redirecting requests to {}", LoggingEvents.AUTH_LOGIN_SUCCESS, returnUrl);
         return "redirect:" + userLoginForm.getReturnUrl();
     }
 
@@ -197,12 +211,14 @@ public class AuthControllerWeb {
             HttpServletRequest servletRequest,
             HttpServletResponse servletResponse) {
         AuthResponse authResponse;
+        log.info("Refreshing request received, try to validate it");
         try {
             authResponse = authService.refresh(
                     request.refreshToken(),
                     servletRequest.getHeader("User-Agent"),
                     servletRequest.getRemoteAddr());
         } catch (InvalidJwtToken e) {
+            log.warn("{} - Refreshing using token failed, return FORBIDDEN status", LoggingEvents.REFRESHING_FAILED);
             return ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
                     .body(null);
@@ -215,7 +231,7 @@ public class AuthControllerWeb {
                 "REFRESH_TOKEN",
                 authResponse.refreshToken(),
                 Duration.ofSeconds(authService.refreshTokenExpireSeconds()));
-
+        log.info("{} - Refreshing using token succeed, return a new authResponse as result", LoggingEvents.REFRESHING_SUCCEED);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(authResponse);
@@ -230,7 +246,9 @@ public class AuthControllerWeb {
         try {
             authService.logout(refreshToken);
             removeTokenCookies(servletResponse);
+            log.info("{} - logging out was successful, redirecting to home page", LoggingEvents.AUTH_LOGOUT_SUCCESS);
         } catch (InvalidJwtToken e) {
+            log.error("{} - Invalid refresh token used for logging out, redirect to home page", LoggingEvents.AUTH_LOGOUT_FAILED);
             removeTokenCookies(servletResponse);
         }
         return "redirect:/ir/aspireapps/linker/home";

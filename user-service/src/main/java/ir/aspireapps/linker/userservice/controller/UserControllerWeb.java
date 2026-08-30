@@ -2,6 +2,7 @@ package ir.aspireapps.linker.userservice.controller;
 
 import ir.aspireapps.linker.common.dto.LinkRegisterRequest;
 import ir.aspireapps.linker.common.dto.LinkResponse;
+import ir.aspireapps.linker.common.utility.LoggingEvents;
 import ir.aspireapps.linker.userservice.dto.UserProfileResponse;
 import ir.aspireapps.linker.userservice.error.ResourceNotFoundException;
 import ir.aspireapps.linker.userservice.feign.LinksServiceClient;
@@ -42,8 +43,11 @@ public class UserControllerWeb {
             user = userService.profile(username);
         } catch (ResourceNotFoundException e) {
             AuthControllerWeb.removeTokenCookies(servletResponse);
+            log.error("User with username[{}] didn't exists in database, remove all Auth cookies and tokens then redirect to to home page ", username);
             return "redirect:/ir/aspireapps/linker/home";
         }
+
+        log.info("{} - Calling links-service from FeignServer to collect user's links", LoggingEvents.EXTERNAL_SERVICE_CALL);
 
         model.addAttribute("profile", user);
         model.addAttribute("links", linksServiceClient.userLinks());
@@ -82,7 +86,14 @@ public class UserControllerWeb {
                         .atStartOfDay(ZoneId.systemDefault()).toInstant())
                 .build();
 
+        log.info("{} - Calling links-service from FeignServer to register new link", LoggingEvents.EXTERNAL_SERVICE_CALL);
+
         LinkResponse response = linksServiceClient.registerLink(request);
+        if (response == null)
+            log.warn("{} - Registering new link at links-service failed", LoggingEvents.EXTERNAL_SERVICE_ERROR);
+        else {
+            log.info("{} - Registering new link at links-server succeeds", LoggingEvents.LINK_CREATED);
+        }
 
         UserProfileResponse user = userService.profile(username);
 
@@ -97,6 +108,7 @@ public class UserControllerWeb {
                                     @NotEmpty @RequestHeader("X-USERNAME") String username,
                                     Model model,
                                     HttpServletRequest servletRequest) {
+        log.info("{} - Calling links-service from FeignServer to delete new link", LoggingEvents.EXTERNAL_SERVICE_CALL);
         linksServiceClient.deleteLink(linkId);
 
         UserProfileResponse user = userService.profile(username);
@@ -112,6 +124,7 @@ public class UserControllerWeb {
                                     @NotEmpty @RequestHeader("X-USERNAME") String username,
                                     Model model,
                                     HttpServletRequest servletRequest) {
+        log.info("{} - Calling links-service from FeignServer to toggle new link", LoggingEvents.EXTERNAL_SERVICE_CALL);
         linksServiceClient.toggleLink(linkId);
 
         UserProfileResponse user = userService.profile(username);

@@ -56,14 +56,17 @@ public class RefreshTokenService {
                 .orElse(null);
 
         if (refreshToken == null) {
+            log.warn("[Null] refresh token requested for validation");
             throw new InvalidJwtToken("Invalid refresh Token");
         }
 
         if (refreshToken.getExpiresAt().isBefore(Instant.now())) {
+            log.warn("Expired refresh token requested for validation");
             throw new InvalidJwtToken("Expired refresh token used");
         }
 
         if (refreshToken.isRevoked()) {
+            log.warn("Used/Revoked refresh token requested for validation");
             throw new InvalidJwtToken("Revoked refresh token used");
         }
 

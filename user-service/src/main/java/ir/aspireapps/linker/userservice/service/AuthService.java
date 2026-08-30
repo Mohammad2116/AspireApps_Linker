@@ -14,10 +14,12 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -33,10 +35,14 @@ public class AuthService {
             @NotEmpty String deviceName,
             @NotEmpty String deviceIp
     ) {
-        if (userRepository.existsByUsername(request.username()))
+        if (userRepository.existsByUsername(request.username())) {
+            log.warn("Username [{}] is already taken", request.username());
             throw new DuplicateResourceException("Username is already in use");
-        if (userRepository.existsByEmail(request.email()))
+        }
+        if (userRepository.existsByEmail(request.email())) {
+            log.warn("Email [{}] is already taken", request.email());
             throw new DuplicateResourceException("Email is already in use");
+        }
 
         User newUser = User.builder()
                 .username(request.username())
@@ -64,7 +70,10 @@ public class AuthService {
             @NotEmpty String deviceName,
             @NotEmpty String deviceIp) {
         User user = userRepository.findByUsername(request.username())
-                .orElseThrow(() -> new ResourceNotFoundException("username or password not found"));
+                .orElseThrow(() -> {
+                    log.warn("Username [{}] not found in database", request.username());
+                    return new ResourceNotFoundException("username or password not found");
+                });
 
         if (passwordEncoder.matches(request.password(), user.getPassword())) {
             return AuthResponse.builder()
@@ -74,6 +83,7 @@ public class AuthService {
                             user, deviceName, deviceIp))
                     .build();
         }
+        log.warn("Wrong password [*********] for username [{}] entered", request.username());
         throw new ResourceNotFoundException("username or password not found");
     }
 

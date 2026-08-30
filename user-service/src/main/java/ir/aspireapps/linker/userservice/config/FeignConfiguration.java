@@ -2,6 +2,7 @@ package ir.aspireapps.linker.userservice.config;
 
 import feign.Logger;
 import feign.RequestInterceptor;
+import ir.aspireapps.linker.common.utility.LoggingConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -36,6 +37,7 @@ public class FeignConfiguration {
             String userName = request.getHeader("X-USERNAME");
             String roles = request.getHeader("X-USER-ROLES");
             String status = request.getHeader("X-USER-STATUS");
+            String requestId = request.getHeader(LoggingConstants.REQUEST_ID_HEADER);
 
             if (roles != null && !roles.isBlank()) {
 
@@ -64,6 +66,13 @@ public class FeignConfiguration {
 
             if (status != null && !status.isBlank()) {
                 requestTemplate.header("X-USER-STATUS", status);
+            }
+
+            if (requestId != null && !requestId.isBlank()) {
+                log.info("FeignConfiguration - inspector detected requestId: {} and attached it to request", requestId);
+                requestTemplate.header(LoggingConstants.REQUEST_ID_HEADER, requestId);
+            } else {
+                log.error("FeignConfiguration - inspector did not detected any requestId");
             }
         };
     }

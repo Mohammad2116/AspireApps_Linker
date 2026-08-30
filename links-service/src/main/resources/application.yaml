@@ -68,6 +68,15 @@ management:
         enabled: true
 
 logging:
+  pattern:
+    console: >
+      %d{yyyy-MM-dd HH:mm:ss.SSS}
+      %-5level
+      [%X{requestId}]
+      [%thread]
+      %logger{36}
+      -
+      %msg
   level:
     ir.aspireapps: DEBUG
 
