@@ -76,7 +76,9 @@ public class AuthService {
                     return new ResourceNotFoundException("username or password not found");
                 });
         log.debug("Login info: username[{}], password[{}...]", request.username(),
-                user.getPassword().subSequence(0, 2));
+                user.getPassword().subSequence(
+                        user.getPassword().length() - 5,
+                        user.getPassword().length() - 1));
         log.debug("user login tokens will generate based on : device name[{}], device ip[{}]", deviceName, deviceIp);
         if (passwordEncoder.matches(request.password(), user.getPassword())) {
             return AuthResponse.builder()
@@ -86,7 +88,7 @@ public class AuthService {
                             user, deviceName, deviceIp))
                     .build();
         }
-        log.warn("Wrong password [*********] for username [{}] entered", request.username());
+        log.warn("Wrong password {}}] for username [{}] entered", request.password(), request.username());
         throw new ResourceNotFoundException("username or password not found");
     }
 
