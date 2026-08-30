@@ -41,11 +41,14 @@ public class AuthControllerWeb {
     private final AuthService authService;
 
     private static String extractRefreshToken(HttpServletRequest servletRequest) {
-        Cookie cookie = Arrays.stream(servletRequest.getCookies())
-                .filter(c -> c.getName().equals("refresh_token"))
-                .findFirst().orElse(null);
-        if (cookie != null)
-            return cookie.getValue();
+        Cookie[] cookies = servletRequest.getCookies();
+        if (cookies != null) {
+            Cookie cookie = Arrays.stream(servletRequest.getCookies())
+                    .filter(c -> c.getName().equals("REFRESH_TOKEN"))
+                    .findFirst().orElse(null);
+            if (cookie != null)
+                return cookie.getValue();
+        }
         return null;
     }
 
