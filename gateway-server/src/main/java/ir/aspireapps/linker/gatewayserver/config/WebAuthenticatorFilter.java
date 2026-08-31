@@ -70,6 +70,7 @@ public class WebAuthenticatorFilter implements WebFilter {
     }
 
     private boolean isLocal(String path) {
-        return LOCAL_PATHS.stream().anyMatch(path::equalsIgnoreCase);
+        return (path.equals("/ir/aspireapps/linker/home") ||
+                path.startsWith("/ir/aspireapps/linker/css/"));
     }
 }
