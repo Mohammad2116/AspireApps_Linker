@@ -1,0 +1,83 @@
+name: Build and Publish Docker Images - gateway-server
+
+on:
+  push:
+    branches:
+      - CI-CD/microservice/gateway-server
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # -----------------------------------------------------------------------
+      # Checkout
+      # -----------------------------------------------------------------------
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+
+      # -----------------------------------------------------------------------
+      # Java
+      # -----------------------------------------------------------------------
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+
+      # -----------------------------------------------------------------------
+      # Maven Build
+      # -----------------------------------------------------------------------
+
+      - name: Build project
+        run: ./mvnw -pl gateway-server -am clean package
+
+
+      # -----------------------------------------------------------------------
+      # Docker
+      # -----------------------------------------------------------------------
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+
+      # -----------------------------------------------------------------------
+      # Login to GHCR
+      # -----------------------------------------------------------------------
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+
+      # -----------------------------------------------------------------------
+      # Build & Push Gateway Server
+      # -----------------------------------------------------------------------
+
+      - name: Build and push Gateway Server
+        uses: docker/build-push-action@v6
+        with:
+          context: ./gateway-server
+          file: ./gateway-server/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/mohammad2116/aspireapps-linker-gateway-server:latest
+            ghcr.io/mohammad2116/aspireapps-linker-gateway-server:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
