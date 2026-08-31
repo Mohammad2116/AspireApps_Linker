@@ -23,7 +23,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class WebAuthenticatorFilter implements WebFilter {
     private final static List<String> LOCAL_PATHS = List.of(
-            "/ir/aspireapps/linker/home");
+            "/ir/aspireapps/linker/home",
+            "/ir/aspireapps/linker/css/**");
     private final JwtService jwtService;
 
     @Override
