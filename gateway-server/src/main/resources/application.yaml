@@ -18,22 +18,22 @@ spring:
         - id: gateway-server-api
           uri: lb://gateway-service
           predicates:
-            - Path=/ir/aspireapps/linker/gateway/api/v1/**
+            - Path=/ir/aspireapps/linker/gateway/api/v1/**,/ir/aspireapps/linker/css/**
 
         - id: gateway-server-web
           uri: lb://gateway-service
           predicates:
-            - Path=/ir/aspireapps/linker/gateway/web/v1/**
+            - Path=/ir/aspireapps/linker/gateway/web/v1/**,/ir/aspireapps/linker/css/**
 
         - id: user-service-api
           uri: lb://user-service
           predicates:
-            - Path=/ir/aspireapps/linker/auth/api/v1/**,/ir/aspireapps/linker/user/api/v1/**
+            - Path=/ir/aspireapps/linker/auth/api/v1/**,/ir/aspireapps/linker/user/api/v1/**,/ir/aspireapps/linker/css/**
 
         - id: user-service-web
           uri: lb://user-service
           predicates:
-            - Path=/ir/aspireapps/linker/auth/web/v1/**,/ir/aspireapps/linker/user/web/v1/**
+            - Path=/ir/aspireapps/linker/auth/web/v1/**,/ir/aspireapps/linker/user/web/v1/**,/ir/aspireapps/linker/css/**
           filters:
             - PreserveHostHeader
 
