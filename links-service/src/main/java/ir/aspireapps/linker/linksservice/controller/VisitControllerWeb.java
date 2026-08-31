@@ -4,14 +4,12 @@ import ir.aspireapps.linker.linksservice.dto.RedirectResponse;
 import ir.aspireapps.linker.linksservice.service.RedirectService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +22,7 @@ public class VisitControllerWeb {
 
     @GetMapping("/ir/aspireapps/visit/{shorted}")
     public String visitWeb(
-            @NotBlank @PathVariable String shorted,
+            @PathVariable(required = true) String shorted,
             Model model,
             HttpServletRequest request) {
 
