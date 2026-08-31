@@ -8,7 +8,7 @@ spring:
         - id: homepage
           uri: lb://gateway-service
           predicates:
-            - Path=/ir/aspireapps/linker/home
+            - Path=/ir/aspireapps/linker/home,/ir/aspireapps/linker/css/**,/ir/aspireapps/linker/js/**,/ir/aspireapps/linker/images/**
 
         - id: links-service
           uri: lb://links-service
