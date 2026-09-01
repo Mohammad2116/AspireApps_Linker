@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<div class="home" th:fragment="profile">
+
+    <h1>Welcome back <span th:text="${profile.username}"></span></h1>
+    <div class="profile-pair">
+        <div class="profile-label">Email:</div>
+        <div class="profile-text" th:text="${profile.email}"></div>
+    </div>
+    <div class="profile-pair">
+        <div class="profile-label">Role:</div>
+        <div class="profile-text" th:text="${profile.role}"></div>
+    </div>
+    <div class="profile-pair">
+        <div class="profile-label">Subscription:</div>
+        <div class="profile-text" th:text="${profile.status}"></div>
+    </div>
+
+    <nav class="row-items">
+        <button class="navbar-button"
+                th:onclick="|location.href='@{/linker/user/web/v1/addLink}'|">
+            Register a new link
+        </button>
+
+        <button class="navbar-button"
+                th:onclick="|location.href='@{/linker/user/web/v1/profile}'|">
+            Refresh links
+        </button>
+    </nav>
+
+    <div class="links-table-container">
+        <table class="links-table">
+            <caption>
+                Registered links:
+            </caption>
+            <thead>
+            <tr>
+                <th>title</th>
+                <th>Original URL</th>
+                <th>Shorted URL</th>
+                <th>Status</th>
+                <th>Created At</th>
+                <th>Expires At</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="link : ${links}">
+                <td th:text="${link.title}"></td>
+                <td class="original-url">
+                    <a target="_blank"
+                       th:href="${link.originalUrl}"
+                       th:text="${link.originalUrl}"></a>
+                </td>
+                <td>
+                    <a th:href="${link.shortUrl}"
+                       th:text="${link.shortUrl}"></a>
+                </td>
+                <td>
+                    <span
+                            class="link-status"
+                            th:classappend="${link.status.name() == 'ACTIVE'}
+                            ? ' link-status-active'
+                            : (${link.status.name() == 'DISABLED'}
+                            ? ' link-status-disabled'
+                            : ' link-status-expired')"
+                            th:text="${link.status}">
+                    </span>
+                </td>
+                <td th:text="${link.createdAt}"></td>
+                <td th:text="${link.expiresAt}"></td>
+                <td>
+
+                    <div class="table-actions">
+
+                        <button
+                                class="table-button table-button-toggle"
+                                th:onClick="|location.href='@{/linker/user/web/v1/toggle/{linkId}(linkId=${link.id})}'|"
+                                type="button"
+                        >
+                            Toggle
+                        </button>
+
+                        <button
+                                class="table-button table-button-delete"
+                                th:onClick="|location.href='@{/linker/user/web/v1/delete/{linkId}(linkId=${link.id})}'|"
+                                type="button"
+                        >
+                            Delete
+                        </button>
+
+                    </div>
+
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</html>
