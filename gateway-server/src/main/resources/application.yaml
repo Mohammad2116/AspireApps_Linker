@@ -13,7 +13,7 @@ spring:
         - id: links-service
           uri: lb://links-service
           predicates:
-            - Path=/ir/aspireapps/visit/**, /ir/aspireapps/linker/links/api/v1/visit/**
+            - Path=/ir/aspireapps/linker/visit/**, /ir/aspireapps/linker/links/api/v1/visit/**
 
         - id: gateway-server-api
           uri: lb://gateway-service
