@@ -1,0 +1,36 @@
+@import "tic/linker/css/colors.css";
+
+.general_error {
+    background-color: var(--error);
+
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    color: white;
+    padding: 0.1rem 2rem;
+    border-radius: 12px;
+}
+
+.general_error h4 {
+    color: var(--surface);
+}
+
+.error404 {
+    background-color: var(--error);
+
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    min-height: 50vh;
+    max-height: 75vh;
+
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+}

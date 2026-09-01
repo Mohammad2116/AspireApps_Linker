@@ -1,4 +1,4 @@
-@import url("colors.css");
+@import url("tic/linker/css/colors.css");
 
 .navbar {
     background-color: var(--navbar);
@@ -162,6 +162,7 @@
     transform: translateY(0);
     box-shadow: none;
 }
+
 /* ///////////////////////////////////////////////////////// */
 .profile-pair {
     display: flex;
