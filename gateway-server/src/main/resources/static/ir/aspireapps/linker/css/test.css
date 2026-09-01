@@ -1,4 +1,4 @@
-@import "tic/linker/css/colors.css";
+@import "colors.css";
 
 .test {
     background-color: var(--success);
