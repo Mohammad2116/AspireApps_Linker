@@ -8,7 +8,7 @@
         <h4>Invalid login data</h4>
     </div>
 
-    <form method="post" th:action="@{/ir/aspireapps/linker/auth/web/v1/login}"
+    <form method="post" th:action="@{/linker/auth/web/v1/login}"
           th:object="${loginForm}">
         <input name="returnUrl"
                th:value="${returnUrl}"

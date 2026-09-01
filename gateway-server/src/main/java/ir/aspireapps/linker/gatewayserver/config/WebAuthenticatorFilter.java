@@ -6,6 +6,7 @@ import ir.aspireapps.linker.common.utility.LoggingConstants;
 import ir.aspireapps.linker.common.utility.LoggingContext;
 import ir.aspireapps.linker.common.utility.LoggingEvents;
 import ir.aspireapps.linker.gatewayserver.service.JwtService;
+import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpCookie;
@@ -22,13 +23,16 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class WebAuthenticatorFilter implements WebFilter {
+    private final static List<String> RESOURCE_PATHS = List.of(
+            "/ir/aspireapps/linker/css/"
+    );
     private final static List<String> LOCAL_PATHS = List.of(
             "/ir/aspireapps/linker/home",
             "/ir/aspireapps/linker/css/**");
     private final JwtService jwtService;
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+    public Mono<Void> filter(ServerWebExchange exchange, @Nonnull WebFilterChain chain) {
         String requestId = exchange.getRequest().getHeaders().getFirst(LoggingConstants.REQUEST_ID_HEADER);
         if (requestId == null || requestId.isEmpty()) requestId = UUID.randomUUID().toString();
         LoggingContext.putRequestId(requestId);
@@ -37,6 +41,15 @@ public class WebAuthenticatorFilter implements WebFilter {
 
         String path = exchange.getRequest().getURI().getPath();
         log.info("{} - Starting web request to path {}", LoggingEvents.REQUEST_STARTED, path);
+
+        if (isResource(path)) {
+            log.info("This is a request for Resources got at WebAuthenticatorFilter");
+            return chain.filter(exchange)
+                    .doFinally(signal -> {
+                        log.info("{} - End web request to resource at {}", LoggingEvents.REQUEST_COMPLETED, path);
+                    });
+        }
+
         if (!isLocal(path)) {
             log.info("Not a local request so sent request to controller");
             return chain.filter(exchange)
@@ -72,5 +85,9 @@ public class WebAuthenticatorFilter implements WebFilter {
     private boolean isLocal(String path) {
         return (path.equals("/ir/aspireapps/linker/home") ||
                 path.startsWith("/ir/aspireapps/linker/css/"));
+    }
+
+    private boolean isResource(String path) {
+        return RESOURCE_PATHS.stream().anyMatch(path::startsWith);
     }
 }
