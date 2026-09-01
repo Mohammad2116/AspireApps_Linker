@@ -23,7 +23,7 @@
                 placeholder="Enter a shortened URL"
                 type="text"/>
         <button class="primary-button"
-                th:onclick="|location.href='@{/visit/}' + encodeURIComponent(document.getElementById('shorted').value)|"
+                th:onclick="|location.href='@{/linker/visit/}' + encodeURIComponent(document.getElementById('shorted').value)|"
                 type="button">
             Go
         </button>
