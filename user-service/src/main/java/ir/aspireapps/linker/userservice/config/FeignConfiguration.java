@@ -2,6 +2,7 @@ package ir.aspireapps.linker.userservice.config;
 
 import feign.Logger;
 import feign.RequestInterceptor;
+import ir.aspireapps.linker.common.utility.HeaderConstants;
 import ir.aspireapps.linker.common.utility.LoggingConstants;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -33,10 +34,10 @@ public class FeignConfiguration {
 
             HttpServletRequest request = attributes.getRequest();
 
-            String userId = request.getHeader("X-USER-ID");
-            String userName = request.getHeader("X-USERNAME");
-            String roles = request.getHeader("X-USER-ROLES");
-            String status = request.getHeader("X-USER-STATUS");
+            String userId = request.getHeader(HeaderConstants.X_USER_ID);
+            String userName = request.getHeader(HeaderConstants.X_USERNAME);
+            String roles = request.getHeader(HeaderConstants.X_USER_ROLES);
+            String status = request.getHeader(HeaderConstants.X_USER_STATE);
             String requestId = request.getHeader(LoggingConstants.REQUEST_ID_HEADER);
 
             if (roles != null && !roles.isBlank()) {
@@ -53,19 +54,19 @@ public class FeignConfiguration {
             }
 
             if (userId != null) {
-                requestTemplate.header("X-USER-ID", userId);
+                requestTemplate.header(HeaderConstants.X_USER_ID, userId);
             }
 
             if (userName != null) {
-                requestTemplate.header("X-USERNAME", userName);
+                requestTemplate.header(HeaderConstants.X_USERNAME, userName);
             }
 
             if (roles != null && !roles.isBlank()) {
-                requestTemplate.header("X-USER-ROLES", roles);
+                requestTemplate.header(HeaderConstants.X_USER_ROLES, roles);
             }
 
             if (status != null && !status.isBlank()) {
-                requestTemplate.header("X-USER-STATUS", status);
+                requestTemplate.header(HeaderConstants.X_USER_STATE, status);
             }
 
             if (requestId != null && !requestId.isBlank()) {

@@ -1,5 +1,6 @@
 package ir.aspireapps.linker.userservice.service;
 
+import ir.aspireapps.linker.common.model.TokenExceptionReason;
 import ir.aspireapps.linker.userservice.error.InvalidJwtToken;
 import ir.aspireapps.linker.userservice.model.RefreshToken;
 import ir.aspireapps.linker.userservice.model.User;
@@ -57,17 +58,17 @@ public class RefreshTokenService {
 
         if (refreshToken == null) {
             log.warn("[Null] refresh token requested for validation");
-            throw new InvalidJwtToken("Invalid refresh Token");
+            throw new InvalidJwtToken(TokenExceptionReason.TOKEN_INVALID.name());
         }
 
         if (refreshToken.getExpiresAt().isBefore(Instant.now())) {
             log.warn("Expired refresh token requested for validation");
-            throw new InvalidJwtToken("Expired refresh token used");
+            throw new InvalidJwtToken(TokenExceptionReason.TOKEN_EXPIRED.name());
         }
 
         if (refreshToken.isRevoked()) {
             log.warn("Used/Revoked refresh token requested for validation");
-            throw new InvalidJwtToken("Revoked refresh token used");
+            throw new InvalidJwtToken(TokenExceptionReason.TOKEN_REVOKED.name());
         }
 
         refreshToken.revoke();

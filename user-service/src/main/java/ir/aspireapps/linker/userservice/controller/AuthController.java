@@ -34,11 +34,6 @@ public class AuthController {
                 servletRequest.getHeader("User-Agent"),
                 servletRequest.getRemoteAddr()
         );
-        if (result == null)
-            log.warn("{} - User registration failed", LoggingEvents.USER_REGISTRATION_FAILED);
-        else
-            log.info("{} - User registration complete", LoggingEvents.USER_REGISTERED);
-
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(result);
@@ -54,10 +49,6 @@ public class AuthController {
                 servletRequest.getHeader("User-Agent"),
                 servletRequest.getRemoteAddr()
         );
-        if (result == null)
-            log.warn("{} - User login using username and password failed", LoggingEvents.AUTH_LOGIN_FAILED);
-        else
-            log.info("{} - User login using username and password complete", LoggingEvents.AUTH_LOGIN_SUCCESS);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(result);
