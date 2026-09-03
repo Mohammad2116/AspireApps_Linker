@@ -1,10 +1,10 @@
 package ir.aspireapps.linker.userservice.service;
 
+import ir.aspireapps.linker.common.utility.LoggingEvents;
 import ir.aspireapps.linker.userservice.dto.AuthResponse;
 import ir.aspireapps.linker.userservice.dto.UserLoginRequest;
 import ir.aspireapps.linker.userservice.dto.UserRegisterRequest;
 import ir.aspireapps.linker.userservice.error.DuplicateResourceException;
-import ir.aspireapps.linker.userservice.error.InvalidJwtToken;
 import ir.aspireapps.linker.userservice.error.ResourceNotFoundException;
 import ir.aspireapps.linker.userservice.model.RefreshToken;
 import ir.aspireapps.linker.userservice.model.User;
@@ -37,10 +37,12 @@ public class AuthService {
     ) {
         if (userRepository.existsByUsername(request.username())) {
             log.warn("Username [{}] is already taken", request.username());
+            log.debug("{} - registration failed}", LoggingEvents.USER_REGISTRATION_FAILED);
             throw new DuplicateResourceException("Username is already in use");
         }
         if (userRepository.existsByEmail(request.email())) {
             log.warn("Email [{}] is already taken", request.email());
+            log.debug("{} - registration failed}", LoggingEvents.USER_REGISTRATION_FAILED);
             throw new DuplicateResourceException("Email is already in use");
         }
 
@@ -56,6 +58,7 @@ public class AuthService {
         User savedUser = userRepository.save(newUser);
         log.info("New user: username[{}], email[{}], status[{}], ... ==> inserted into users table", newUser.getUsername(), savedUser.getEmail(), savedUser.getStatus());
         log.debug("New user tokens will generate based on : device name[{}], device ip[{}]", deviceName, deviceIp);
+        log.debug("{} - registration successful}", LoggingEvents.USER_REGISTERED);
         return AuthResponse.builder()
                 .accessToken(jwtService.generateAccessToken(savedUser))
                 .accessTokenExpiresInSeconds(jwtService.accessTokenExpirationSeconds())
@@ -73,6 +76,7 @@ public class AuthService {
         User user = userRepository.findByUsername(request.username())
                 .orElseThrow(() -> {
                     log.warn("Username [{}] not found in database", request.username());
+                    log.debug("{} - logging failed}", LoggingEvents.AUTH_LOGIN_FAILED);
                     return new ResourceNotFoundException("username or password not found");
                 });
         log.debug("Login info: username[{}], password[{}...]", request.username(),
@@ -81,6 +85,7 @@ public class AuthService {
                         user.getPassword().length()));
         log.debug("user login tokens will generate based on : device name[{}], device ip[{}]", deviceName, deviceIp);
         if (passwordEncoder.matches(request.password(), user.getPassword())) {
+            log.debug("{} - logging successful}", LoggingEvents.AUTH_LOGIN_SUCCESS);
             return AuthResponse.builder()
                     .accessToken(jwtService.generateAccessToken(user))
                     .accessTokenExpiresInSeconds(jwtService.accessTokenExpirationSeconds())
@@ -89,17 +94,20 @@ public class AuthService {
                     .build();
         }
         log.warn("Wrong password [{}] for username [{}] entered", request.password(), request.username());
+        log.debug("{} - logging failed}", LoggingEvents.AUTH_LOGIN_FAILED);
         throw new ResourceNotFoundException("username or password not found");
     }
 
     @Transactional
     public AuthResponse refresh(@NotEmpty @Size(max = 512) String refreshToken,
                                 @NotEmpty String deviceName,
-                                @NotEmpty String deviceIp) throws InvalidJwtToken {
-        RefreshToken oldToken = refreshTokenService.verifyToken(refreshToken);
-        User user = oldToken.getUser();
-        log.debug("Old token injected user is [{}]", user.getUsername());
+                                @NotEmpty String deviceIp) {
+        RefreshToken oldTokenData;
+        oldTokenData = refreshTokenService.verifyToken(refreshToken);
+        User user = oldTokenData.getUser();
+        log.debug("Old token user is [{}]", user.getUsername());
         log.debug("user refresh tokens will generate based on : device name[{}], device ip[{}]", deviceName, deviceIp);
+        log.debug("{} - refreshing successful}", LoggingEvents.AUTH_LOGIN_SUCCESS);
         return AuthResponse.builder()
                 .accessToken(jwtService.generateAccessToken(user))
                 .accessTokenExpiresInSeconds(jwtService.accessTokenExpirationSeconds())

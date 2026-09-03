@@ -87,11 +87,12 @@ public class AuthControllerWeb {
                 log.debug("Refresh token is valid, so view already logged in items on page");
                 addAuthenticationToModel(model, true);
             } else {
-                log.debug("Refresh token is not valid, so remove expired or invalid cookies");
+                log.debug("Refresh token is not valid(revoked, expired or invalid cookies)");
+                log.info("Removing all auth cookies");
                 removeTokenCookies(servletResponse);
             }
         } else
-            log.debug("There is no refresh cookie available in header");
+            log.debug("There is no refresh cookie available");
         return "register";
     }
 
@@ -106,6 +107,8 @@ public class AuthControllerWeb {
         if (refreshToken != null) {
             if (authService.isRefreshTokenValid(refreshToken)) {
                 addAuthenticationToModel(model, true);
+            } else {
+                removeTokenCookies(servletResponse);
             }
         }
         if (bindingResult.hasFieldErrors()) {

@@ -2,6 +2,7 @@ package ir.aspireapps.linker.userservice.controller;
 
 import ir.aspireapps.linker.common.utility.LoggingEvents;
 import ir.aspireapps.linker.userservice.dto.*;
+import ir.aspireapps.linker.userservice.error.InvalidJwtToken;
 import ir.aspireapps.linker.userservice.service.AuthService;
 import ir.aspireapps.linker.userservice.utility.InputNormalizer;
 import jakarta.servlet.http.HttpServletRequest;
@@ -58,14 +59,17 @@ public class AuthController {
     public ResponseEntity<AuthResponse> refresh(
             @NotNull @Valid @RequestBody UserRefreshRequest request,
             HttpServletRequest servletRequest) {
-        AuthResponse result = authService.refresh(
-                request.refreshToken(),
-                servletRequest.getHeader("User-Agent"),
-                servletRequest.getRemoteAddr());
-        if (result == null)
-            log.warn("{} - User auth refreshing failed", LoggingEvents.AUTH_LOGIN_FAILED);
-        else
-            log.info("{} - User auth refreshed successfully", LoggingEvents.AUTH_LOGIN_SUCCESS);
+        AuthResponse result;
+        try {
+            result = authService.refresh(
+                    request.refreshToken(),
+                    servletRequest.getHeader("User-Agent"),
+                    servletRequest.getRemoteAddr());
+        } catch (InvalidJwtToken invalidJwtToken) {
+            log.debug("{} - refreshing failed}", LoggingEvents.AUTH_LOGIN_FAILED);
+            throw invalidJwtToken;
+        }
+        log.info("{} - User auth refreshed successfully", LoggingEvents.AUTH_LOGIN_SUCCESS);
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
                 .body(result);
@@ -75,7 +79,12 @@ public class AuthController {
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Void> logout(
             @NotNull @Valid UserLogoutRequest request) {
-        authService.logout(request.refreshToken());
+        try {
+            authService.logout(request.refreshToken());
+        } catch (InvalidJwtToken invalidJwtToken) {
+            log.debug("{} - User auth logout failed", LoggingEvents.AUTH_LOGIN_FAILED);
+            throw invalidJwtToken;
+        }
         log.info("{} - User logged out successfully", LoggingEvents.AUTH_LOGOUT_SUCCESS);
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)

@@ -89,7 +89,16 @@ public class RefreshTokenService {
         String hashedToken = tokenService.hashToken(token);
         RefreshToken refreshToken = refreshTokenRepository.findByTokenHash(hashedToken)
                 .orElse(null);
-
+        if (refreshToken == null) {
+            log.error("Refresh token is not valid");
+        } else {
+            if (refreshToken.getExpiresAt().isBefore(Instant.now())) {
+                log.warn("Refresh token expired");
+            }
+            if (refreshToken.isRevoked()) {
+                log.warn("Used/Revoked refresh token");
+            }
+        }
         return refreshToken != null
                 && !refreshToken.getExpiresAt().isBefore(Instant.now())
                 && !refreshToken.isRevoked();
