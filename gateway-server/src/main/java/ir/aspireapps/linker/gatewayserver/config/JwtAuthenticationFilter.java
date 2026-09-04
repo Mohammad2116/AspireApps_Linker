@@ -132,6 +132,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         try {
             ClaimsData claimsData = claimsDataManager.Extractor(accessToken);
             ServerHttpRequest request = claimsDataManager.serverRequestBuilder(exchange, claimsData);
+            log.info("Username [{}], status[{}], ... extracted from access token", claimsData.username(), claimsData.status());
             return chain.filter(exchange.mutate().request(request).build());
         } catch (InvalidJwtToken e) {
             log.info("{} - Authorized web path [{}] \n REQUESTED with an Invalid JWT token, Start to use RefreshToken", LoggingEvents.REQUEST_FAILED, path);
