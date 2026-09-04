@@ -53,7 +53,8 @@ public class WebAuthenticatorFilter implements WebFilter {
         exchange.getAttributes().put("AUTHENTICATED", false);
 
         HttpCookie cookie = exchange.getRequest().getCookies().getFirst("ACCESS_TOKEN");
-        if (cookie != null) {
+        if (cookie != null && !cookie.getValue().isEmpty()) {
+            log.info("Access Token has been loaded {}", cookie.getValue());
             try {
                 claimsDataManager.serverRequestBuilder(
                         exchange,
