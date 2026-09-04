@@ -79,7 +79,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             log.warn("{} - Authorized path [{}] \n REQUESTED with [null or not a Bearer] authHeader info", LoggingEvents.REQUEST_FAILED, path);
-            log.info("========== REQUEST FINISHED(1) ==========");
+            log.info("\n========== REQUEST FINISHED(1) ==========");
             LoggingContext.clear();
             return unauthorized(exchange);
         }
@@ -92,7 +92,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange.mutate().request(request).build());
         } catch (InvalidJwtToken e) {
             log.warn("{} - Invalid JWT Token, reason: [{}]", LoggingEvents.REQUEST_FAILED, e.getMessage());
-            log.info("========== REQUEST FINISHED(2) ==========");
+            log.info("\n========== REQUEST FINISHED(2) ==========");
             LoggingContext.clear();
             return unauthorized(exchange);
         }
@@ -103,7 +103,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
         if (isPublic(path)) {
             return chain.filter(exchange).doFinally(signalType -> {
-                log.info("========== REQUEST FINISHED(3) ==========");
+                log.info("\n========== REQUEST FINISHED(3) ==========");
             });
         }
 
@@ -118,14 +118,14 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         if (refreshToken == null || refreshToken.isEmpty()) {
             log.info("{} - Authorized web path [{}] \n REQUESTED with no REFRESH_TOKEN cookie, so Login required", LoggingEvents.REQUEST_FAILED, path);
             return redirectToLogin(exchange).doFinally(signalType -> {
-                log.info("========== REQUEST FINISHED(4) ==========");
+                log.info("\n========== REQUEST FINISHED(4) ==========");
             });
         }
 
         if (accessToken == null || accessToken.isEmpty()) {
             log.info("{} - Authorized web path [{}] \n REQUESTED with no ACCESS_TOKEN cookie, so Refreshing required", LoggingEvents.REQUEST_FAILED, path);
             return redirectToRefresh(exchange, refreshToken).doFinally(signalType -> {
-                log.info("========== REQUEST FINISHED(5) ==========");
+                log.info("\n========== REQUEST FINISHED(5) ==========");
             });
         }
 
@@ -136,7 +136,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         } catch (InvalidJwtToken e) {
             log.info("{} - Authorized web path [{}] \n REQUESTED with an Invalid JWT token, Start to use RefreshToken", LoggingEvents.REQUEST_FAILED, path);
             return redirectToRefresh(exchange, refreshToken).doFinally(signalType -> {
-                log.info("========== REQUEST FINISHED(6) ==========");
+                log.info("\n========== REQUEST FINISHED(6) ==========");
             });
         }
     }
@@ -146,7 +146,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 .refreshToken(refreshToken)
                 .returnUrl(exchange.getRequest().getURI().getRawPath())
                 .build();
-        String redirectPath = "/linker/auth/web/v1/refresh";
+        String redirectPath = "/ir/aspireapps/linker/auth/web/v1/refresh";
         return webClientBuilder
                 .build()
                 .post()
@@ -170,7 +170,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         response.setStatusCode(HttpStatus.SEE_OTHER);
         response.getHeaders().setLocation(
                 // TODO: for implementation redirect to other pages that contains @RequestBody data I should use something like Redis to save it's data and send it's data into a path variable, then after redirecting I must load data from Redis and do a complete redirect with data
-                URI.create("ir/aspireapps/linker/auth/web/v1/login")
+                URI.create("/ir/aspireapps/linker/auth/web/v1/login")
         );
         return response.setComplete();
     }
