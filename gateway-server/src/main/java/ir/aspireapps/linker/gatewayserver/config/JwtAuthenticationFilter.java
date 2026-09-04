@@ -46,7 +46,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             "/ir/aspireapps/linker/auth/web/v1/register",
             "/ir/aspireapps/linker/auth/web/v1/login",
             "/ir/aspireapps/linker/auth/web/v1/refresh",
-            "ir/aspireapps/linker/user/web/v1/profile"
+            "/ir/aspireapps/linker/user/web/v1/profile"
     );
 
 
