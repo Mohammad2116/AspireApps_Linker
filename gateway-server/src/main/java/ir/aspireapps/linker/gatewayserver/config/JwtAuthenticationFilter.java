@@ -64,27 +64,20 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String path = exchange.getRequest().getURI().getPath();
         if (isWebPath(path)) {
             log.info("{} - START WEB path: [{}]", LoggingEvents.REQUEST_STARTED, path);
-            return processWebFilter(exchange, chain).doFinally(signalType -> {
-                log.info("{} - END WEB path: [{}]", LoggingEvents.REQUEST_COMPLETED, path);
-                LoggingContext.clear();
-            });
+            return processWebFilter(exchange, chain);
         }
 
         if (isPublic(path)) {
             log.info("{} - START API PUBLIC path: [{}]", LoggingEvents.REQUEST_STARTED, path);
-            return chain.filter(exchange).doFinally(signal -> {
-                log.info("{} - END API PUBLIC path: [{}]", LoggingEvents.REQUEST_COMPLETED, path);
-                LoggingContext.clear();
-            });
+            return chain.filter(exchange);
         }
 
 
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return unauthorized(exchange).doFinally(signalType -> {
-                log.warn("{} - Authorized path [{}] \n REQUESTED with [null or not a Bearer] authHeader info", LoggingEvents.REQUEST_FAILED, path);
-                LoggingContext.clear();
-            });
+            log.warn("{} - Authorized path [{}] \n REQUESTED with [null or not a Bearer] authHeader info", LoggingEvents.REQUEST_FAILED, path);
+            LoggingContext.clear();
+            return unauthorized(exchange);
         }
 
         log.info("{} - START AUTHENTICATED PUBLIC path: [{}]", LoggingEvents.REQUEST_STARTED, path);
@@ -92,17 +85,11 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         try {
             ClaimsData claimsData = claimsDataManager.Extractor(accessToken);
             ServerHttpRequest request = claimsDataManager.serverRequestBuilder(exchange, claimsData);
-            return chain.filter(exchange.mutate().request(request).build())
-                    .doFinally(signalType -> {
-                        log.info("{} - Authorized request at [{}]", LoggingEvents.REQUEST_COMPLETED, path);
-                        LoggingContext.clear();
-                    });
+            return chain.filter(exchange.mutate().request(request).build());
         } catch (InvalidJwtToken e) {
             log.warn("{} - Invalid JWT Token, reason: [{}]", LoggingEvents.REQUEST_FAILED, e.getMessage());
-            return unauthorized(exchange).doFinally(signalType -> {
-                log.warn("{} - Authorized path [{}] \n REQUESTED with an Invalid JWT token", LoggingEvents.REQUEST_FAILED, path);
-                LoggingContext.clear();
-            });
+            LoggingContext.clear();
+            return unauthorized(exchange);
         }
     }
 
@@ -121,8 +108,15 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         HttpCookie refreshCookie = exchange.getRequest().getCookies().getFirst("REFRESH_TOKEN");
         refreshToken = refreshCookie != null ? refreshCookie.getValue() : null;
 
-        if (refreshToken == null || refreshToken.isEmpty()) return redirectToLogin(exchange);
-        if (accessToken == null || accessToken.isEmpty()) return redirectToRefresh(exchange, refreshToken);
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            log.info("{} - Authorized web path [{}] \n REQUESTED with no REFRESH_TOKEN cookie, so Login required", LoggingEvents.REQUEST_FAILED, path);
+            return redirectToLogin(exchange);
+        }
+
+        if (accessToken == null || accessToken.isEmpty()) {
+            log.info("{} - Authorized web path [{}] \n REQUESTED with no ACCESS_TOKEN cookie, so Refreshing required", LoggingEvents.REQUEST_FAILED, path);
+            return redirectToRefresh(exchange, refreshToken);
+        }
 
         try {
             ClaimsData claimsData = claimsDataManager.Extractor(accessToken);
@@ -139,7 +133,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 .refreshToken(refreshToken)
                 .returnUrl(exchange.getRequest().getURI().getRawPath())
                 .build();
-        String redirectPath = "/linker/auth/web/v1/refresh";
+        String redirectPath = "ir/aspireapps/linker/auth/web/v1/refresh";
         return webClientBuilder
                 .build()
                 .post()
@@ -163,7 +157,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         response.setStatusCode(HttpStatus.SEE_OTHER);
         response.getHeaders().setLocation(
                 // TODO: for implementation redirect to other pages that contains @RequestBody data I should use something like Redis to save it's data and send it's data into a path variable, then after redirecting I must load data from Redis and do a complete redirect with data
-                URI.create("/linker/auth/web/v1/login")
+                URI.create("ir/aspireapps/linker/auth/web/v1/login")
         );
         return response.setComplete();
     }
