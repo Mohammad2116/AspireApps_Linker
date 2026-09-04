@@ -36,7 +36,7 @@ public class ClaimsDataManager {
         if (rawRoles == null || rawRoles.isEmpty()) {
             throw new InvalidJwtToken("Invalid roles list");
         }
-        log.info("Username [{}], status[{}], ... extracted from refreshToken using ClaimsDataManager", claims.getSubject(), claims.get(ClaimConstants.STATUS));
+        log.info("Username [{}], status[{}], roles[{}], ... extracted from refreshToken using ClaimsDataManager", claims.getSubject(), claims.get(ClaimConstants.STATUS), rawRoles.toArray());
         return ClaimsData.builder()
                 .username(claims.getSubject())
                 .userId(claims.get(ClaimConstants.USER_ID).toString())
