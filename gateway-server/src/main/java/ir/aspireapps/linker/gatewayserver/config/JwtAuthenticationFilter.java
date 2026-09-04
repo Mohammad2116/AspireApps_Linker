@@ -170,7 +170,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         response.setStatusCode(HttpStatus.SEE_OTHER);
         response.getHeaders().setLocation(
                 // TODO: for implementation redirect to other pages that contains @RequestBody data I should use something like Redis to save it's data and send it's data into a path variable, then after redirecting I must load data from Redis and do a complete redirect with data
-                URI.create("/ir/aspireapps/linker/auth/web/v1/login")
+                URI.create("/linker/auth/web/v1/login")
         );
         return response.setComplete();
     }
