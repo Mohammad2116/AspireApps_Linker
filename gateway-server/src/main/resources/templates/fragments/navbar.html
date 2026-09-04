@@ -7,10 +7,10 @@
 </nav>
 <hr/>
 <div class="profil-row-items">
-    <a class="navbar-button" th:href="@{/ir/aspireapps/linker/home}">home</a>
+    <a class="navbar-button" th:href="@{/linker/home}">home</a>
     <sec th:if="${AUTHENTICATED}">
-        <a class="navbar-button" th:href="@{/ir/aspireapps/linker/user/web/v1/profile}">profile</a>
-        <a class="navbar-button" th:href="@{/ir/aspireapps/linker/auth/web/v1/logout}">logout</a>
+        <a class="navbar-button" th:href="@{/linker/user/web/v1/profile}">profile</a>
+        <a class="navbar-button" th:href="@{/linker/auth/web/v1/logout}">logout</a>
     </sec>
 </div>
 </html>
