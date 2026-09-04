@@ -56,6 +56,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        log.info("\n\n========================= NEW REQUEST AT JwtAuthenticationFilter RECEIVED =========================");
+
         String requestId = exchange.getRequest().getHeaders().getFirst(LoggingConstants.REQUEST_ID_HEADER);
         if (requestId == null || requestId.isEmpty()) requestId = UUID.randomUUID().toString();
         LoggingContext.putRequestId(requestId);
@@ -77,6 +79,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             log.warn("{} - Authorized path [{}] \n REQUESTED with [null or not a Bearer] authHeader info", LoggingEvents.REQUEST_FAILED, path);
+            log.info("========== REQUEST FINISHED(1) ==========");
             LoggingContext.clear();
             return unauthorized(exchange);
         }
@@ -89,6 +92,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange.mutate().request(request).build());
         } catch (InvalidJwtToken e) {
             log.warn("{} - Invalid JWT Token, reason: [{}]", LoggingEvents.REQUEST_FAILED, e.getMessage());
+            log.info("========== REQUEST FINISHED(2) ==========");
             LoggingContext.clear();
             return unauthorized(exchange);
         }
@@ -98,7 +102,9 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String path = exchange.getRequest().getURI().getPath();
 
         if (isPublic(path)) {
-            return chain.filter(exchange);
+            return chain.filter(exchange).doFinally(signalType -> {
+                log.info("========== REQUEST FINISHED(3) ==========");
+            });
         }
 
         String accessToken;
@@ -111,12 +117,16 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
         if (refreshToken == null || refreshToken.isEmpty()) {
             log.info("{} - Authorized web path [{}] \n REQUESTED with no REFRESH_TOKEN cookie, so Login required", LoggingEvents.REQUEST_FAILED, path);
-            return redirectToLogin(exchange);
+            return redirectToLogin(exchange).doFinally(signalType -> {
+                log.info("========== REQUEST FINISHED(4) ==========");
+            });
         }
 
         if (accessToken == null || accessToken.isEmpty()) {
             log.info("{} - Authorized web path [{}] \n REQUESTED with no ACCESS_TOKEN cookie, so Refreshing required", LoggingEvents.REQUEST_FAILED, path);
-            return redirectToRefresh(exchange, refreshToken);
+            return redirectToRefresh(exchange, refreshToken).doFinally(signalType -> {
+                log.info("========== REQUEST FINISHED(5) ==========");
+            });
         }
 
         try {
@@ -125,7 +135,9 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange.mutate().request(request).build());
         } catch (InvalidJwtToken e) {
             log.info("{} - Authorized web path [{}] \n REQUESTED with an Invalid JWT token, Start to use RefreshToken", LoggingEvents.REQUEST_FAILED, path);
-            return redirectToRefresh(exchange, refreshToken);
+            return redirectToRefresh(exchange, refreshToken).doFinally(signalType -> {
+                log.info("========== REQUEST FINISHED(6) ==========");
+            });
         }
     }
 
