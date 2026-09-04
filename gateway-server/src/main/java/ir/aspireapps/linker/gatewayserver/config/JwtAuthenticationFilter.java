@@ -1,12 +1,13 @@
 package ir.aspireapps.linker.gatewayserver.config;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import ir.aspireapps.linker.common.dto.UserRefreshRequest;
+import ir.aspireapps.linker.common.error.InvalidJwtToken;
 import ir.aspireapps.linker.common.utility.LoggingConstants;
 import ir.aspireapps.linker.common.utility.LoggingContext;
 import ir.aspireapps.linker.common.utility.LoggingEvents;
 import ir.aspireapps.linker.gatewayserver.service.JwtService;
+import ir.aspireapps.linker.gatewayserver.utility.ClaimsData;
+import ir.aspireapps.linker.gatewayserver.utility.ClaimsDataManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -41,70 +42,72 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             "/ir/aspireapps/linker/auth/web/v1/login",
             "/ir/aspireapps/linker/auth/web/v1/refresh"
     );
-    //    private static final List<String> ADMIN_PATHS = List.of(
-//            "/ir/aspireapps/linker/api/v1/admin/**"
-//    );
+    private static final List<String> WEB_PATHS = List.of(
+            "/ir/aspireapps/linker/auth/web/v1/register",
+            "/ir/aspireapps/linker/auth/web/v1/login",
+            "/ir/aspireapps/linker/auth/web/v1/refresh"
+    );
+
+
     private final JwtService jwtService;
     private final WebClient.Builder webClientBuilder;
+    private final ClaimsDataManager claimsDataManager;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String requestId = exchange.getRequest().getHeaders().getFirst(LoggingConstants.REQUEST_ID_HEADER);
         if (requestId == null || requestId.isEmpty()) requestId = UUID.randomUUID().toString();
         LoggingContext.putRequestId(requestId);
-        exchange.getResponse().getHeaders().add(LoggingConstants.REQUEST_ID_HEADER, requestId);
-        exchange.getRequest().getHeaders().add(LoggingConstants.REQUEST_ID_HEADER, requestId);
+        exchange.getResponse().getHeaders().set(LoggingConstants.REQUEST_ID_HEADER, requestId);
+        exchange.getRequest().getHeaders().set(LoggingConstants.REQUEST_ID_HEADER, requestId);
 
         String path = exchange.getRequest().getURI().getPath();
-        log.info("{} - Request path {}", LoggingEvents.REQUEST_STARTED, path);
-
-        if (path.contains("/web/"))
+        if (isWebPath(path)) {
+            log.info("{} - START WEB path: [{}]", LoggingEvents.REQUEST_STARTED, path);
             return processWebFilter(exchange, chain).doFinally(signalType -> {
-                log.info("{} - Requested to WEB path: {}", LoggingEvents.REQUEST_COMPLETED, path);
+                log.info("{} - END WEB path: [{}]", LoggingEvents.REQUEST_COMPLETED, path);
                 LoggingContext.clear();
             });
+        }
 
-        if (isPublic(path))
+        if (isPublic(path)) {
+            log.info("{} - START API PUBLIC path: [{}]", LoggingEvents.REQUEST_STARTED, path);
             return chain.filter(exchange).doFinally(signal -> {
-                log.info("{} - Request to public path: {}", LoggingEvents.REQUEST_COMPLETED, path);
+                log.info("{} - END API PUBLIC path: [{}]", LoggingEvents.REQUEST_COMPLETED, path);
                 LoggingContext.clear();
             });
+        }
+
 
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return unauthorized(exchange).doFinally(signalType -> {
-                log.warn("{} - Authorized path with no or not Bearer authHeader to: {}", LoggingEvents.REQUEST_FAILED, path);
+                log.warn("{} - Authorized path [{}] \n REQUESTED with [null or not a Bearer] authHeader info", LoggingEvents.REQUEST_FAILED, path);
                 LoggingContext.clear();
             });
         }
-        String accessToken = authHeader.substring("Bearer ".length());
-        Claims claims;
-        claims = jwtService.validateToken(accessToken);
-        String username = claims.getSubject();
-        String userId = claims.get("userId").toString();
-        String status = claims.get("Status").toString();
-        List<?> roles = claims.get("roles", List.class);
-        List<String> rolesNames = roles.stream().map(Object::toString).toList();
-        ServerHttpRequest request = exchange
-                .getRequest()
-                .mutate()
-                .header("X-USERNAME", username)
-                .header("X-USER-ID", userId)
-                .header("X-USER-STATE", status)
-                .header("X-USER-ROLES", String.join(",", rolesNames))
-                .build();
 
-        return chain.filter(exchange.mutate().request(request).build())
-                .doFinally(signalType -> {
-                    log.info("{} - Request to authorized path: {}", LoggingEvents.REQUEST_COMPLETED, path);
-                    LoggingContext.clear();
-                });
+        log.info("{} - START AUTHENTICATED PUBLIC path: [{}]", LoggingEvents.REQUEST_STARTED, path);
+        String accessToken = authHeader.substring("Bearer ".length());
+        try {
+            ClaimsData claimsData = claimsDataManager.Extractor(accessToken);
+            ServerHttpRequest request = claimsDataManager.serverRequestBuilder(exchange, claimsData);
+            return chain.filter(exchange.mutate().request(request).build())
+                    .doFinally(signalType -> {
+                        log.info("{} - Authorized request at [{}]", LoggingEvents.REQUEST_COMPLETED, path);
+                        LoggingContext.clear();
+                    });
+        } catch (InvalidJwtToken e) {
+            log.warn("{} - Invalid JWT Token, reason: [{}]", LoggingEvents.REQUEST_FAILED, e.getMessage());
+            return unauthorized(exchange).doFinally(signalType -> {
+                log.warn("{} - Authorized path [{}] \n REQUESTED with an Invalid JWT token", LoggingEvents.REQUEST_FAILED, path);
+                LoggingContext.clear();
+            });
+        }
     }
 
     private Mono<Void> processWebFilter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
-        log.info("This is a web request, so web filter will process it");
-        log.info("exchange web request path is {}", path);
 
         if (isPublic(path)) {
             return chain.filter(exchange);
@@ -121,23 +124,14 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         if (refreshToken == null || refreshToken.isEmpty()) return redirectToLogin(exchange);
         if (accessToken == null || accessToken.isEmpty()) return redirectToRefresh(exchange, refreshToken);
 
-        Claims claims;
         try {
-            claims = jwtService.validateToken(accessToken);
-        } catch (ExpiredJwtException e) {
+            ClaimsData claimsData = claimsDataManager.Extractor(accessToken);
+            ServerHttpRequest request = claimsDataManager.serverRequestBuilder(exchange, claimsData);
+            return chain.filter(exchange.mutate().request(request).build());
+        } catch (InvalidJwtToken e) {
+            log.info("{} - Authorized web path [{}] \n REQUESTED with an Invalid JWT token, Start to use RefreshToken", LoggingEvents.REQUEST_FAILED, path);
             return redirectToRefresh(exchange, refreshToken);
         }
-        List<?> roles = claims.get("roles", List.class);
-        List<String> rolesNames = roles.stream().map(Object::toString).toList();
-        ServerHttpRequest request = exchange
-                .getRequest()
-                .mutate()
-                .header("X-USERNAME", claims.getSubject())
-                .header("X-USER-ID", claims.get("userId").toString())
-                .header("X-USER-STATUS", claims.get("status").toString())
-                .header("X-USER-ROLES", String.join(",", rolesNames))
-                .build();
-        return chain.filter(exchange.mutate().request(request).build());
     }
 
     private Mono<Void> redirectToRefresh(ServerWebExchange exchange, String refreshToken) {
@@ -168,13 +162,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(HttpStatus.SEE_OTHER);
         response.getHeaders().setLocation(
-// TODO: for implementation redirect to other pages that contains @RequestBody data I should use something like Redis to save it's data and send it's data into a path variable, then after redirecting I must load data from Redis and do a complete redirect with data
-//
-//                redirectToProfile
-//                    ?
-                URI.create("/ir/aspireapps/linker/auth/web/v1/login")
-//                    :
-//                        URI.create("/ir/aspireapps/linker/auth/web/v1/login?returnUrl=" + exchange.getRequest().getURI().getPath())
+                // TODO: for implementation redirect to other pages that contains @RequestBody data I should use something like Redis to save it's data and send it's data into a path variable, then after redirecting I must load data from Redis and do a complete redirect with data
+                URI.create("/linker/auth/web/v1/login")
         );
         return response.setComplete();
     }
@@ -188,14 +177,9 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
     }
 
-//    private boolean isAdmin(String path) {
-//        return ADMIN_PATHS.stream().anyMatch(path::startsWith);
-//    }
-//
-//    private Mono<Void> forbidden(ServerWebExchange exchange) {
-//        exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
-//        return exchange.getResponse().setComplete();
-//    }
+    private boolean isWebPath(String path) {
+        return WEB_PATHS.stream().anyMatch(path::startsWith);
+    }
 
     private Mono<Void> unauthorized(ServerWebExchange exchange) {
         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);

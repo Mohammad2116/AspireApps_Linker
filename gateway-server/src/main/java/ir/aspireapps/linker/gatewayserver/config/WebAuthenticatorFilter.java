@@ -2,9 +2,9 @@ package ir.aspireapps.linker.gatewayserver.config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import ir.aspireapps.linker.common.error.InvalidJwtToken;
 import ir.aspireapps.linker.common.utility.LoggingConstants;
 import ir.aspireapps.linker.common.utility.LoggingContext;
-import ir.aspireapps.linker.common.utility.LoggingEvents;
 import ir.aspireapps.linker.gatewayserver.service.JwtService;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class WebAuthenticatorFilter implements WebFilter {
     private final static List<String> RESOURCE_PATHS = List.of(
             "/ir/aspireapps/linker/css/"
     );
-    private final static List<String> LOCAL_PATHS = List.of(
+    private final static List<String> GATEWAY_WEB_CONTROLLERS_PATH = List.of(
             "/ir/aspireapps/linker/home");
     private final JwtService jwtService;
 
@@ -39,50 +39,37 @@ public class WebAuthenticatorFilter implements WebFilter {
         exchange.getRequest().getHeaders().add(LoggingConstants.REQUEST_ID_HEADER, requestId);
 
         String path = exchange.getRequest().getURI().getPath();
-        log.info("{} - Starting web request to path {}", LoggingEvents.REQUEST_STARTED, path);
 
         if (isResource(path)) {
-            log.info("This is a request for Resources got at WebAuthenticatorFilter");
-            return chain.filter(exchange)
-                    .doFinally(signal -> {
-                        log.info("{} - End web request to resource at {}", LoggingEvents.REQUEST_COMPLETED, path);
-                    });
+            log.info("This is a request for Resources, return resource");
+            return chain.filter(exchange);
         }
 
-        if (!isLocal(path)) {
-            log.info("Not a local request so sent request to controller");
-            return chain.filter(exchange)
-                    .doFinally(signal -> {
-                        log.info("{} - End web request to path {}", LoggingEvents.REQUEST_COMPLETED, path);
-                    });
-        }
+        // if path is a controller at gateway, it's a public page no need any check up, just send it to controller
+        if (!isGatewayWebControllersPath(path)) return chain.filter(exchange);
 
+        // by default request is not authenticated, until authentication passes successfully
         exchange.getAttributes().put("AUTHENTICATED", false);
 
         HttpCookie cookie = exchange.getRequest().getCookies().getFirst("ACCESS_TOKEN");
         if (cookie != null) {
             Claims claims;
             try {
-                claims = jwtService.validateToken(cookie.getValue());
+                jwtService.validateToken(cookie.getValue());
                 exchange.getAttributes().put("AUTHENTICATED", true);
             } catch (ExpiredJwtException e) {
                 log.warn("Expired JWT Token received");
-                return chain.filter(exchange)
-                        .doFinally(signal -> {
-                            log.info("{} End of request without Auth info", LoggingEvents.REQUEST_COMPLETED);
-                            LoggingContext.clear();
-                        });
+                return chain.filter(exchange);
+            } catch (InvalidJwtToken e) {
+                log.warn("Invalid JWT Token received");
+                return chain.filter(exchange);
             }
         }
-        return chain.filter(exchange)
-                .doFinally(signal -> {
-                    log.info("{} End of request with Auth info", LoggingEvents.REQUEST_COMPLETED);
-                    LoggingContext.clear();
-                });
+        return chain.filter(exchange);
     }
 
-    private boolean isLocal(String path) {
-        return LOCAL_PATHS.stream().anyMatch(path::equalsIgnoreCase);
+    private boolean isGatewayWebControllersPath(String path) {
+        return GATEWAY_WEB_CONTROLLERS_PATH.stream().anyMatch(path::equals);
     }
 
     private boolean isResource(String path) {
