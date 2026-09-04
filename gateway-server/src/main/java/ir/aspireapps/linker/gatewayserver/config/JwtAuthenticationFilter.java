@@ -134,7 +134,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 .refreshToken(refreshToken)
                 .returnUrl(exchange.getRequest().getURI().getRawPath())
                 .build();
-        String redirectPath = "ir/aspireapps/linker/auth/web/v1/refresh";
+        String redirectPath = "/linker/auth/web/v1/refresh";
         return webClientBuilder
                 .build()
                 .post()
