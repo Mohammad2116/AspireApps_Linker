@@ -1,6 +1,5 @@
 package ir.aspireapps.linker.gatewayserver.config;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import ir.aspireapps.linker.common.error.InvalidJwtToken;
 import ir.aspireapps.linker.common.utility.LoggingConstants;
@@ -58,7 +57,7 @@ public class WebAuthenticatorFilter implements WebFilter {
             try {
                 claimsDataManager.serverRequestBuilder(
                         exchange,
-                        claimsDataManager.Extractor(cookie.getName())
+                        claimsDataManager.Extractor(cookie.getValue())
                 );
                 exchange.getAttributes().put("AUTHENTICATED", true);
             } catch (ExpiredJwtException e) {
