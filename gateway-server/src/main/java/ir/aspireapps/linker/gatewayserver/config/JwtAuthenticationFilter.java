@@ -150,7 +150,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         return webClientBuilder
                 .build()
                 .post()
-                .uri(redirectPath)
+                .uri(URI.create(redirectPath))
                 .bodyValue(refreshRequest)
                 .exchangeToMono(response -> {
                     if (response.statusCode() == HttpStatus.FORBIDDEN)
