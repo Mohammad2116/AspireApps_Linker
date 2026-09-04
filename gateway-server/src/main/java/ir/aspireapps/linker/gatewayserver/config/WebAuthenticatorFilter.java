@@ -6,6 +6,7 @@ import ir.aspireapps.linker.common.error.InvalidJwtToken;
 import ir.aspireapps.linker.common.utility.LoggingConstants;
 import ir.aspireapps.linker.common.utility.LoggingContext;
 import ir.aspireapps.linker.gatewayserver.service.JwtService;
+import ir.aspireapps.linker.gatewayserver.utility.ClaimsDataManager;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ public class WebAuthenticatorFilter implements WebFilter {
     private final static List<String> GATEWAY_WEB_CONTROLLERS_PATH = List.of(
             "/ir/aspireapps/linker/home");
     private final JwtService jwtService;
+    private final ClaimsDataManager  claimsDataManager;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, @Nonnull WebFilterChain chain) {
@@ -53,9 +55,11 @@ public class WebAuthenticatorFilter implements WebFilter {
 
         HttpCookie cookie = exchange.getRequest().getCookies().getFirst("ACCESS_TOKEN");
         if (cookie != null) {
-            Claims claims;
             try {
-                jwtService.validateToken(cookie.getValue());
+                claimsDataManager.serverRequestBuilder(
+                        exchange,
+                        claimsDataManager.Extractor(cookie.getName())
+                );
                 exchange.getAttributes().put("AUTHENTICATED", true);
             } catch (ExpiredJwtException e) {
                 log.warn("Expired JWT Token received");
