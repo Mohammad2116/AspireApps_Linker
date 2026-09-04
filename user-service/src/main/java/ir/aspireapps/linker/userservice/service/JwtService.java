@@ -2,6 +2,7 @@ package ir.aspireapps.linker.userservice.service;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import ir.aspireapps.linker.common.utility.ClaimConstants;
 import ir.aspireapps.linker.userservice.model.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -28,9 +29,9 @@ public class JwtService {
         Instant now = Instant.now();
         return Jwts.builder()
                 .subject(user.getUsername())
-                .claim("userId", user.getId())
-                .claim("roles", List.of(user.getRole().name()))
-                .claim("status", user.getStatus().name())
+                .claim(ClaimConstants.USER_ID, user.getId())
+                .claim(ClaimConstants.ROLES, List.of(user.getRole().name()))
+                .claim(ClaimConstants.STATUS, user.getStatus().name())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusMillis(expirationMs)))
                 .signWith(secretKey)
