@@ -36,12 +36,13 @@ public class ClaimsDataManager {
         if (rawRoles == null || rawRoles.isEmpty()) {
             throw new InvalidJwtToken("Invalid roles list");
         }
-        log.info("Username [{}], status[{}], roles[{}], ... extracted from refreshToken using ClaimsDataManager", claims.getSubject(), claims.get(ClaimConstants.STATUS), rawRoles.toArray());
+        List<String> rolesNames = rawRoles.stream().map(Object::toString).toList();
+        log.info("Username [{}], status[{}], roles[{}], ... extracted from refreshToken using ClaimsDataManager", claims.getSubject(), claims.get(ClaimConstants.STATUS), rolesNames.toArray());
         return ClaimsData.builder()
                 .username(claims.getSubject())
                 .userId(claims.get(ClaimConstants.USER_ID).toString())
                 .status(claims.get(ClaimConstants.STATUS).toString())
-                .rolesNames(rawRoles.stream().map(Object::toString).toList())
+                .rolesNames(rolesNames)
                 .build();
     }
 
