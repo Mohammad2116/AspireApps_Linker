@@ -2,6 +2,7 @@ package ir.aspireapps.linker.gatewayserver.config;
 
 import ir.aspireapps.linker.common.dto.UserRefreshRequest;
 import ir.aspireapps.linker.common.error.InvalidJwtToken;
+import ir.aspireapps.linker.common.utility.HeaderConstants;
 import ir.aspireapps.linker.common.utility.LoggingConstants;
 import ir.aspireapps.linker.common.utility.LoggingContext;
 import ir.aspireapps.linker.common.utility.LoggingEvents;
@@ -32,17 +33,18 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     private static final List<String> PUBLIC_PATHS = List.of(
-            "/ir/aspireapps/linker/visit",
             "/ir/aspireapps/linker/auth/api/v1/register",
             "/ir/aspireapps/linker/auth/api/v1/login",
             "/ir/aspireapps/linker/auth/api/v1/refresh",
             "/ir/aspireapps/linker/links/api/v1/visit/",
             "/actuator",
+            "/ir/aspireapps/linker/visit",
             "/ir/aspireapps/linker/auth/web/v1/register",
             "/ir/aspireapps/linker/auth/web/v1/login",
             "/ir/aspireapps/linker/auth/web/v1/refresh"
     );
     private static final List<String> WEB_PATHS = List.of(
+            "/ir/aspireapps/linker/visit",
             "/ir/aspireapps/linker/auth/web/v1/register",
             "/ir/aspireapps/linker/auth/web/v1/login",
             "/ir/aspireapps/linker/auth/web/v1/refresh",
@@ -57,6 +59,10 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         log.info("\n\n========================= NEW REQUEST AT JwtAuthenticationFilter RECEIVED =========================");
+        log.info("Header X-USERNAME: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USERNAME));
+        log.info("Header X-USER_ID: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ID));
+        log.info("Header X-USER_STATE: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_STATUS));
+        log.info("Header X-USER-ROLES: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ROLES));
 
         String requestId = exchange.getRequest().getHeaders().getFirst(LoggingConstants.REQUEST_ID_HEADER);
         if (requestId == null || requestId.isEmpty()) requestId = UUID.randomUUID().toString();
@@ -121,6 +127,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 log.info("\n========== REQUEST FINISHED(4) ==========");
             });
         }
+        log.info("Refresh Token Cookie found");
 
         if (accessToken == null || accessToken.isEmpty()) {
             log.info("{} - Authorized web path [{}] \n REQUESTED with no ACCESS_TOKEN cookie, so Refreshing required", LoggingEvents.REQUEST_FAILED, path);
@@ -128,6 +135,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 log.info("\n========== REQUEST FINISHED(5) ==========");
             });
         }
+        log.info("Access Token Cookie found");
 
         try {
             ClaimsData claimsData = claimsDataManager.Extractor(accessToken);
