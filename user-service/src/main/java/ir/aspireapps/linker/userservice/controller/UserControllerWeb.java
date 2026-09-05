@@ -2,6 +2,7 @@ package ir.aspireapps.linker.userservice.controller;
 
 import ir.aspireapps.linker.common.dto.LinkRegisterRequest;
 import ir.aspireapps.linker.common.dto.LinkResponse;
+import ir.aspireapps.linker.common.utility.HeaderConstants;
 import ir.aspireapps.linker.common.utility.LoggingEvents;
 import ir.aspireapps.linker.userservice.dto.UserProfileResponse;
 import ir.aspireapps.linker.userservice.error.ResourceNotFoundException;
@@ -33,8 +34,8 @@ public class UserControllerWeb {
 
     @GetMapping("profile")
     public String profile(
-            @NotEmpty @RequestHeader("X-USERNAME") String username,
-            @NotEmpty @RequestHeader("X-USER-ROLES") String roles,
+            @NotEmpty @RequestHeader(HeaderConstants.X_USERNAME) String username,
+            @NotEmpty @RequestHeader(HeaderConstants.X_USER_ROLES) String roles,
             Model model,
             HttpServletResponse servletResponse) {
 
