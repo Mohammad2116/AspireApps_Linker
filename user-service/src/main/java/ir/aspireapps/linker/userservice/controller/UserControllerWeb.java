@@ -58,7 +58,7 @@ public class UserControllerWeb {
 
     @GetMapping("addLink")
     public String addLink(
-            @NotEmpty @RequestHeader("X-USER-STATUS") String status,
+            @NotEmpty @RequestHeader(HeaderConstants.X_USER_STATE) String status,
             Model model,
             HttpServletRequest servletRequest) {
         if (!status.equals(SubscriptionStatus.PREMIUM.name()))
@@ -70,9 +70,9 @@ public class UserControllerWeb {
 
     @PostMapping("addLinkProcess")
     public String addLinkProcess(
-            @NotEmpty @RequestHeader("X-USERNAME") String username,
-            @NotEmpty @RequestHeader("X-USER-ROLES") String roles,
-            @NotEmpty @RequestHeader("X-USER-STATUS") String status,
+            @NotEmpty @RequestHeader(HeaderConstants.X_USERNAME) String username,
+            @NotEmpty @RequestHeader(HeaderConstants.X_USER_ROLES) String roles,
+            @NotEmpty @RequestHeader(HeaderConstants.X_USER_STATE) String status,
             @Valid @ModelAttribute AddLinkForm addLinkForm,
             Model model,
             HttpServletRequest servletRequest) {
@@ -106,7 +106,7 @@ public class UserControllerWeb {
 
     @GetMapping("delete/{linkId}")
     public String deleteLinkProcess(@Valid @PathVariable long linkId,
-                                    @NotEmpty @RequestHeader("X-USERNAME") String username,
+                                    @NotEmpty @RequestHeader(HeaderConstants.X_USERNAME) String username,
                                     Model model,
                                     HttpServletRequest servletRequest) {
         log.info("{} - Calling links-service from FeignServer to delete new link", LoggingEvents.EXTERNAL_SERVICE_CALL);
@@ -122,7 +122,7 @@ public class UserControllerWeb {
 
     @GetMapping("toggle/{linkId}")
     public String toggleLinkProcess(@Valid @PathVariable long linkId,
-                                    @NotEmpty @RequestHeader("X-USERNAME") String username,
+                                    @NotEmpty @RequestHeader(HeaderConstants.X_USERNAME) String username,
                                     Model model,
                                     HttpServletRequest servletRequest) {
         log.info("{} - Calling links-service from FeignServer to toggle new link", LoggingEvents.EXTERNAL_SERVICE_CALL);
