@@ -150,6 +150,10 @@ public class AuthControllerWeb {
         if (refreshToken != null) {
             log.info("Check validity of refresh token");
             if (authService.isRefreshTokenValid(refreshToken)) {
+                AuthResponse authResponse = authService.refresh(refreshToken,
+                        servletRequest.getHeader("User-Agent"),
+                        servletRequest.getRemoteAddr());
+                generateTokenCookies(servletResponse, authResponse);
                 log.info("{} - Refresh token is valid redirecting to profile page is consider as new target",
                         LoggingEvents.AUTH_LOGIN_SUCCESS);
                 return "redirect:/linker/user/web/v1/profile";
