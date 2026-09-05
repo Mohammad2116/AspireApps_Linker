@@ -37,6 +37,7 @@ public class ClaimsDataManager {
                 || userId == null || userId.isBlank()
                 || status == null || status.isBlank()) {
             log.warn("Required claims are missing from refresh token");
+            log.info("username [{}], userId [{}], status [{}]", username, userId, status);
             throw new InvalidJwtToken("Required claims are missing");
         }
 
