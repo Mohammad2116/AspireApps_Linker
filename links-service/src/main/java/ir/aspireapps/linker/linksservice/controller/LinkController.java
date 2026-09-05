@@ -1,6 +1,7 @@
 package ir.aspireapps.linker.linksservice.controller;
 
 import ir.aspireapps.linker.common.dto.LinkResponse;
+import ir.aspireapps.linker.common.utility.HeaderConstants;
 import ir.aspireapps.linker.linksservice.dto.LinkRegisterRequest;
 import ir.aspireapps.linker.linksservice.dto.LinkUpdateStatusRequest;
 import ir.aspireapps.linker.linksservice.service.LinkService;
@@ -17,16 +18,16 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/ir/aspireapps/linker/links/api/v1/**")
+@RequestMapping("/ir/aspireapps/linker/links/api/v1")
 @RequiredArgsConstructor
 public class LinkController {
     private final LinkService linkService;
 
-    @PostMapping("register")
+    @PostMapping("/register")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<LinkResponse> register(
             @Valid @NotNull @RequestBody LinkRegisterRequest request,
-            @NotEmpty @RequestHeader("X-USER-ID") String userId) {
+            @NotEmpty @RequestHeader(HeaderConstants.X_USER_ID) String userId) {
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
                 .body(
@@ -34,11 +35,11 @@ public class LinkController {
                 );
     }
 
-    @PutMapping("update/status")
+    @PutMapping("/update/status")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<LinkResponse> updateStatus(
             @Valid @NotNull @RequestBody LinkUpdateStatusRequest request,
-            @NotEmpty @RequestHeader("X-USER-ID") String userId) {
+            @NotEmpty @RequestHeader(HeaderConstants.X_USER_ID) String userId) {
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
                 .body(
@@ -50,7 +51,7 @@ public class LinkController {
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<LinkResponse> details(
             @NotNull @RequestBody Long id,
-            @NotEmpty @RequestHeader("X-USER-ID") String userId) {
+            @NotEmpty @RequestHeader(HeaderConstants.X_USER_ID) String userId) {
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
                 .body(
@@ -61,7 +62,7 @@ public class LinkController {
     @GetMapping("/user/links")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<List<LinkResponse>> userLinks(
-            @NotEmpty @RequestHeader("X-USER-ID") String userId) {
+            @NotEmpty @RequestHeader(HeaderConstants.X_USER_ID) String userId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(
@@ -69,17 +70,17 @@ public class LinkController {
                 );
     }
 
-    @DeleteMapping("/ir/aspireapps/linker/links/api/v1/delete/{linkId}")
+    @DeleteMapping("/delete/{linkId}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     void deleteLink(@NotNull @PathVariable long linkId,
-                    @NotEmpty @RequestHeader("X-USER-ID") String userId) {
+                    @NotEmpty @RequestHeader(HeaderConstants.X_USER_ID) String userId) {
         linkService.delete(linkId, UUID.fromString(userId));
     }
 
-    @PutMapping("/ir/aspireapps/linker/links/api/v1/toggle/{linkId}")
+    @PutMapping("/toggle/{linkId}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     void toggleLink(@NotNull @PathVariable long linkId,
-                    @NotEmpty @RequestHeader("X-USER-ID") String userId) {
+                    @NotEmpty @RequestHeader(HeaderConstants.X_USER_ID) String userId) {
         linkService.toggle(linkId, UUID.fromString(userId));
     }
 }
