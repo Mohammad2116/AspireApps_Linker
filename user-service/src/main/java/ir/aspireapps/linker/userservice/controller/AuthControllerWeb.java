@@ -190,6 +190,7 @@ public class AuthControllerWeb {
                             .build(),
                     servletRequest.getHeader("User-Agent"),
                     servletRequest.getRemoteAddr());
+            generateTokenCookies(servletResponse, authResponse);
             log.info("{} - Authentication using login form was successful", LoggingEvents.AUTH_LOGIN_SUCCESS);
         } catch (ResourceNotFoundException e) {
             model.addAttribute("generalError", true);
