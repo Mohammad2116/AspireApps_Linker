@@ -21,9 +21,13 @@
                 aria-label="Shortened URL"
                 class="link-input"
                 placeholder="Enter a shortened URL"
-                type="text"/>
+                maxlength="12"
+                oninput="onAliasInput(this)"
+                pattern="[A-Za-z0-9]{4,12}"
+                type="text"
+        />
         <button class="primary-button"
-                th:onclick="|location.href='@{/linker/visit/}' + encodeURIComponent(document.getElementById('shorted').value)|"
+                th:onclick="onGoClicked()"
                 type="button">
             Go
         </button>
@@ -32,4 +36,16 @@
         <h4>Invalid shorted link, check link and try again</h4>
     </div>
 </div>
+<script>
+    function onAliasInput(field) {
+        field.value = field.value.replace(/[^a-zA-Z0-9]/g, '');
+    }
+
+    function onGoClicked() {
+        let url = document.getElementById('shorted').value.trim();
+        if (/^[A-Za-z0-9]{4,12}$/i.test(url)) {
+            window.location.href = url;
+        }
+    }
+</script>
 </html>
