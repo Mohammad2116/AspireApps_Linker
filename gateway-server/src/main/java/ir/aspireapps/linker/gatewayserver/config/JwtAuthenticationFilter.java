@@ -59,10 +59,6 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         log.info("\n\n========================= NEW REQUEST AT JwtAuthenticationFilter RECEIVED =========================");
-        log.info("Header X-USERNAME: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USERNAME));
-        log.info("Header X-USER_ID: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ID));
-        log.info("Header X-USER_STATE: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_STATUS));
-        log.info("Header X-USER-ROLES: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ROLES));
 
         String requestId = exchange.getRequest().getHeaders().getFirst(LoggingConstants.REQUEST_ID_HEADER);
         if (requestId == null || requestId.isEmpty()) requestId = UUID.randomUUID().toString();
@@ -81,7 +77,6 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
-
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             log.warn("{} - Authorized path [{}] \n REQUESTED with [null or not a Bearer] authHeader info", LoggingEvents.REQUEST_FAILED, path);
@@ -95,6 +90,10 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         try {
             ClaimsData claimsData = claimsDataManager.Extractor(accessToken);
             ServerHttpRequest request = claimsDataManager.serverRequestBuilder(exchange, claimsData);
+            log.info("API Header X-USERNAME: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USERNAME));
+            log.info("API Header X-USER_ID: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ID));
+            log.info("API Header X-USER_STATE: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_STATUS));
+            log.info("API Header X-USER-ROLES: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ROLES));
             return chain.filter(exchange.mutate().request(request).build());
         } catch (InvalidJwtToken e) {
             log.warn("{} - Invalid JWT Token, reason: [{}]", LoggingEvents.REQUEST_FAILED, e.getMessage());
@@ -140,7 +139,10 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         try {
             ClaimsData claimsData = claimsDataManager.Extractor(accessToken);
             ServerHttpRequest request = claimsDataManager.serverRequestBuilder(exchange, claimsData);
-            log.info("Username [{}], status[{}], ... extracted from access token", claimsData.username(), claimsData.status());
+            log.info("Web Header X-USERNAME: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USERNAME));
+            log.info("Web Header X-USER_ID: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ID));
+            log.info("Web Header X-USER_STATE: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_STATUS));
+            log.info("Web Header X-USER-ROLES: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ROLES));
             return chain.filter(exchange.mutate().request(request).build());
         } catch (InvalidJwtToken e) {
             log.info("{} - Authorized web path [{}] \n REQUESTED with an Invalid JWT token, Start to use RefreshToken", LoggingEvents.REQUEST_FAILED, path);
