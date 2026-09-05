@@ -44,7 +44,7 @@
     function onGoClicked() {
         let url = document.getElementById('shorted').value.trim();
         if (/^[A-Za-z0-9]{4,12}$/i.test(url)) {
-            window.location.href = url;
+            window.location.href = '/linker/visit/' + url;
         }
     }
 </script>
