@@ -25,7 +25,7 @@
                 oninput="onAliasInput(this)"
                 pattern="[A-Za-z0-9]{4,12}"
                 type="text"
-        />
+                required/>
         <button class="primary-button"
                 th:onclick="onGoClicked()"
                 type="button">
@@ -38,12 +38,14 @@
 </div>
 <script>
     function onAliasInput(field) {
-        field.value = field.value.replace(/[^a-zA-Z0-9]/g, '');
+        field.value = field.value.replace(/[^A-Za-z0-9]/g, '');
     }
 
     function onGoClicked() {
         let url = document.getElementById('shorted').value.trim();
-        if (/^[A-Za-z0-9]{4,12}$/i.test(url)) {
+
+        const valid = /^[A-Za-z0-9]{4,12}$/.test(url)
+        if (valid && url !== '') {
             window.location.href = '/linker/visit/' + url;
         }
     }
