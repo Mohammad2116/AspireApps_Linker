@@ -88,7 +88,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         log.info("{} - START AUTHENTICATED PUBLIC path: [{}]", LoggingEvents.REQUEST_STARTED, path);
         String accessToken = authHeader.substring("Bearer ".length());
         try {
-            ClaimsData claimsData = claimsDataManager.Extractor(accessToken);
+            ClaimsData claimsData = claimsDataManager.extract(accessToken);
             ServerHttpRequest request = claimsDataManager.serverRequestBuilder(exchange, claimsData);
             log.info("API Header X-USERNAME: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USERNAME));
             log.info("API Header X-USER_ID: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ID));
@@ -137,7 +137,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         log.info("Access Token Cookie found");
 
         try {
-            ClaimsData claimsData = claimsDataManager.Extractor(accessToken);
+            ClaimsData claimsData = claimsDataManager.extract(accessToken);
             ServerHttpRequest request = claimsDataManager.serverRequestBuilder(exchange, claimsData);
             log.info("Web Header X-USERNAME: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USERNAME));
             log.info("Web Header X-USER_ID: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ID));

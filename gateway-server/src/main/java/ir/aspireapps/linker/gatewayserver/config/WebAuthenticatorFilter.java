@@ -59,7 +59,7 @@ public class WebAuthenticatorFilter implements WebFilter {
             try {
                 claimsDataManager.serverRequestBuilder(
                         exchange,
-                        claimsDataManager.Extractor(cookie.getValue())
+                        claimsDataManager.extract(cookie.getValue())
                 );
                 log.info("Web Auth Header X-USERNAME: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USERNAME));
                 log.info("Web Auth Header X-USER_ID: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ID));

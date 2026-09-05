@@ -17,36 +17,59 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class ClaimsDataManager {
+
     private final JwtService jwtService;
 
-    public ClaimsData Extractor(String refreshToken) {
-        if (refreshToken == null || refreshToken.isEmpty()) {
-            log.warn("Refresh token is null or empty");
-            throw new InvalidJwtToken("Refresh token is null or empty");
+    public ClaimsData extract(String refreshToken) {
+
+        if (refreshToken == null || refreshToken.isBlank()) {
+            log.warn("Refresh token is null or blank");
+            throw new InvalidJwtToken("Refresh token is null or blank");
         }
 
-        Claims claims;
-        claims = jwtService.validateToken(refreshToken);
-        if (claims == null) {
-            log.warn("Invalid refresh token");
-            throw new InvalidJwtToken("Invalid refresh token");
+        Claims claims = jwtService.validateToken(refreshToken);
+
+        String username = claims.getSubject();
+        String userId = claims.get(ClaimConstants.USER_ID, String.class);
+        String status = claims.get(ClaimConstants.STATUS, String.class);
+
+        if (username == null || username.isBlank()
+                || userId == null || userId.isBlank()
+                || status == null || status.isBlank()) {
+            log.warn("Required claims are missing from refresh token");
+            throw new InvalidJwtToken("Required claims are missing");
         }
 
         List<?> rawRoles = claims.get(ClaimConstants.ROLES, List.class);
+
         if (rawRoles == null || rawRoles.isEmpty()) {
+            log.warn("Roles claim is missing or empty");
             throw new InvalidJwtToken("Invalid roles list");
         }
-        List<String> rolesNames = rawRoles.stream().map(Object::toString).toList();
-        log.info("Username [{}], status[{}], roles[{}], ... extracted from refreshToken using ClaimsDataManager", claims.getSubject(), claims.get(ClaimConstants.STATUS), rolesNames.toArray());
+
+        List<String> rolesNames = rawRoles.stream()
+                .map(Object::toString)
+                .toList();
+
+        log.debug(
+                "Claims extracted for username [{}], status [{}], roles [{}]",
+                username,
+                status,
+                rolesNames
+        );
+
         return ClaimsData.builder()
-                .username(claims.getSubject())
-                .userId(claims.get(ClaimConstants.USER_ID).toString())
-                .status(claims.get(ClaimConstants.STATUS).toString())
+                .username(username)
+                .userId(userId)
+                .status(status)
                 .rolesNames(rolesNames)
                 .build();
     }
 
-    public ServerHttpRequest serverRequestBuilder(ServerWebExchange exchange, ClaimsData claimsData) {
+    public ServerHttpRequest serverRequestBuilder(
+            ServerWebExchange exchange,
+            ClaimsData claimsData) {
+
         return exchange
                 .getRequest()
                 .mutate()
@@ -57,4 +80,3 @@ public class ClaimsDataManager {
                 .build();
     }
 }
-
