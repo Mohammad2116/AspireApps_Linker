@@ -20,7 +20,7 @@ import java.util.List;
 public class VisitControllerWeb {
     private final RedirectService redirectService;
 
-    @GetMapping("/ir/aspireapps/visit/{shorted}")
+    @GetMapping("/ir/aspireapps/linker/visit/{shorted}")
     public String visitWeb(
             @PathVariable(required = true) String shorted,
             Model model,

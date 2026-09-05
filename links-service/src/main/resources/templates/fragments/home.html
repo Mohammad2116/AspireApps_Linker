@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div class="home" th:fragment="home">
+    <h1 style="white-space: pre">W E L C O M E - T O - A S P I R E A P P S</h1>
+    <h1 style="white-space: pre"> L I N K E R </h1>
+    <h5>V.1.0 - at checkpoint</h5>
+
+    <div class="button-group">
+        <button class="primary-button"
+                th:onClick="|location.href='@{/linker/auth/web/v1/register}'|">Sign up
+        </button>
+
+        <button class="secondary-button"
+                th:onclick="|location.href='@{/linker/auth/web/v1/login}'|">Login
+        </button>
+    </div>
+
+    <div class="link-checker">
+        <input
+                id="shorted"
+                aria-label="Shortened URL"
+                class="link-input"
+                placeholder="Enter a shortened URL"
+                maxlength="12"
+                oninput="onAliasInput(this)"
+                pattern="[A-Za-z0-9]{4,12}"
+                type="text"
+                required/>
+        <button class="primary-button"
+                onclick="onGoClicked()"
+                type="button">
+            Go
+        </button>
+    </div>
+    <div class="general_error" th:if="${redirectError}">
+        <h4>Invalid shorted link, check link and try again</h4>
+    </div>
+</div>
+<script>
+    function onAliasInput(field) {
+        field.value = field.value.replace(/[^A-Za-z0-9]/g, '');
+    }
+
+    function onGoClicked() {
+        let url = document.getElementById('shorted').value.trim();
+
+        const valid = /^[A-Za-z0-9]{4,12}$/.test(url)
+        if (valid && url !== '') {
+            window.location.href = '/linker/visit/' + url;
+        }
+    }
+</script>
+</html>

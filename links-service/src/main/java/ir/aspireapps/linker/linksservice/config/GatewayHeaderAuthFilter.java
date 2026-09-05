@@ -1,5 +1,6 @@
 package ir.aspireapps.linker.linksservice.config;
 
+import ir.aspireapps.linker.common.utility.HeaderConstants;
 import ir.aspireapps.linker.common.utility.LoggingConstants;
 import ir.aspireapps.linker.common.utility.LoggingContext;
 import ir.aspireapps.linker.common.utility.LoggingEvents;
@@ -37,9 +38,9 @@ public class GatewayHeaderAuthFilter extends OncePerRequestFilter {
         response.setHeader(LoggingConstants.REQUEST_ID_HEADER, requestId);
 
         log.info("{} - Request received at links-service", LoggingEvents.REQUEST_STARTED);
-        String username = request.getHeader("X-USERNAME");
-        String roles = request.getHeader("X-USER-ROLES");
-        String status = request.getHeader("X-USER-STATUS");
+        String username = request.getHeader(HeaderConstants.X_USERNAME);
+        String roles = request.getHeader(HeaderConstants.X_USER_ROLES);
+        String status = request.getHeader(HeaderConstants.X_USER_STATE);
 
         if ((username != null) && (!username.isEmpty())
                 && (SecurityContextHolder.getContext().getAuthentication() == null)) {
