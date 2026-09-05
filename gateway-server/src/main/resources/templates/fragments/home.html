@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.w3.org/1999/xhtml">
+<html xmlns:th="http://www.thymeleaf.org">
 <div class="home" th:fragment="home">
     <h1 style="white-space: pre">W E L C O M E - T O - A S P I R E A P P S</h1>
     <h1 style="white-space: pre"> L I N K E R </h1>
@@ -11,7 +11,7 @@
         </button>
 
         <button class="secondary-button"
-                th:onclick="|location.href='@{/linker/auth/web/v1/login'}|">Login
+                th:onclick="|location.href='@{/linker/auth/web/v1/login}'|">Login
         </button>
     </div>
 
@@ -27,7 +27,7 @@
                 type="text"
                 required/>
         <button class="primary-button"
-                th:onclick="onGoClicked()"
+                onclick="onGoClicked()"
                 type="button">
             Go
         </button>
