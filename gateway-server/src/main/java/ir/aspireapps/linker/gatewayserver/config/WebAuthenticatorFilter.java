@@ -11,6 +11,7 @@ import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpCookie;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
@@ -56,15 +57,16 @@ public class WebAuthenticatorFilter implements WebFilter {
         HttpCookie cookie = exchange.getRequest().getCookies().getFirst("ACCESS_TOKEN");
         if (cookie != null && !cookie.getValue().isEmpty()) {
             log.info("Access Token has been loaded {}", cookie.getValue());
+            ServerHttpRequest request;
             try {
-                claimsDataManager.serverRequestBuilder(
+                request = claimsDataManager.serverRequestBuilder(
                         exchange,
                         claimsDataManager.extract(cookie.getValue())
                 );
-                log.info("Web Auth Header X-USERNAME: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USERNAME));
-                log.info("Web Auth Header X-USER_ID: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ID));
-                log.info("Web Auth Header X-USER_STATE: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_STATE));
-                log.info("Web Auth Header X-USER-ROLES: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ROLES));
+                log.info("Web Auth Header X-USERNAME: {}", request.getHeaders().get(HeaderConstants.X_USERNAME));
+                log.info("Web Auth Header X-USER_ID: {}", request.getHeaders().get(HeaderConstants.X_USER_ID));
+                log.info("Web Auth Header X-USER_STATE: {}", request.getHeaders().get(HeaderConstants.X_USER_STATE));
+                log.info("Web Auth Header X-USER-ROLES: {}", request.getHeaders().get(HeaderConstants.X_USER_ROLES));
                 exchange.getAttributes().put("AUTHENTICATED", true);
             } catch (ExpiredJwtException e) {
                 log.warn("Expired JWT Token received");

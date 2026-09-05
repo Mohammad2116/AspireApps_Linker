@@ -90,10 +90,10 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         try {
             ClaimsData claimsData = claimsDataManager.extract(accessToken);
             ServerHttpRequest request = claimsDataManager.serverRequestBuilder(exchange, claimsData);
-            log.info("API Header X-USERNAME: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USERNAME));
-            log.info("API Header X-USER_ID: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ID));
-            log.info("API Header X-USER_STATE: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_STATE));
-            log.info("API Header X-USER-ROLES: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ROLES));
+            log.info("API Header X-USERNAME: {}", request.getHeaders().get(HeaderConstants.X_USERNAME));
+            log.info("API Header X-USER_ID: {}", request.getHeaders().get(HeaderConstants.X_USER_ID));
+            log.info("API Header X-USER_STATE: {}", request.getHeaders().get(HeaderConstants.X_USER_STATE));
+            log.info("API Header X-USER-ROLES: {}", request.getHeaders().get(HeaderConstants.X_USER_ROLES));
             return chain.filter(exchange.mutate().request(request).build());
         } catch (InvalidJwtToken e) {
             log.warn("{} - Invalid JWT Token, reason: [{}]", LoggingEvents.REQUEST_FAILED, e.getMessage());
@@ -139,10 +139,10 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         try {
             ClaimsData claimsData = claimsDataManager.extract(accessToken);
             ServerHttpRequest request = claimsDataManager.serverRequestBuilder(exchange, claimsData);
-            log.info("Web Header X-USERNAME: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USERNAME));
-            log.info("Web Header X-USER_ID: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ID));
-            log.info("Web Header X-USER_STATE: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_STATE));
-            log.info("Web Header X-USER-ROLES: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ROLES));
+            log.info("Web Header X-USERNAME: {}", request.getHeaders().get(HeaderConstants.X_USERNAME));
+            log.info("Web Header X-USER_ID: {}", request.getHeaders().get(HeaderConstants.X_USER_ID));
+            log.info("Web Header X-USER_STATE: {}", request.getHeaders().get(HeaderConstants.X_USER_STATE));
+            log.info("Web Header X-USER-ROLES: {}", request.getHeaders().get(HeaderConstants.X_USER_ROLES));
             return chain.filter(exchange.mutate().request(request).build());
         } catch (InvalidJwtToken e) {
             log.info("{} - Authorized web path [{}] \n REQUESTED with an Invalid JWT token, Start to use RefreshToken", LoggingEvents.REQUEST_FAILED, path);
