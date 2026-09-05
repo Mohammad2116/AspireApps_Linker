@@ -92,7 +92,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             ServerHttpRequest request = claimsDataManager.serverRequestBuilder(exchange, claimsData);
             log.info("API Header X-USERNAME: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USERNAME));
             log.info("API Header X-USER_ID: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ID));
-            log.info("API Header X-USER_STATE: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_STATUS));
+            log.info("API Header X-USER_STATE: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_STATE));
             log.info("API Header X-USER-ROLES: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ROLES));
             return chain.filter(exchange.mutate().request(request).build());
         } catch (InvalidJwtToken e) {
@@ -141,7 +141,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             ServerHttpRequest request = claimsDataManager.serverRequestBuilder(exchange, claimsData);
             log.info("Web Header X-USERNAME: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USERNAME));
             log.info("Web Header X-USER_ID: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ID));
-            log.info("Web Header X-USER_STATE: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_STATUS));
+            log.info("Web Header X-USER_STATE: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_STATE));
             log.info("Web Header X-USER-ROLES: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ROLES));
             return chain.filter(exchange.mutate().request(request).build());
         } catch (InvalidJwtToken e) {

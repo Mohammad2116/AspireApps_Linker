@@ -76,7 +76,7 @@ public class ClaimsDataManager {
                 .mutate()
                 .header(HeaderConstants.X_USERNAME, claimsData.username())
                 .header(HeaderConstants.X_USER_ID, claimsData.userId())
-                .header(HeaderConstants.X_USER_STATUS, claimsData.status())
+                .header(HeaderConstants.X_USER_STATE, claimsData.status())
                 .header(HeaderConstants.X_USER_ROLES, String.join(",", claimsData.rolesNames()))
                 .build();
     }

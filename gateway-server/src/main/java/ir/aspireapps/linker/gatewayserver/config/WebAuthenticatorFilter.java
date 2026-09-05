@@ -63,7 +63,7 @@ public class WebAuthenticatorFilter implements WebFilter {
                 );
                 log.info("Web Auth Header X-USERNAME: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USERNAME));
                 log.info("Web Auth Header X-USER_ID: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ID));
-                log.info("Web Auth Header X-USER_STATE: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_STATUS));
+                log.info("Web Auth Header X-USER_STATE: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_STATE));
                 log.info("Web Auth Header X-USER-ROLES: {}", exchange.getRequest().getHeaders().get(HeaderConstants.X_USER_ROLES));
                 exchange.getAttributes().put("AUTHENTICATED", true);
             } catch (ExpiredJwtException e) {
