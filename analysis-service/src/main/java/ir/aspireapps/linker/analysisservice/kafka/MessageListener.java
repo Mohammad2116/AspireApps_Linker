@@ -6,6 +6,7 @@ import ir.aspireapps.linker.analysisservice.service.AnalysisService;
 import ir.aspireapps.linker.common.payload.LinkClickedPayload;
 import ir.aspireapps.linker.common.payload.LinkDeletePayload;
 import ir.aspireapps.linker.common.payload.LinkRegisteredPayload;
+import ir.aspireapps.linker.common.utility.KafkaTopicsConstants;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,40 +21,50 @@ import org.springframework.transaction.annotation.Transactional;
 public class MessageListener {
     private final AnalysisService analysisService;
     private final ObjectMapper objectMapper;
-    @KafkaListener(topics = "link-visit-topic", groupId = "linker")
+
+    @KafkaListener(topics = KafkaTopicsConstants.LINK_VISIT_TOPIC, groupId = "linker")
     @Transactional
     public void visitListener(
             @Nonnull ConsumerRecord<String, String> record) {
-        LinkClickedPayload payload;
+        LinkClickedPayload payload = null;
         try {
             payload = objectMapper.readValue(record.value(), LinkClickedPayload.class);
+            log.info("Received Kafka message at topic: [{}], with payload: [{}]", KafkaTopicsConstants.LINK_VISIT_TOPIC, payload);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error parsing link-visit-payload");
+            log.error("Error parsing received Kafka Message at topic: [{}], with payload: [{}]",
+                    KafkaTopicsConstants.LINK_VISIT_TOPIC, payload, e);
+            throw new RuntimeException("Error parsing received Kafka Message at topic: " + payload);
         }
         analysisService.clicked(payload);
     }
 
-    @KafkaListener(topics = "link-registered-topic", groupId = "linker")
+    @KafkaListener(topics = KafkaTopicsConstants.LINK_REGISTERED_TOPIC, groupId = "linker")
     @Transactional
     public void registeredListener(
             @Nonnull ConsumerRecord<String, String> record) {
-        LinkRegisteredPayload payload;
+        LinkRegisteredPayload payload = null;
         try {
             payload = objectMapper.readValue(record.value(), LinkRegisteredPayload.class);
+            log.info("Received Kafka message at topic: [{}], with payload: [{}]", KafkaTopicsConstants.LINK_REGISTERED_TOPIC, payload);
         } catch (JsonProcessingException e) {
+            log.error("Error parsing received Kafka Message at topic: [{}], with payload: [{}]",
+                    KafkaTopicsConstants.LINK_REGISTERED_TOPIC, payload, e);
             throw new RuntimeException("Error parsing link-registered-payload");
         }
         analysisService.register(payload);
     }
 
-    @KafkaListener(topics = "link-deleted-topic", groupId = "linker")
+    @KafkaListener(topics = KafkaTopicsConstants.LINK_DELETED_TOPIC, groupId = "linker")
     @Transactional
     public void deletedListener(
             @Nonnull ConsumerRecord<String, String> record) {
-        LinkDeletePayload payload;
+        LinkDeletePayload payload = null;
         try {
             payload = objectMapper.readValue(record.value(), LinkDeletePayload.class);
+            log.info("Received Kafka message at topic: [{}], with payload: [{}]", KafkaTopicsConstants.LINK_DELETED_TOPIC, payload);
         } catch (Exception e) {
+            log.error("Error parsing received Kafka Message at topic: [{}], with payload: [{}]",
+                    KafkaTopicsConstants.LINK_DELETED_TOPIC, payload, e);
             throw new RuntimeException("Error parsing link-deleted-payload", e);
         }
         analysisService.delete(payload.shortUrl());

@@ -35,9 +35,10 @@ public class MessageScheduler {
                     .setHeader("schemaVersion", "1")
                     .build();
             try {
+                log.info("A message write to Kafka topic[{}], with payload: [{}]", outboxMessage.getTopic(), message.getPayload());
                 kafkaTemplate.send(message).get();
             } catch (Exception e) {
-                log.info("Error while sending kafka message");
+                log.info("Error while sending kafka message to topic: [{}], with payload: [{}]", outboxMessage.getTopic(), message.getPayload(), e);
                 throw new RuntimeException(e);
             }
             outboxMessage.setStatus(EventStatus.PROCEED);
