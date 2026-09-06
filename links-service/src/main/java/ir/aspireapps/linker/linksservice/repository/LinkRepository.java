@@ -4,9 +4,9 @@ import ir.aspireapps.linker.common.dto.LinkResponse;
 import ir.aspireapps.linker.common.model.LinkStatus;
 import ir.aspireapps.linker.linksservice.dto.RedirectResponse;
 import ir.aspireapps.linker.linksservice.model.Link;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -16,6 +16,17 @@ import java.util.UUID;
 
 public interface LinkRepository extends JpaRepository<Link, Long> {
     Optional<Link> findByIdAndUserId(@NotNull Long id, @NotNull UUID userId);
+
+    @Modifying
+    @Query("""
+            UPDATE link l
+            SET l.status = ir.aspireapps.linker.common.model.LinkStatus.EXPIRED
+            WHERE l.status = ir.aspireapps.linker.common.model.LinkStatus.ACTIVE
+                        AND l.expiresAt IS NOT NULL
+                        AND l.expiresAt < CURRENT_TIMESTAMP
+                        AND l.userId = :userId
+            """)
+    void updateExpirationOfUserLinks(@NotNull @Param("userId") UUID userId);
 
     @Query(
             """
@@ -35,7 +46,7 @@ public interface LinkRepository extends JpaRepository<Link, Long> {
                     WHERE l.userId = :userId
                     """
     )
-    List<LinkResponse> findUserLinks(@NotEmpty @Param("userId") UUID userId);
+    List<LinkResponse> findUserLinks(@NotNull @Param("userId") UUID userId);
 
     @Query(
             """
