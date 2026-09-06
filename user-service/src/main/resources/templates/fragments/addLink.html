@@ -37,8 +37,6 @@
                    class="form-input"
                    id="status"
                    name="status"
-                   placeholder="Enter your password"
-                   required
                    th:field="*{status}"
                    type="checkbox"/>
         </div>
@@ -52,6 +50,7 @@
                    placeholder="expiresAt"
                    required
                    th:field="*{expiresAt}"
+                   th:min="${minExpiresAt}"
                    type="datetime-local"/>
         </div>
         <th:block th:if="${freeAccount}">
