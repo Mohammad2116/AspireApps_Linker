@@ -54,7 +54,7 @@
                        th:text="${link.originalUrl}"></a>
                 </td>
                 <td>
-                    <a th:href="${link.shortUrl}"
+                    <a th:href="@{/linker/visit/${link.shortUrl}}"
                        th:text="${link.shortUrl}"></a>
                 </td>
                 <td>
