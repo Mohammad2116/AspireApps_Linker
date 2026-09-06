@@ -47,9 +47,9 @@ public class AnalysisService {
             analyzeData.incClickCount();
             HitState currentState = payload.currentHitState();
             HitState newState = calculateNewState(analyzeData.getHitCount());
-            log.info("Link:[{}], current hit count: [{}], total hit count: [{}] , current state: [{}], seconds to refresh: [{}]",
+            log.info("Link:[{}], current hit count: [{}], total hit count: [{}] , current state: [{}], new state: [{}], seconds since last popularity test : [{}]",
                     analyzeData.getShortedUrl(), analyzeData.getHitCount(), analyzeData.getAllTimeHitCount(),
-                    currentState,
+                    currentState, newState,
                     Duration.between(analyzeData.getCounterResetAt(), Instant.now()).toSeconds());
             if (Duration.between(
                     analyzeData.getCounterResetAt(),
@@ -57,6 +57,7 @@ public class AnalysisService {
                 analyzeData.setHitCount(0);
                 analyzeData.setCounterResetAt(Instant.now());
                 analyzeData.setHitState(newState);
+                analysisRepository.save(analyzeData);
                 String payloadString;
                 try {
                     payloadString = objectMapper.writeValueAsString(payload);
