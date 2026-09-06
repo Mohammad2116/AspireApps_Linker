@@ -19,9 +19,9 @@ public interface LinkRepository extends JpaRepository<Link, Long> {
 
     @Modifying
     @Query("""
-            UPDATE link l
+            UPDATE Link l
             SET l.status = ir.aspireapps.linker.common.model.LinkStatus.EXPIRED
-            WHERE l.status = ir.aspireapps.linker.common.model.LinkStatus.ACTIVE
+            WHERE l.status == ir.aspireapps.linker.common.model.LinkStatus.ACTIVE
                         AND l.expiresAt IS NOT NULL
                         AND l.expiresAt < CURRENT_TIMESTAMP
                         AND l.userId = :userId
