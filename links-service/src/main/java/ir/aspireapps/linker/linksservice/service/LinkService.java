@@ -105,6 +105,7 @@ public class LinkService {
                 .build();
     }
 
+    @Transactional
     public List<LinkResponse> userLinks(UUID userId) {
 
         linksRepository.updateExpirationOfUserLinks(userId);
