@@ -11,6 +11,7 @@ import ir.aspireapps.linker.common.payload.LinkRegisteredPayload;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
@@ -40,7 +41,7 @@ public class AnalysisService {
                 .build();
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void clicked(LinkClickedPayload payload) {
         if (analysisRepository.existsByShortedUrl(payload.shortedUrl())) {
             AnalyzeData analyzeData = analysisRepository.findByShortedUrl(payload.shortedUrl());
@@ -60,7 +61,10 @@ public class AnalysisService {
                 analysisRepository.save(analyzeData);
                 String payloadString;
                 try {
-                    payloadString = objectMapper.writeValueAsString(payload);
+                    payloadString = objectMapper.writeValueAsString(LinkClickedPayload.builder()
+                            .shortedUrl(payload.shortedUrl())
+                            .currentHitState(newState)
+                            .build());
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException("Could not serialize payload");
                 }
