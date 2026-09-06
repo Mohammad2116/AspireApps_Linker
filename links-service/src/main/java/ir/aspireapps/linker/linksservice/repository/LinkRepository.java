@@ -18,14 +18,14 @@ public interface LinkRepository extends JpaRepository<Link, Long> {
     Optional<Link> findByIdAndUserId(@NotNull Long id, @NotNull UUID userId);
 
     @Modifying
-    @Query("""
-            UPDATE Link l
-            SET l.status = ir.aspireapps.linker.common.model.LinkStatus.EXPIRED
-            WHERE l.status = ir.aspireapps.linker.common.model.LinkStatus.ACTIVE
-                        AND l.expiresAt IS NOT NULL
-                        AND l.expiresAt < CURRENT_TIMESTAMP
-                        AND l.userId = :userId
-            """)
+    @Query(value = """
+            UPDATE links
+            SET status = 'EXPIRED'::link_status
+            WHERE status = 'ACTIVE'::link_status
+                        AND expires_at IS NOT NULL
+                        AND expires_at < CURRENT_TIMESTAMP
+                        AND user_id = :userId
+            """, nativeQuery = true)
     void updateExpirationOfUserLinks(@NotNull @Param("userId") UUID userId);
 
     @Query(
