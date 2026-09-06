@@ -47,7 +47,10 @@ public class AnalysisService {
             analyzeData.incClickCount();
             HitState currentState = payload.currentHitState();
             HitState newState = calculateNewState(analyzeData.getHitCount());
-
+            log.info("Link:[{}], current hit count: [{}], total hit count: [{}] , current state: [{}], seconds to refresh: [{}]",
+                    analyzeData.getShortedUrl(), analyzeData.getHitCount(), analyzeData.getAllTimeHitCount(),
+                    currentState,
+                    Duration.between(analyzeData.getCounterResetAt(), Instant.now()).toSeconds());
             if (Duration.between(
                     analyzeData.getCounterResetAt(),
                     Instant.now()).toSeconds() >= 60) {
