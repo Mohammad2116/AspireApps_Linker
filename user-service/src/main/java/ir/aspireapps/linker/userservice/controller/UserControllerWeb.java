@@ -23,6 +23,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 @Slf4j
 @Controller
@@ -66,6 +69,8 @@ public class UserControllerWeb {
             model.addAttribute("freeAccount", "freeAccount");
         model.addAttribute("addLinkForm", new AddLinkForm());
         model.addAttribute("AUTHENTICATED", true);
+        model.addAttribute("minExpiresAt", LocalDateTime.now().plusMinutes(1)
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
         return "addLink";
     }
 
@@ -86,7 +91,7 @@ public class UserControllerWeb {
                 .title(addLinkForm.getTitle())
                 .url(addLinkForm.getOriginalUrl())
                 .isActivated(addLinkForm.isStatus())
-                .expiresAt(addLinkForm.getExpiresAt())
+                .expiresAt(addLinkForm.getExpiresAt().atZone(ZoneId.systemDefault()).toInstant())
                 .build();
 
         log.info("{} - Calling links-service from FeignServer to register new link", LoggingEvents.EXTERNAL_SERVICE_CALL);
@@ -111,10 +116,10 @@ public class UserControllerWeb {
         long maxSeconds = 7 * 24 * 60 * 60;
         long currentDiffSec = Duration.between(Instant.now(), addLinkForm.getExpiresAt()).toSeconds();
         if (currentDiffSec < minSeconds) {
-            addLinkForm.setExpiresAt(Instant.now().plusSeconds(minSeconds));
+            addLinkForm.setExpiresAt(LocalDateTime.now().plusSeconds(minSeconds));
         }
         if (currentDiffSec > maxSeconds) {
-            addLinkForm.setExpiresAt(Instant.now().plusSeconds(maxSeconds));
+            addLinkForm.setExpiresAt(LocalDateTime.now().plusSeconds(maxSeconds));
         }
     }
 
