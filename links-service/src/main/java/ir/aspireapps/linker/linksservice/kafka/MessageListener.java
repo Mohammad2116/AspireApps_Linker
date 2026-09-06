@@ -3,6 +3,7 @@ package ir.aspireapps.linker.linksservice.kafka;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ir.aspireapps.linker.common.payload.LinkClickedPayload;
+import ir.aspireapps.linker.common.utility.KafkaTopicsConstants;
 import ir.aspireapps.linker.linksservice.service.LinkService;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
@@ -19,15 +20,17 @@ public class MessageListener {
     private final LinkService linkService;
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(topics = "popularity-response-topic", groupId = "linker")
+    @KafkaListener(topics = KafkaTopicsConstants.POPULARITY_RESPONSE_TOPIC, groupId = "linker")
     @Transactional
     public void visitListener(
             @Nonnull ConsumerRecord<String, String> record) {
-        LinkClickedPayload payload;
+        LinkClickedPayload payload = null;
         try {
             payload = objectMapper.readValue(record.value(), LinkClickedPayload.class);
+            log.info("Received Kafka message at topic: [{}], with payload: [{}]", KafkaTopicsConstants.POPULARITY_RESPONSE_TOPIC, payload);
         } catch (JsonProcessingException e) {
-            log.error("Error parsing link-visit-payload", e);
+            log.error("Error parsing received Kafka Message at topic: [{}], with payload: [{}]",
+                    KafkaTopicsConstants.LINK_VISIT_TOPIC, payload, e);
             throw new RuntimeException("Error parsing link-visit-payload");
         }
         linkService.updateHitState(payload);
