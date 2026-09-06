@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import java.time.LocalDate;
+import java.time.Instant;
 
 @Data
 public class AddLinkForm {
@@ -20,5 +20,5 @@ public class AddLinkForm {
     @NotNull
     private boolean status;
     @NotNull
-    private LocalDate expiresAt;
+    private Instant expiresAt;
 }
