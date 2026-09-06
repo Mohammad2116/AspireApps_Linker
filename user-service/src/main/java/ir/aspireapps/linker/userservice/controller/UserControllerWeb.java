@@ -22,7 +22,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -114,12 +113,17 @@ public class UserControllerWeb {
     private void trimFreeAccountDate(@Valid AddLinkForm addLinkForm) {
         long minSeconds = 5 * 60;
         long maxSeconds = 7 * 24 * 60 * 60;
-        long currentDiffSec = Duration.between(Instant.now(), addLinkForm.getExpiresAt()).toSeconds();
+
+        LocalDateTime now = LocalDateTime.now();
+        long currentDiffSec =
+                Duration.between(now, addLinkForm.getExpiresAt()).toSeconds();
+
         if (currentDiffSec < minSeconds) {
-            addLinkForm.setExpiresAt(LocalDateTime.now().plusSeconds(minSeconds));
+            addLinkForm.setExpiresAt(now.plusSeconds(minSeconds));
         }
+
         if (currentDiffSec > maxSeconds) {
-            addLinkForm.setExpiresAt(LocalDateTime.now().plusSeconds(maxSeconds));
+            addLinkForm.setExpiresAt(now.plusSeconds(maxSeconds));
         }
     }
 
