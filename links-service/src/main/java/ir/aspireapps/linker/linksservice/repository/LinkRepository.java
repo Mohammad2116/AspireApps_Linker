@@ -44,6 +44,7 @@ public interface LinkRepository extends JpaRepository<Link, Long> {
                         )
                     FROM Link l
                     WHERE l.userId = :userId
+                    ORDER BY l.title ASC
                     """
     )
     List<LinkResponse> findUserLinks(@NotNull @Param("userId") UUID userId);
