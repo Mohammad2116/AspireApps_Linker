@@ -107,6 +107,8 @@ public class LinkService {
 
     public List<LinkResponse> userLinks(UUID userId) {
 
+        linksRepository.updateExpirationOfUserLinks(userId);
+
         return linksRepository.findUserLinks(userId);
 
     }
