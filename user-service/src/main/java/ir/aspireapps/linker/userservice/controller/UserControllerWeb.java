@@ -21,7 +21,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.ZoneId;
+import java.time.Duration;
+import java.time.Instant;
 
 @Slf4j
 @Controller
@@ -76,15 +77,16 @@ public class UserControllerWeb {
             @Valid @ModelAttribute AddLinkForm addLinkForm,
             Model model,
             HttpServletRequest servletRequest) {
-        if (!status.equals(SubscriptionStatus.PREMIUM.name()))
+        if (!status.equals(SubscriptionStatus.PREMIUM.name())) {
             model.addAttribute("freeAccount", "freeAccount");
+            trimFreeAccountDate(addLinkForm);
+        }
 
         LinkRegisterRequest request = LinkRegisterRequest.builder()
                 .title(addLinkForm.getTitle())
                 .url(addLinkForm.getOriginalUrl())
                 .isActivated(addLinkForm.isStatus())
-                .expiresAt(addLinkForm.getExpiresAt()
-                        .atStartOfDay(ZoneId.systemDefault()).toInstant())
+                .expiresAt(addLinkForm.getExpiresAt())
                 .build();
 
         log.info("{} - Calling links-service from FeignServer to register new link", LoggingEvents.EXTERNAL_SERVICE_CALL);
@@ -102,6 +104,18 @@ public class UserControllerWeb {
         model.addAttribute("links", linksServiceClient.userLinks());
         model.addAttribute("AUTHENTICATED", true);
         return "profile";
+    }
+
+    private void trimFreeAccountDate(@Valid AddLinkForm addLinkForm) {
+        long minSeconds = 5 * 60;
+        long maxSeconds = 7 * 24 * 60 * 60;
+        long currentDiffSec = Duration.between(Instant.now(), addLinkForm.getExpiresAt()).toSeconds();
+        if (currentDiffSec < minSeconds) {
+            addLinkForm.setExpiresAt(Instant.now().plusSeconds(minSeconds));
+        }
+        if (currentDiffSec > maxSeconds) {
+            addLinkForm.setExpiresAt(Instant.now().plusSeconds(maxSeconds));
+        }
     }
 
     @GetMapping("delete/{linkId}")
