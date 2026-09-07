@@ -45,3 +45,4 @@ node_modules/
 /restart_user-service.sh
 /restart_gateway.sh
 /.todo/tasks.json
+/restart_gateway-server.sh
