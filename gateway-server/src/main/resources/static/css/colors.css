@@ -1,7 +1,7 @@
 :root {
-    --primary: #6D28D9;
-    --primary-dark: #5B21B6;
-    --accent: #A78BFA;
+    --primary: #2563EB;
+    --primary-dark: #1D4ED8;
+    --accent: #60A5FA;
 
     --bg: #F8FAFC;
     --surface: #FFFFFF;
@@ -15,6 +15,6 @@
     --warning: #F59E0B;
     --error: #EF4444;
 
-    --navbar: #4C1D95;
-    --footer: #111827;
+    --navbar: #1E3A8A;
+    --footer: #0F172A;
 }
