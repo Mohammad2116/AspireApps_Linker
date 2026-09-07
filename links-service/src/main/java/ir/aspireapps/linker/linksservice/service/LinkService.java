@@ -1,6 +1,7 @@
 package ir.aspireapps.linker.linksservice.service;
 
 import ir.aspireapps.linker.common.dto.LinkResponse;
+import ir.aspireapps.linker.common.error.ResourceNotFoundException;
 import ir.aspireapps.linker.common.model.LinkStatus;
 import ir.aspireapps.linker.common.payload.LinkClickedPayload;
 import ir.aspireapps.linker.linksservice.converter.LinkConverter;
@@ -62,7 +63,7 @@ public class LinkService {
             @NotNull UUID userId) {
 
         Link link = linksRepository.findByIdAndUserId(request.id(), userId)
-                .orElseThrow(() -> new RuntimeException("Link not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Link not found: " + request.id()));
         if (link.getExpiresAt().isBefore(Instant.now()))
             link.setStatus(LinkStatus.EXPIRED);
         else
@@ -88,7 +89,7 @@ public class LinkService {
             @NotNull long id,
             @NotNull UUID userId) {
         Link link = linksRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new RuntimeException("Link not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Link for User id: " + userId + ", And link id: " + id + "not found"));
         if (link.getExpiresAt().isBefore(Instant.now()))
             link.setStatus(LinkStatus.EXPIRED);
         return LinkResponse.builder()
@@ -117,7 +118,7 @@ public class LinkService {
     @Transactional
     public void delete(@NotNull long linkId, @NotEmpty UUID userId) {
         Link link = linksRepository.findByIdAndUserId(linkId, userId)
-                .orElseThrow(() -> new RuntimeException("Link not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Link for User id: " + userId + ", And link id: " + linkId + "not found"));
         redisLinkCacheService.evict(link.getShortUrl());
         outboxService.delete(link);
         linksRepository.delete(link);
@@ -126,7 +127,7 @@ public class LinkService {
     @Transactional
     public void toggle(@NotNull long linkId, @NotEmpty UUID userId) {
         Link link = linksRepository.findByIdAndUserId(linkId, userId)
-                .orElseThrow(() -> new RuntimeException("Link not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Link for User id: " + userId + ", And link id: " + linkId + "not found"));
         if (link.getExpiresAt().isBefore(Instant.now()))
             link.setStatus(LinkStatus.EXPIRED);
         else
@@ -153,7 +154,7 @@ public class LinkService {
     @Transactional
     public void checkExpiration(Long id) {
         Link link = linksRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("shortUrl not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Link not found: " + id));
         if (link.getExpiresAt().isBefore(Instant.now())) {
             redisLinkCacheService.evict(link.getShortUrl());
             link.setStatus(LinkStatus.EXPIRED);
