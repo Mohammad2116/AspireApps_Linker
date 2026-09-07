@@ -20,14 +20,14 @@ public class ClaimsDataManager {
 
     private final JwtService jwtService;
 
-    public ClaimsData extract(String refreshToken) {
+    public ClaimsData extract(String accessToken) {
 
-        if (refreshToken == null || refreshToken.isBlank()) {
+        if (accessToken == null || accessToken.isBlank()) {
             log.warn("Refresh token is null or blank");
             throw new InvalidJwtToken("Refresh token is null or blank");
         }
 
-        Claims claims = jwtService.validateToken(refreshToken);
+        Claims claims = jwtService.validateToken(accessToken);
 
         String username = claims.getSubject();
         String userId = claims.get(ClaimConstants.USER_ID, String.class);
