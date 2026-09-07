@@ -50,7 +50,7 @@ public class LinkController {
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<LinkResponse> details(
-            @NotNull @RequestBody Long id,
+            @NotNull @PathVariable Long id,
             @NotEmpty @RequestHeader(HeaderConstants.X_USER_ID) String userId) {
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
