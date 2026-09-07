@@ -63,9 +63,8 @@ public class MessageListener {
         } catch (JsonProcessingException e) {
             log.error("Error parsing received Kafka Message at topic: [{}], with payload: [{}]",
                     KafkaTopicsConstants.LINK_VISIT_TOPIC, payload, e);
-            throw new RuntimeException("Error parsing received Kafka Message at topic: " + payload);
+            throw new RuntimeException("Error parsing received Kafka Message at topic: " + payload, e);
         }
-        analysisService.clicked(payload);
     }
 
     @KafkaListener(topics = KafkaTopicsConstants.LINK_REGISTERED_TOPIC, groupId = "linker")
@@ -102,9 +101,9 @@ public class MessageListener {
         } catch (JsonProcessingException e) {
             log.error("Error parsing received Kafka Message at topic: [{}], with payload: [{}]",
                     KafkaTopicsConstants.LINK_REGISTERED_TOPIC, payload, e);
-            throw new RuntimeException("Error parsing link-registered-payload");
+            throw new RuntimeException("Error parsing received Kafka Message at topic: " + payload, e);
         }
-        analysisService.register(payload);
+
     }
 
     @KafkaListener(topics = KafkaTopicsConstants.LINK_DELETED_TOPIC, groupId = "linker")
@@ -141,8 +140,7 @@ public class MessageListener {
         } catch (JsonProcessingException e) {
             log.error("Error parsing received Kafka Message at topic: [{}], with payload: [{}]",
                     KafkaTopicsConstants.LINK_DELETED_TOPIC, payload, e);
-            throw new RuntimeException("Error parsing link-deleted-payload", e);
+            throw new RuntimeException("Error parsing received Kafka Message at topic: " + payload, e);
         }
-        analysisService.delete(payload.shortUrl());
     }
 }
