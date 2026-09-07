@@ -263,7 +263,7 @@ The web interface is implemented with **Thymeleaf**.
 Public routing is exposed through:
 
 ```text
-https://aspireapps.ir/linker/...
+https://aspireapps.ir/linker/home
 ```
 
 ### REST API
@@ -271,7 +271,7 @@ https://aspireapps.ir/linker/...
 API endpoints are exposed through:
 
 ```text
-https://api.aspireapps.ir/linker/home
+https://api.aspireapps.ir/linker/...
 ```
 
 Internally, Gateway routes use the application's `/ir/aspireapps/linker/...` path structure.
