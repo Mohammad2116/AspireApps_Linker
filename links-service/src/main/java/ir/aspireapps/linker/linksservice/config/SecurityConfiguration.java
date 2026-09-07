@@ -30,12 +30,14 @@ public class SecurityConfiguration {
 
                 .authorizeHttpRequests(
                         authorize ->
-                                authorize.anyRequest()
-                                        .anonymous().requestMatchers(
+                                authorize
+                                        .requestMatchers(
                                                 "/ir/aspireapps/linker/links/api/v1/visit/**",
                                                 "/ir/aspireapps/linker/visit/**"
-                                        ).permitAll()
-                                        .anyRequest().authenticated()
+                                        )
+                                        .permitAll()
+                                        .anyRequest()
+                                        .authenticated()
                 )
 
                 .addFilterAfter(gatewayHeaderAuthFilter, UsernamePasswordAuthenticationFilter.class)
