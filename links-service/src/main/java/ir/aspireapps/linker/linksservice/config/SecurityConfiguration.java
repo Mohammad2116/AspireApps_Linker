@@ -33,7 +33,7 @@ public class SecurityConfiguration {
                                 authorize.anyRequest()
                                         .anonymous().requestMatchers(
                                                 "/ir/aspireapps/linker/links/api/v1/visit/**",
-                                                "ir/aspireapps/linker/visit/**"
+                                                "/ir/aspireapps/linker/visit/**"
                                         ).permitAll()
                                         .anyRequest().authenticated()
                 )
