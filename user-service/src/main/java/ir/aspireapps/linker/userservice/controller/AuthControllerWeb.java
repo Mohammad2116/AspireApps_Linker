@@ -39,10 +39,10 @@ import java.util.Arrays;
 @RequestMapping("/ir/aspireapps/linker/auth/web/v1/")
 @RequiredArgsConstructor
 public class AuthControllerWeb {
-    @Value("${app.security.cookies-security}")
-    private final String cookiesSecure;
-
     private final AuthService authService;
+
+    @Value("${app.security.cookies-security}")
+    private boolean cookiesSecure;
 
     private static String extractRefreshToken(HttpServletRequest servletRequest) {
         Cookie[] cookies = servletRequest.getCookies();
@@ -63,13 +63,13 @@ public class AuthControllerWeb {
     protected void removeTokenCookies(HttpServletResponse servletResponse) {
         Cookie accessCookie = new Cookie("ACCESS_TOKEN", null);
         accessCookie.setHttpOnly(true);
-        accessCookie.setSecure(Boolean.parseBoolean(cookiesSecure));
+        accessCookie.setSecure(cookiesSecure);
         accessCookie.setPath("/");
         accessCookie.setMaxAge(0);
 
         Cookie refreshCookie = new Cookie("REFRESH_TOKEN", null);
         refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(Boolean.parseBoolean(cookiesSecure));
+        refreshCookie.setSecure(cookiesSecure);
         refreshCookie.setPath("/");
         refreshCookie.setMaxAge(0);
 
@@ -293,7 +293,7 @@ public class AuthControllerWeb {
     private void addTokenCookie(HttpServletResponse servletResponse, String tokenName, String tokenValue, Duration duration) {
         ResponseCookie cookie = ResponseCookie.from(tokenName, tokenValue)
                 .httpOnly(true)
-                .secure(Boolean.parseBoolean(cookiesSecure))
+                .secure(cookiesSecure)
                 .sameSite("Lax")
                 .path("/")
                 .maxAge(duration)
