@@ -1,6 +1,5 @@
 package ir.aspireapps.linker.gatewayserver.config;
 
-import io.jsonwebtoken.ExpiredJwtException;
 import ir.aspireapps.linker.common.error.InvalidJwtToken;
 import ir.aspireapps.linker.common.utility.HeaderConstants;
 import ir.aspireapps.linker.common.utility.LoggingConstants;
@@ -68,9 +67,6 @@ public class WebAuthenticatorFilter implements WebFilter {
                 log.info("Web Auth Header X-USER_STATE: {}", request.getHeaders().get(HeaderConstants.X_USER_STATE));
                 log.info("Web Auth Header X-USER-ROLES: {}", request.getHeaders().get(HeaderConstants.X_USER_ROLES));
                 exchange.getAttributes().put("AUTHENTICATED", true);
-            } catch (ExpiredJwtException e) {
-                log.warn("Expired JWT Token received");
-                return chain.filter(exchange);
             } catch (InvalidJwtToken e) {
                 log.warn("Invalid JWT Token received");
                 return chain.filter(exchange);
