@@ -29,7 +29,7 @@ public class MessageListener {
         LinkClickedPayload payload = null;
         try {
             payload = objectMapper.readValue(record.value(), LinkClickedPayload.class);
-            log.info("Received Kafka message at topic: [{}], with payload: [{}]", KafkaTopicsConstants.LINK_VISIT_TOPIC, payload);
+            log.info("a) Received Kafka message at topic: [{}], with payload: [{}]", KafkaTopicsConstants.LINK_VISIT_TOPIC, payload);
         } catch (JsonProcessingException e) {
             log.error("Error parsing received Kafka Message at topic: [{}], with payload: [{}]",
                     KafkaTopicsConstants.LINK_VISIT_TOPIC, payload, e);
@@ -45,7 +45,7 @@ public class MessageListener {
         LinkRegisteredPayload payload = null;
         try {
             payload = objectMapper.readValue(record.value(), LinkRegisteredPayload.class);
-            log.info("Received Kafka message at topic: [{}], with payload: [{}]", KafkaTopicsConstants.LINK_REGISTERED_TOPIC, payload);
+            log.info("b) Received Kafka message at topic: [{}], with payload: [{}]", KafkaTopicsConstants.LINK_REGISTERED_TOPIC, payload);
         } catch (JsonProcessingException e) {
             log.error("Error parsing received Kafka Message at topic: [{}], with payload: [{}]",
                     KafkaTopicsConstants.LINK_REGISTERED_TOPIC, payload, e);
@@ -61,7 +61,7 @@ public class MessageListener {
         LinkDeletePayload payload = null;
         try {
             payload = objectMapper.readValue(record.value(), LinkDeletePayload.class);
-            log.info("Received Kafka message at topic: [{}], with payload: [{}]", KafkaTopicsConstants.LINK_DELETED_TOPIC, payload);
+            log.info("c) Received Kafka message at topic: [{}], with payload: [{}]", KafkaTopicsConstants.LINK_DELETED_TOPIC, payload);
         } catch (Exception e) {
             log.error("Error parsing received Kafka Message at topic: [{}], with payload: [{}]",
                     KafkaTopicsConstants.LINK_DELETED_TOPIC, payload, e);
