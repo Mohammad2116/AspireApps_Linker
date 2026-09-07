@@ -62,7 +62,7 @@ services:
     environment:
       SERVER_PORT: 8080
       SPRING_APPLICATION_NAME: gateway-server
-      EUREKA_CLIENT_SERVICE_URL_DEFAUTZONE: http://eureka-server:8761/eureka/
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-server:8761/eureka/
       ACCESS_TOKEN_SECURITY_KEY: ${ACCESS_TOKEN_SECURITY_KEY}
 
     depends_on:
