@@ -5,6 +5,7 @@ import ir.aspireapps.linker.userservice.dto.AuthResponse;
 import ir.aspireapps.linker.userservice.dto.UserLoginRequest;
 import ir.aspireapps.linker.userservice.dto.UserRegisterRequest;
 import ir.aspireapps.linker.userservice.error.DuplicateResourceException;
+import ir.aspireapps.linker.userservice.error.InvalidJwtToken;
 import ir.aspireapps.linker.userservice.error.ResourceNotFoundException;
 import ir.aspireapps.linker.userservice.model.RefreshToken;
 import ir.aspireapps.linker.userservice.model.User;
@@ -79,10 +80,6 @@ public class AuthService {
                     log.debug("{} - logging failed}", LoggingEvents.AUTH_LOGIN_FAILED);
                     return new ResourceNotFoundException("username or password not found");
                 });
-        log.debug("Login info: username[{}], password[{}...]", request.username(),
-                user.getPassword().subSequence(
-                        user.getPassword().length() - 5,
-                        user.getPassword().length()));
         log.debug("user login tokens will generate based on : device name[{}], device ip[{}]", deviceName, deviceIp);
         if (passwordEncoder.matches(request.password(), user.getPassword())) {
             log.debug("{} - logging successful}", LoggingEvents.AUTH_LOGIN_SUCCESS);
@@ -93,7 +90,7 @@ public class AuthService {
                             user, deviceName, deviceIp))
                     .build();
         }
-        log.warn("Wrong password [{}] for username [{}] entered", request.password(), request.username());
+        log.warn("Wrong password for username [{}] entered", request.username());
         log.debug("{} - logging failed}", LoggingEvents.AUTH_LOGIN_FAILED);
         throw new ResourceNotFoundException("username or password not found");
     }
@@ -103,7 +100,7 @@ public class AuthService {
                                 @NotEmpty String deviceName,
                                 @NotEmpty String deviceIp) {
         RefreshToken oldTokenData;
-        oldTokenData = refreshTokenService.verifyToken(refreshToken);
+        oldTokenData = refreshTokenService.verifyAndRevokeToken(refreshToken);
         User user = oldTokenData.getUser();
         log.debug("Old token user is [{}]", user.getUsername());
         log.debug("user refresh tokens will generate based on : device name[{}], device ip[{}]", deviceName, deviceIp);
@@ -118,15 +115,21 @@ public class AuthService {
     }
 
     @Transactional
-    public void logout(@NotEmpty @Size(max = 512) String refreshToken) {
-        refreshTokenService.verifyToken(refreshToken);
+    public void logout(@NotEmpty @Size(max = 512) String refreshToken, String loggedInUsername) {
+        if (refreshTokenService.ownerCheck(refreshToken, loggedInUsername))
+            refreshTokenService.verifyAndRevokeToken(refreshToken);
+        else
+            throw new InvalidJwtToken("Invalid refresh token");
     }
 
     @Transactional
-    public void logoutAll(@NotEmpty @Size(max = 512) String refreshToken) {
-        RefreshToken oldToken = refreshTokenService.verifyToken(refreshToken);
-        User user = oldToken.getUser();
-        refreshTokenService.revokeAll(user);
+    public void logoutAll(@NotEmpty @Size(max = 512) String refreshToken, String username) {
+        if (refreshTokenService.ownerCheck(refreshToken, username)) {
+            RefreshToken oldToken = refreshTokenService.verifyAndRevokeToken(refreshToken);
+            User user = oldToken.getUser();
+            refreshTokenService.revokeAll(user);
+        } else
+            throw new InvalidJwtToken("Invalid refresh token");
     }
 
     public long refreshTokenExpireSeconds() {

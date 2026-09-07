@@ -1,7 +1,11 @@
 package ir.aspireapps.linker.userservice.controller;
 
+import ir.aspireapps.linker.common.utility.HeaderConstants;
 import ir.aspireapps.linker.common.utility.LoggingEvents;
-import ir.aspireapps.linker.userservice.dto.*;
+import ir.aspireapps.linker.userservice.dto.AuthResponse;
+import ir.aspireapps.linker.userservice.dto.UserLoginRequest;
+import ir.aspireapps.linker.userservice.dto.UserRefreshRequest;
+import ir.aspireapps.linker.userservice.dto.UserRegisterRequest;
 import ir.aspireapps.linker.userservice.error.DuplicateResourceException;
 import ir.aspireapps.linker.userservice.error.InvalidJwtToken;
 import ir.aspireapps.linker.userservice.error.ResourceNotFoundException;
@@ -35,8 +39,8 @@ import java.util.Arrays;
 @RequestMapping("/ir/aspireapps/linker/auth/web/v1/")
 @RequiredArgsConstructor
 public class AuthControllerWeb {
-    @Value("${app.security.cookies-security")
-    private static String cookiesSecure;
+    @Value("${app.security.cookies-security}")
+    private final String cookiesSecure;
 
     private final AuthService authService;
 
@@ -56,7 +60,7 @@ public class AuthControllerWeb {
         model.addAttribute("AUTHENTICATED", state);
     }
 
-    protected static void removeTokenCookies(HttpServletResponse servletResponse) {
+    protected void removeTokenCookies(HttpServletResponse servletResponse) {
         Cookie accessCookie = new Cookie("ACCESS_TOKEN", null);
         accessCookie.setHttpOnly(true);
         accessCookie.setSecure(Boolean.parseBoolean(cookiesSecure));
@@ -127,7 +131,7 @@ public class AuthControllerWeb {
                             .passwordConfirm(userRegisterForm.getPasswordConfirm())
                             .build(),
                     servletRequest.getHeader("User-Agent"),
-                    servletRequest.getRemoteUser());
+                    servletRequest.getRemoteAddr());
         } catch (DuplicateResourceException e) {
             log.error("{} - Duplicate user registration attempt, return to register page", LoggingEvents.USER_REGISTRATION_FAILED, e);
             model.addAttribute("duplicateResourceException", true);
@@ -212,7 +216,7 @@ public class AuthControllerWeb {
         if (!returnUrl.startsWith("/"))
             returnUrl = "/" + returnUrl;
         log.info("{} - login using login form was successful, redirecting requests to {}", LoggingEvents.AUTH_LOGIN_SUCCESS, returnUrl);
-        return "redirect:" + userLoginForm.getReturnUrl();
+        return "redirect:" + returnUrl;
     }
 
     @PostMapping("refresh")
@@ -243,11 +247,12 @@ public class AuthControllerWeb {
     @GetMapping("logout")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public String logout(
+            @RequestHeader(HeaderConstants.X_USERNAME) String username,
             HttpServletRequest servletRequest,
             HttpServletResponse servletResponse) {
         String refreshToken = extractRefreshToken(servletRequest);
         try {
-            authService.logout(refreshToken);
+            authService.logout(refreshToken, username);
             removeTokenCookies(servletResponse);
             log.info("{} - logging out was successful, redirecting to home page", LoggingEvents.AUTH_LOGOUT_SUCCESS);
         } catch (InvalidJwtToken e) {
@@ -259,14 +264,21 @@ public class AuthControllerWeb {
 
     @PostMapping("logout/all")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<Void> logoutAll(
-            @NotNull @Valid @RequestBody UserLogoutRequest request) {
-        authService.logoutAll(request.refreshToken());
-        return ResponseEntity
-                .status(HttpStatus.ACCEPTED)
-                .body(null);
+    public String logoutAll(
+            @RequestHeader(HeaderConstants.X_USERNAME) String username,
+            HttpServletRequest servletRequest,
+            HttpServletResponse servletResponse) {
+        String refreshToken = extractRefreshToken(servletRequest);
+        try {
+            authService.logoutAll(refreshToken, username);
+            removeTokenCookies(servletResponse);
+            log.info("{} - logging out all was successful, redirecting to home page", LoggingEvents.AUTH_LOGOUT_SUCCESS);
+        } catch (InvalidJwtToken e) {
+            log.error("{} - Invalid refresh token used for logging out all, redirect to home page", LoggingEvents.AUTH_LOGOUT_FAILED);
+            removeTokenCookies(servletResponse);
+        }
+        return "redirect:/linker/home";
     }
-
     private void generateTokenCookies(HttpServletResponse servletResponse, AuthResponse authResponse) {
         addTokenCookie(servletResponse,
                 "ACCESS_TOKEN",

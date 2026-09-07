@@ -51,7 +51,7 @@ public class RefreshTokenService {
     }
 
     @Transactional
-    public RefreshToken verifyToken(@NotEmpty @Size(max = 512) String token) {
+    public RefreshToken verifyAndRevokeToken(@NotEmpty @Size(max = 512) String token) {
         String hashedToken = tokenService.hashToken(token);
         RefreshToken refreshToken = refreshTokenRepository.findByTokenHash(hashedToken)
                 .orElse(null);
@@ -102,5 +102,28 @@ public class RefreshTokenService {
         return refreshToken != null
                 && !refreshToken.getExpiresAt().isBefore(Instant.now())
                 && !refreshToken.isRevoked();
+    }
+
+    public boolean ownerCheck(@NotEmpty @Size(max = 512) String token, String loggedInUsername) {
+        String hashedToken = tokenService.hashToken(token);
+        RefreshToken refreshToken = refreshTokenRepository.findByTokenHash(hashedToken)
+                .orElse(null);
+
+        if (refreshToken == null) {
+            log.warn("[Null] refresh token requested for ownerCheck");
+            throw new InvalidJwtToken(TokenExceptionReason.TOKEN_INVALID.name());
+        }
+
+        if (refreshToken.getExpiresAt().isBefore(Instant.now())) {
+            log.warn("Expired refresh token requested for ownerCheck");
+            throw new InvalidJwtToken(TokenExceptionReason.TOKEN_EXPIRED.name());
+        }
+
+        if (refreshToken.isRevoked()) {
+            log.warn("Used/Revoked refresh token requested for ownerCheck");
+            throw new InvalidJwtToken(TokenExceptionReason.TOKEN_REVOKED.name());
+        }
+
+        return refreshToken.getUser().getUsername().equals(loggedInUsername);
     }
 }
