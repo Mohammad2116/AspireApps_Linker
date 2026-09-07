@@ -271,7 +271,7 @@ https://aspireapps.ir/linker/...
 API endpoints are exposed through:
 
 ```text
-https://api.aspireapps.ir/linker/...
+https://api.aspireapps.ir/linker/home
 ```
 
 Internally, Gateway routes use the application's `/ir/aspireapps/linker/...` path structure.
