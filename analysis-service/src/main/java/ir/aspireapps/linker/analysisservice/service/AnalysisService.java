@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ir.aspireapps.linker.analysisservice.model.AnalyzeData;
 import ir.aspireapps.linker.analysisservice.repository.AnalysisRepository;
 import ir.aspireapps.linker.common.dto.AnalysisResponse;
+import ir.aspireapps.linker.common.error.DuplicateResourceException;
+import ir.aspireapps.linker.common.error.ResourceNotFoundException;
 import ir.aspireapps.linker.common.model.HitState;
 import ir.aspireapps.linker.common.payload.LinkClickedPayload;
 import ir.aspireapps.linker.common.payload.LinkRegisteredPayload;
@@ -28,9 +30,10 @@ public class AnalysisService {
 
     @Transactional
     public void register(LinkRegisteredPayload request) {
-        if (analysisRepository.existsByShortedUrl(request.shortedUrl()))
-        ////// TODO: send kafka error
-            throw new RuntimeException("duplicate shorted url");
+        if (analysisRepository.existsByShortedUrl(request.shortedUrl())) {
+            log.warn("duplicated link to register: [{}]", request.shortedUrl());
+            throw new DuplicateResourceException(request.shortedUrl());
+        }
         AnalyzeData analyzeData = AnalyzeData.builder()
                 .shortedUrl(request.shortedUrl())
                 .build();
@@ -43,49 +46,50 @@ public class AnalysisService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void clicked(LinkClickedPayload payload) {
-        if (analysisRepository.existsByShortedUrl(payload.shortedUrl())) {
-            AnalyzeData analyzeData = analysisRepository.findByShortedUrl(payload.shortedUrl());
-            analyzeData.incClickCount();
-            HitState currentState = payload.currentHitState();
-            HitState newState = calculateNewState(analyzeData.getHitCount());
-            log.info("Link:[{}], current hit count: [{}], total hit count: [{}] , current state: [{}], new state: [{}], seconds since last popularity test : [{}]",
-                    analyzeData.getShortedUrl(), analyzeData.getHitCount(), analyzeData.getAllTimeHitCount(),
-                    currentState, newState,
-                    Duration.between(analyzeData.getCounterResetAt(), Instant.now()).toSeconds());
-            if (Duration.between(
-                    analyzeData.getCounterResetAt(),
-                    Instant.now()).toSeconds() >= 60) {
-                analyzeData.setHitCount(0);
-                analyzeData.setCounterResetAt(Instant.now());
-                analyzeData.setHitState(newState);
-                analysisRepository.save(analyzeData);
-                String payloadString;
-                try {
-                    payloadString = objectMapper.writeValueAsString(LinkClickedPayload.builder()
-                            .shortedUrl(payload.shortedUrl())
-                            .currentHitState(newState)
-                            .build());
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException("Could not serialize payload");
-                }
-                outboxService.register(analyzeData.getId(),
-                        "popularity-response-topic",
-                        payloadString);
-            } else if (hitStateImproved(currentState, newState)) {
-                analyzeData.setHitState(newState);
-                String payloadString;
-                try {
-                    payloadString = objectMapper.writeValueAsString(payload);
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException("Could not serialize payload");
-                }
-                outboxService.register(analyzeData.getId(),
-                        "popularity-response-topic",
-                        payloadString);
-            }
-        }
-            ////////////// TODO: send an error message to kafka error listener
+        AnalyzeData analyzeData = analysisRepository.findByShortedUrl(payload.shortedUrl())
+                .orElseThrow(() -> {
+                    log.warn("clicked not found shorted url {}", payload.shortedUrl());
+                    return new ResourceNotFoundException("clicked:" + payload.shortedUrl());
+                });
 
+        analyzeData.incClickCount();
+        HitState currentState = payload.currentHitState();
+        HitState newState = calculateNewState(analyzeData.getHitCount());
+        log.info("Link:[{}], current hit count: [{}], total hit count: [{}] , current state: [{}], new state: [{}], seconds since last popularity test : [{}]",
+                analyzeData.getShortedUrl(), analyzeData.getHitCount(), analyzeData.getAllTimeHitCount(),
+                currentState, newState,
+                Duration.between(analyzeData.getCounterResetAt(), Instant.now()).toSeconds());
+        if (Duration.between(
+                analyzeData.getCounterResetAt(),
+                Instant.now()).toSeconds() >= 60) {
+            analyzeData.setHitCount(0);
+            analyzeData.setCounterResetAt(Instant.now());
+            analyzeData.setHitState(newState);
+            analysisRepository.save(analyzeData);
+            String payloadString;
+            try {
+                payloadString = objectMapper.writeValueAsString(LinkClickedPayload.builder()
+                        .shortedUrl(payload.shortedUrl())
+                        .currentHitState(newState)
+                        .build());
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("Could not serialize payload");
+            }
+            outboxService.register(analyzeData.getId(),
+                    "popularity-response-topic",
+                    payloadString);
+        } else if (hitStateImproved(currentState, newState)) {
+            analyzeData.setHitState(newState);
+            String payloadString;
+            try {
+                payloadString = objectMapper.writeValueAsString(payload);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("Could not serialize payload");
+            }
+            outboxService.register(analyzeData.getId(),
+                    "popularity-response-topic",
+                    payloadString);
+        }
     }
 
     private boolean hitStateImproved(HitState currentState, HitState newSate) {
@@ -110,6 +114,10 @@ public class AnalysisService {
 
     @Transactional
     public void delete(String shortUrl) {
+        if (!analysisRepository.existsByShortedUrl(shortUrl)) {
+            log.warn("url not found to delete: {}", shortUrl);
+            throw new ResourceNotFoundException(shortUrl);
+        }
         analysisRepository.deleteByShortedUrl(shortUrl);
     }
 }
