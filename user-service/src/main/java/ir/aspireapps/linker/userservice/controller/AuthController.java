@@ -1,5 +1,6 @@
 package ir.aspireapps.linker.userservice.controller;
 
+import ir.aspireapps.linker.common.utility.HeaderConstants;
 import ir.aspireapps.linker.common.utility.LoggingEvents;
 import ir.aspireapps.linker.userservice.dto.*;
 import ir.aspireapps.linker.userservice.error.InvalidJwtToken;
@@ -13,10 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -78,9 +76,10 @@ public class AuthController {
     @PostMapping("logout")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Void> logout(
+            @RequestHeader(HeaderConstants.X_USERNAME) String username,
             @NotNull @Valid UserLogoutRequest request) {
         try {
-            authService.logout(request.refreshToken());
+            authService.logout(request.refreshToken(), username);
         } catch (InvalidJwtToken invalidJwtToken) {
             log.debug("{} - User auth logout failed", LoggingEvents.AUTH_LOGIN_FAILED);
             throw invalidJwtToken;
@@ -94,9 +93,15 @@ public class AuthController {
     @PostMapping("logout/all")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Void> logoutAll(
+            @RequestHeader(HeaderConstants.X_USERNAME) String username,
             @NotNull @Valid @RequestBody UserLogoutRequest request) {
-        authService.logoutAll(request.refreshToken());
-        log.info("{} - User logged out all sessions successfully", LoggingEvents.AUTH_LOGOUT_ALL_SUCCESS);
+        try {
+            authService.logoutAll(request.refreshToken(), username);
+        } catch (InvalidJwtToken invalidJwtToken) {
+            log.debug("{} - User auth logout all failed", LoggingEvents.AUTH_LOGIN_FAILED);
+            throw invalidJwtToken;
+        }
+        log.info("{} - User logged out all successfully", LoggingEvents.AUTH_LOGOUT_ALL_SUCCESS);
         return ResponseEntity
                 .status(HttpStatus.ACCEPTED)
                 .body(null);

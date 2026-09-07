@@ -34,6 +34,7 @@ import java.time.format.DateTimeFormatter;
 public class UserControllerWeb {
     private final UserService userService;
     private final LinksServiceClient linksServiceClient;
+    private final AuthControllerWeb authControllerWeb;
 
     @GetMapping("profile")
     public String profile(
@@ -46,7 +47,7 @@ public class UserControllerWeb {
         try {
             user = userService.profile(username);
         } catch (ResourceNotFoundException e) {
-            AuthControllerWeb.removeTokenCookies(servletResponse);
+            authControllerWeb.removeTokenCookies(servletResponse);
             log.error("User with username[{}] didn't exists in database, remove all Auth cookies and tokens then redirect to to home page ", username);
             return "redirect:/linker/home";
         }
