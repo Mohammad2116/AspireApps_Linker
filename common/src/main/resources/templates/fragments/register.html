@@ -9,7 +9,7 @@
             <h4>Invalid registration data</h4>
         </div>
 
-        <form method="post" th:action="@{/ir/aspireapps/linker/auth/web/v1/register}"
+        <form method="post" th:action="@{/linker/auth/web/v1/register}"
               th:object="${registerForm}">
 
             <div class="form-pair">
@@ -69,7 +69,7 @@
             <h4>Username Or Email Already registered</br>
                 Try to log into your account</h4>
             <button class="primary-button"
-                    th:onclick="|location.href='@{/ir/aspireapps/linker/auth/web/v1/login'}|">Login
+                    th:onclick="|location.href='@{/linker/auth/web/v1/login'}|">Login
             </button>
         </div>
     </div>

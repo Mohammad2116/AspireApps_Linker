@@ -133,7 +133,7 @@ public class AuthControllerWeb {
 
         generateTokenCookies(servletResponse, authResponse);
         log.info("{} - User registration complete, redirecting to profile page", LoggingEvents.USER_REGISTERED);
-        return "redirect:/ir/aspireapps/linker/user/web/v1/profile";
+        return "redirect:/linker/user/web/v1/profile";
     }
 
     @GetMapping("login")
@@ -149,7 +149,7 @@ public class AuthControllerWeb {
             if (authService.isRefreshTokenValid(refreshToken)) {
                 log.info("{} - Refresh token is valid redirecting to profile page is consider as new target",
                         LoggingEvents.AUTH_LOGIN_SUCCESS);
-                return "redirect:/ir/aspireapps/linker/user/web/v1/profile";
+                return "redirect:/linker/user/web/v1/profile";
             } else {
                 log.warn("Refresh token is expired or used or invalid, remove it and continue to logging in page");
                 removeTokenCookies(servletResponse);
@@ -199,7 +199,7 @@ public class AuthControllerWeb {
         String returnUrl = userLoginForm.getReturnUrl();
         if (returnUrl == null || returnUrl.isBlank()) {
             log.info("{} - login using login form was successful, no redirect request so goto profile", LoggingEvents.AUTH_LOGIN_SUCCESS);
-            return "redirect:/ir/aspireapps/linker/user/web/v1/profile";
+            return "redirect:/linker/user/web/v1/profile";
         }
         if (!returnUrl.startsWith("/"))
             returnUrl = "/" + returnUrl;
@@ -253,7 +253,7 @@ public class AuthControllerWeb {
             log.error("{} - Invalid refresh token used for logging out, redirect to home page", LoggingEvents.AUTH_LOGOUT_FAILED);
             removeTokenCookies(servletResponse);
         }
-        return "redirect:/ir/aspireapps/linker/home";
+        return "redirect:/linker/home";
     }
 
     @PostMapping("logout/all")
