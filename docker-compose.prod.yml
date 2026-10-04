@@ -7,6 +7,7 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: linker-postgres
+    restart: unless-stopped
 
     environment:
       POSTGRES_USER: ${DB_USERNAME}
@@ -37,6 +38,7 @@ services:
   eureka-server:
     image: ghcr.io/mohammad2116/aspireapps-linker-eureka-server:${IMAGE_TAG:-latest}
     container_name: linker-eureka-server
+    restart: unless-stopped
 
     environment:
       SERVER_PORT: 8761
@@ -65,6 +67,7 @@ services:
   gateway-server:
     image: ghcr.io/mohammad2116/aspireapps-linker-gateway-server:${IMAGE_TAG:-latest}
     container_name: linker-gateway-server
+    restart: unless-stopped
 
     environment:
       SERVER_PORT: 8080
@@ -90,6 +93,7 @@ services:
   user-service:
     image: ghcr.io/mohammad2116/aspireapps-linker-user-service:${IMAGE_TAG:-latest}
     container_name: linker-user-service
+    restart: unless-stopped
 
     environment:
       DB_HOST: postgres
@@ -119,6 +123,7 @@ services:
   links-service:
     image: ghcr.io/mohammad2116/aspireapps-linker-links-service:${IMAGE_TAG:-latest}
     container_name: linker-links-service
+    restart: unless-stopped
 
     environment:
       DB_HOST: postgres
@@ -148,6 +153,7 @@ services:
   analysis-service:
     image: ghcr.io/mohammad2116/aspireapps-linker-analysis-service:${IMAGE_TAG:-latest}
     container_name: linker-analysis-service
+    restart: unless-stopped
 
     environment:
       DB_HOST: postgres
@@ -175,6 +181,7 @@ services:
   kafka:
     image: apache/kafka:4.2.1
     container_name: linker-kafka
+    restart: unless-stopped
     hostname: kafka
 
     environment:
