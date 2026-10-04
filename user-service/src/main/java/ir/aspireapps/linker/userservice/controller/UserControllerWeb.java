@@ -44,7 +44,7 @@ public class UserControllerWeb {
         } catch (ResourceNotFoundException e) {
             AuthControllerWeb.removeTokenCookies(servletResponse);
             log.error("User with username[{}] didn't exists in database, remove all Auth cookies and tokens then redirect to to home page ", username);
-            return "redirect:/ir/aspireapps/linker/home";
+            return "redirect:/linker/home";
         }
 
         log.info("{} - Calling links-service from FeignServer to collect user's links", LoggingEvents.EXTERNAL_SERVICE_CALL);
